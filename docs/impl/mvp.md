@@ -194,7 +194,7 @@ tracking.
 - [x] Implement `:MdpStop` command — graceful shutdown
 - [x] Implement `:MdpToggle` command
 - [x] Implement `:MdpOpen` command — re-open browser without restarting
-- [ ] Add LazyVim plugin spec in README with `build` step for `go install`
+- [x] Add LazyVim plugin spec in README with `build` step for `go install`
 - [x] Add support for `opts` table: `port`, `browser`, `theme`, `scroll_sync`
 - [x] Handle edge cases:
   - Multiple markdown buffers open (switch preview when buffer changes)
@@ -225,7 +225,7 @@ binaries, and documentation.
   - `go test ./...` on push
   - `golangci-lint` for linting
   - GoReleaser on tag push
-- [ ] Write comprehensive README.md:
+- [x] Write comprehensive README.md:
   - Quick start (install + use)
   - Neovim plugin setup for LazyVim, lazy.nvim, packer
   - CLI reference
