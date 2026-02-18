@@ -24,11 +24,14 @@ type Config struct {
 // Server is the HTTP preview server.
 type Server struct {
 	cfg    Config
+	addr   string
 	parser *parser.Parser
 	tmpl   *template.Template
 }
 
-// New creates a new Server from the given config.
+// New creates a new Server from the given config. The listen address is
+// resolved eagerly so callers can read it via Addr() before calling
+// ListenAndServe.
 func New(cfg Config) (*Server, error) {
 	tmplData, err := assets.FS.ReadFile("preview.html")
 	if err != nil {
@@ -40,11 +43,22 @@ func New(cfg Config) (*Server, error) {
 		return nil, fmt.Errorf("parsing template: %w", err)
 	}
 
+	addr, err := resolveAddr(cfg.Port)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Server{
 		cfg:    cfg,
+		addr:   addr,
 		parser: parser.New(),
 		tmpl:   tmpl,
 	}, nil
+}
+
+// Addr returns the resolved listen address (host:port).
+func (s *Server) Addr() string {
+	return s.addr
 }
 
 // pageData is the template data for preview.html.
@@ -60,25 +74,20 @@ func (s *Server) ListenAndServe() error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", s.handleIndex)
 
-	addr, err := s.resolve()
-	if err != nil {
-		return err
-	}
-
-	slog.Info("serving", "addr", "http://"+addr, "file", s.cfg.File)
+	slog.Info("serving", "addr", "http://"+s.addr, "file", s.cfg.File)
 
 	if s.cfg.OpenBrowser {
-		go openBrowser("http://" + addr)
+		go openBrowser("http://" + s.addr)
 	}
 
 	//nolint:gosec // Bind address is intentionally configurable.
-	return http.ListenAndServe(addr, mux)
+	return http.ListenAndServe(s.addr, mux)
 }
 
-// resolve returns the listen address, auto-assigning a port if needed.
-func (s *Server) resolve() (string, error) {
-	if s.cfg.Port != 0 {
-		return fmt.Sprintf("localhost:%d", s.cfg.Port), nil
+// resolveAddr returns the listen address, auto-assigning a port if needed.
+func resolveAddr(port int) (string, error) {
+	if port != 0 {
+		return fmt.Sprintf("localhost:%d", port), nil
 	}
 
 	// Bind to :0 to get an ephemeral port, then close and reuse it.

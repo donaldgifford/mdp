@@ -36,9 +36,9 @@ HTML, and serve it over HTTP with embedded assets.
 - [x] Add `--browser` / `--no-browser` flag to control auto-open behavior
 - [x] Implement browser auto-open using `os/exec` (respects `$BROWSER`, falls
       back to `xdg-open` / `open` / `start`)
-- [ ] Write integration test: parse a markdown fixture, assert expected HTML
+- [x] Write integration test: parse a markdown fixture, assert expected HTML
       output
-- [ ] Write integration test: start server, HTTP GET `/`, assert 200 with
+- [x] Write integration test: start server, HTTP GET `/`, assert 200 with
       rendered content
 
 ### Success Criteria
