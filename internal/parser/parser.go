@@ -11,6 +11,7 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
+	"github.com/yuin/goldmark/util"
 	"go.abhg.dev/goldmark/mermaid"
 )
 
@@ -95,6 +96,9 @@ func New(opts ...Option) *Parser {
 		goldmark.WithExtensions(extensions...),
 		goldmark.WithParserOptions(
 			parser.WithAutoHeadingID(),
+			parser.WithASTTransformers(
+				util.Prioritized(&lineAnnotator{}, 0),
+			),
 		),
 		goldmark.WithRendererOptions(
 			html.WithUnsafe(),

@@ -41,7 +41,7 @@ func TestRender_GFMTable(t *testing.T) {
 	}
 
 	got := string(html)
-	for _, want := range []string{"<table>", "<th>", "<td>", "Alice", "Bob"} {
+	for _, want := range []string{"<table", "<th", "<td", "Alice", "Bob"} {
 		if !strings.Contains(got, want) {
 			t.Errorf("expected %q in output, got: %s", want, got)
 		}
@@ -137,9 +137,9 @@ func TestRender_MarkdownFixture(t *testing.T) {
 		{"italic", "<em>"},
 		{"link", `href="https://example.com"`},
 		{"code block", "<pre"},
-		{"table", "<table>"},
+		{"table", "<table"},
 		{"task list", `type="checkbox"`},
-		{"blockquote", "<blockquote>"},
+		{"blockquote", "<blockquote"},
 		{"horizontal rule", "<hr"},
 	}
 

@@ -136,7 +136,7 @@ any editor that provides line numbers).
 
 ### Tasks
 
-- [ ] Implement a custom goldmark renderer that annotates block-level HTML
+- [x] Implement a custom goldmark renderer that annotates block-level HTML
       elements with `data-source-line="N"` attributes
   - Headings, paragraphs, list items, code blocks, blockquotes, tables,
     horizontal rules
