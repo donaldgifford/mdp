@@ -43,7 +43,7 @@ func TestServer_ServesRenderedMarkdown(t *testing.T) {
 
 	// Wait for the server to be ready.
 	url := "http://" + addr
-	waitForServer(t, url, 2*time.Second)
+	waitForServer(t, url)
 
 	resp, err := http.Get(url) //nolint:noctx // Test code.
 	if err != nil {
@@ -73,11 +73,11 @@ func TestServer_ServesRenderedMarkdown(t *testing.T) {
 	}
 }
 
-// waitForServer polls the URL until it responds or the timeout expires.
-func waitForServer(t *testing.T, url string, timeout time.Duration) {
+// waitForServer polls the URL until it responds or 2 seconds elapse.
+func waitForServer(t *testing.T, url string) {
 	t.Helper()
 
-	deadline := time.Now().Add(timeout)
+	deadline := time.Now().Add(2 * time.Second)
 	for time.Now().Before(deadline) {
 		resp, err := http.Get(url) //nolint:noctx // Test helper.
 		if err == nil {
@@ -86,5 +86,5 @@ func waitForServer(t *testing.T, url string, timeout time.Duration) {
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
-	t.Fatalf("server did not start within %v", timeout)
+	t.Fatal("server did not start within 2s")
 }

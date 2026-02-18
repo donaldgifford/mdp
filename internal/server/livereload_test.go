@@ -39,7 +39,7 @@ func TestLiveReload_WebSocketReceivesUpdates(t *testing.T) {
 		_ = srv.ListenAndServe()
 	}()
 
-	waitForServer(t, "http://"+addr, 2*time.Second)
+	waitForServer(t, "http://"+addr)
 
 	// Connect WebSocket client.
 	wsURL := "ws://" + addr + "/ws"
@@ -99,7 +99,7 @@ func TestLiveReload_SSEEndpoint(t *testing.T) {
 		_ = srv.ListenAndServe()
 	}()
 
-	waitForServer(t, "http://"+addr, 2*time.Second)
+	waitForServer(t, "http://"+addr)
 
 	// Connect SSE client with a short timeout.
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)

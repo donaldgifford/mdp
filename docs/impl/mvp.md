@@ -110,16 +110,16 @@ correctly in the browser using embedded JS libraries.
       `light`, `dark`
 - [x] Implement theme switching in CSS and pass theme preference to Mermaid
       config
-- [ ] Create a test markdown fixture that exercises all rendering features:
+- [x] Create a test markdown fixture that exercises all rendering features:
   - GFM table, task list, strikethrough
   - Fenced code block (Go, Python, JS, Bash, YAML, Rust)
   - Mermaid diagram (flowchart, sequence, gantt)
   - Inline and block math
   - Nested blockquotes
   - Images (both URL and relative path)
-- [ ] Write test: render fixture, assert Mermaid/KaTeX/highlight.js scripts are
+- [x] Write test: render fixture, assert Mermaid/KaTeX/highlight.js scripts are
       present in served HTML
-- [ ] Write Makefile target or script to update vendored JS libraries from CDN
+- [x] Write Makefile target or script to update vendored JS libraries from CDN
 
 ### Success Criteria
 
