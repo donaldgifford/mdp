@@ -218,7 +218,7 @@ binaries, and documentation.
 ### Tasks
 
 - [x] Add structured logging (`slog` from stdlib) with `--verbose` flag
-- [ ] Add `--version` flag that prints version, commit SHA, and build date
+- [x] Add `--version` flag that prints version, commit SHA, and build date
 - [ ] Set up GoReleaser for cross-platform binary releases (macOS arm64/amd64,
       Linux arm64/amd64, Windows amd64)
 - [ ] Create GitHub Actions CI workflow:

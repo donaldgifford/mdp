@@ -3,10 +3,15 @@
 BINARY := mdp
 MAIN := ./cmd/mdp
 VENDOR := assets/vendor
+LDFLAGS_PKG := github.com/donaldgifford/mdp/internal/cli
+VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
+COMMIT  ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo none)
+DATE    ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
+LDFLAGS := -X $(LDFLAGS_PKG).version=$(VERSION) -X $(LDFLAGS_PKG).commit=$(COMMIT) -X $(LDFLAGS_PKG).date=$(DATE)
 
 ## Build the binary.
 build:
-	go build -o $(BINARY) $(MAIN)
+	go build -ldflags "$(LDFLAGS)" -o $(BINARY) $(MAIN)
 
 ## Run golangci-lint.
 lint:
