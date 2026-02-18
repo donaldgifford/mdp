@@ -72,7 +72,7 @@ page refresh. The preview updates in real time.
       is blocked
 - [x] Client-side: prefer WebSocket, fall back to SSE automatically
 - [x] Add visual indicator in browser when connection is lost (subtle banner)
-- [ ] Write test: modify watched file, assert WebSocket receives new content
+- [x] Write test: modify watched file, assert WebSocket receives new content
       within 200ms
 
 ### Success Criteria
