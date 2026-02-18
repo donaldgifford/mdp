@@ -30,6 +30,7 @@ type Server struct {
 	parser   *parser.Parser
 	tmpl     *template.Template
 	hub      *hub
+	sse      *sseHub
 	upgrader websocket.Upgrader
 }
 
@@ -58,6 +59,7 @@ func New(cfg Config) (*Server, error) {
 		parser: parser.New(),
 		tmpl:   tmpl,
 		hub:    newHub(),
+		sse:    newSSEHub(),
 		upgrader: websocket.Upgrader{
 			// Allow connections from any origin — this is a local dev tool.
 			CheckOrigin: func(_ *http.Request) bool { return true },
@@ -71,13 +73,14 @@ func (s *Server) Addr() string {
 }
 
 // Broadcast parses the given markdown and sends the rendered HTML to all
-// connected WebSocket clients.
+// connected WebSocket and SSE clients.
 func (s *Server) Broadcast(md []byte) error {
 	html, err := s.parser.Render(md)
 	if err != nil {
 		return fmt.Errorf("rendering markdown: %w", err)
 	}
 	s.hub.broadcast(html)
+	s.sse.broadcast(html)
 	return nil
 }
 
@@ -90,9 +93,10 @@ func (s *Server) BroadcastFile() error {
 	return s.Broadcast(md)
 }
 
-// Close shuts down the server, closing all WebSocket connections.
+// Close shuts down the server, closing all WebSocket and SSE connections.
 func (s *Server) Close() {
 	s.hub.closeAll()
+	s.sse.closeAll()
 }
 
 // pageData is the template data for preview.html.
@@ -108,6 +112,7 @@ func (s *Server) ListenAndServe() error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", s.handleIndex)
 	mux.HandleFunc("GET /ws", s.handleWebSocket)
+	mux.HandleFunc("GET /events", s.handleSSE)
 
 	slog.Info("serving", "addr", "http://"+s.addr, "file", s.cfg.File)
 

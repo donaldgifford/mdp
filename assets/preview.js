@@ -1,19 +1,20 @@
-// mdp preview client — handles WebSocket connection and DOM updates.
+// mdp preview client — handles WebSocket/SSE connection and DOM updates.
 "use strict";
 
 (function () {
   var content = document.getElementById("content");
-  var status = document.getElementById("connection-status");
-  var ws = null;
+  var statusEl = document.getElementById("connection-status");
   var reconnectDelay = 250;
   var maxReconnectDelay = 5000;
+  var useSSE = false;
 
-  function connect() {
+  function connectWebSocket() {
     var proto = location.protocol === "https:" ? "wss:" : "ws:";
-    ws = new WebSocket(proto + "//" + location.host + "/ws");
+    var ws = new WebSocket(proto + "//" + location.host + "/ws");
 
     ws.onopen = function () {
       reconnectDelay = 250;
+      useSSE = false;
       setConnectionStatus(true);
     };
 
@@ -27,8 +28,37 @@
     };
 
     ws.onerror = function () {
-      if (ws) ws.close();
+      // If WebSocket fails, try SSE on next reconnect.
+      useSSE = true;
+      ws.close();
     };
+  }
+
+  function connectSSE() {
+    var source = new EventSource("/events");
+
+    source.onopen = function () {
+      reconnectDelay = 250;
+      setConnectionStatus(true);
+    };
+
+    source.onmessage = function (event) {
+      updateContent(event.data);
+    };
+
+    source.onerror = function () {
+      source.close();
+      setConnectionStatus(false);
+      scheduleReconnect();
+    };
+  }
+
+  function connect() {
+    if (useSSE) {
+      connectSSE();
+    } else {
+      connectWebSocket();
+    }
   }
 
   function scheduleReconnect() {
@@ -45,12 +75,12 @@
   }
 
   function setConnectionStatus(connected) {
-    if (!status) return;
+    if (!statusEl) return;
     if (connected) {
-      status.className = "connected";
+      statusEl.className = "connected";
     } else {
-      status.className = "disconnected";
-      status.textContent = "Disconnected \u2014 reconnecting\u2026";
+      statusEl.className = "disconnected";
+      statusEl.textContent = "Disconnected \u2014 reconnecting\u2026";
     }
   }
 

@@ -66,12 +66,12 @@ page refresh. The preview updates in real time.
 - [x] Add `fsnotify` file watcher
 - [x] Wire watcher → goldmark parse → WebSocket broadcast pipeline
 - [x] Debounce rapid file changes (50ms window) to avoid excessive re-renders
-- [ ] Implement graceful shutdown: close WebSocket connections, stop watcher,
+- [x] Implement graceful shutdown: close WebSocket connections, stop watcher,
       release port
-- [ ] Add SSE (`/events`) as fallback transport for environments where WebSocket
+- [x] Add SSE (`/events`) as fallback transport for environments where WebSocket
       is blocked
-- [ ] Client-side: prefer WebSocket, fall back to SSE automatically
-- [ ] Add visual indicator in browser when connection is lost (subtle banner)
+- [x] Client-side: prefer WebSocket, fall back to SSE automatically
+- [x] Add visual indicator in browser when connection is lost (subtle banner)
 - [ ] Write test: modify watched file, assert WebSocket receives new content
       within 200ms
 
