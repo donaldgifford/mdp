@@ -3,6 +3,7 @@ package server_test
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -66,12 +67,21 @@ func TestLiveReload_WebSocketReceivesUpdates(t *testing.T) {
 		t.Fatalf("reading websocket message: %v", err)
 	}
 
-	got := string(msg)
-	if !strings.Contains(got, "Updated Content") {
-		t.Errorf("expected 'Updated Content' in message, got: %s", got)
+	var envelope struct {
+		Type string `json:"type"`
+		HTML string `json:"html"`
 	}
-	if !strings.Contains(got, "<h1") {
-		t.Errorf("expected rendered HTML in message, got: %s", got)
+	if err := json.Unmarshal(msg, &envelope); err != nil {
+		t.Fatalf("parsing JSON message: %v", err)
+	}
+	if envelope.Type != "content" {
+		t.Errorf("expected type 'content', got %q", envelope.Type)
+	}
+	if !strings.Contains(envelope.HTML, "Updated Content") {
+		t.Errorf("expected 'Updated Content' in HTML, got: %s", envelope.HTML)
+	}
+	if !strings.Contains(envelope.HTML, "<h1") {
+		t.Errorf("expected rendered HTML in message, got: %s", envelope.HTML)
 	}
 }
 
@@ -135,7 +145,14 @@ func TestLiveReload_SSEEndpoint(t *testing.T) {
 		line := scanner.Text()
 		if strings.HasPrefix(line, "data: ") {
 			data := strings.TrimPrefix(line, "data: ")
-			if strings.Contains(data, "SSE Test") {
+			var sseEnvelope struct {
+				Type string `json:"type"`
+				HTML string `json:"html"`
+			}
+			if err := json.Unmarshal([]byte(data), &sseEnvelope); err != nil {
+				continue
+			}
+			if sseEnvelope.Type == "content" && strings.Contains(sseEnvelope.HTML, "SSE Test") {
 				return // Success.
 			}
 		}

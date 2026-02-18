@@ -196,3 +196,15 @@ img {
 #connection-status.disconnected {
   display: block;
 }
+
+/* Scroll sync highlight */
+.scroll-target {
+  outline: 2px solid var(--color-accent-fg);
+  outline-offset: 2px;
+  border-radius: 3px;
+  transition: outline-color 0.3s ease;
+}
+
+.scroll-target.removing {
+  outline-color: transparent;
+}

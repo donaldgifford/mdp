@@ -141,18 +141,18 @@ any editor that provides line numbers).
   - Headings, paragraphs, list items, code blocks, blockquotes, tables,
     horizontal rules
   - Track source line from goldmark's AST node positions
-- [ ] Add a `/cursor` endpoint (or extend WebSocket protocol) that accepts
+- [x] Add a `/cursor` endpoint (or extend WebSocket protocol) that accepts
       `{ "line": N }` messages
-- [ ] Implement client-side scroll logic in `preview.js`:
+- [x] Implement client-side scroll logic in `preview.js`:
   - On receiving cursor line, find nearest element where
     `data-source-line <= cursor_line`
   - Smooth scroll to that element
   - Highlight the target element briefly (subtle flash) for visual feedback
-- [ ] Handle edge cases:
+- [x] Handle edge cases:
   - Cursor in frontmatter (don't scroll)
   - Cursor past end of document (scroll to bottom)
   - Cursor on an empty line between blocks (snap to nearest block above)
-- [ ] Add `--scroll-sync` flag (default: `true`) to disable if unwanted
+- [x] Add `--scroll-sync` flag (default: `true`) to disable if unwanted
 - [ ] Write test: send cursor position, assert correct element receives scroll
 
 ### Success Criteria

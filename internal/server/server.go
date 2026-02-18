@@ -3,6 +3,7 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io/fs"
@@ -23,6 +24,7 @@ type Config struct {
 	Port        int
 	OpenBrowser bool
 	Theme       string // "auto", "light", or "dark".
+	ScrollSync  bool   // Enable scroll sync via /cursor endpoint.
 }
 
 // Server is the HTTP preview server.
@@ -74,6 +76,13 @@ func (s *Server) Addr() string {
 	return s.addr
 }
 
+// wsMessage is the JSON envelope for WebSocket/SSE messages.
+type wsMessage struct {
+	Type string `json:"type"`
+	HTML string `json:"html,omitempty"`
+	Line int    `json:"line,omitempty"`
+}
+
 // Broadcast parses the given markdown and sends the rendered HTML to all
 // connected WebSocket and SSE clients.
 func (s *Server) Broadcast(md []byte) error {
@@ -81,8 +90,23 @@ func (s *Server) Broadcast(md []byte) error {
 	if err != nil {
 		return fmt.Errorf("rendering markdown: %w", err)
 	}
-	s.hub.broadcast(html)
-	s.sse.broadcast(html)
+	msg, err := json.Marshal(wsMessage{Type: "content", HTML: string(html)})
+	if err != nil {
+		return fmt.Errorf("marshalling message: %w", err)
+	}
+	s.hub.broadcast(msg)
+	s.sse.broadcast(msg)
+	return nil
+}
+
+// SendCursor broadcasts a cursor position update to all connected clients.
+func (s *Server) SendCursor(line int) error {
+	msg, err := json.Marshal(wsMessage{Type: "cursor", Line: line})
+	if err != nil {
+		return fmt.Errorf("marshalling cursor message: %w", err)
+	}
+	s.hub.broadcast(msg)
+	s.sse.broadcast(msg)
 	return nil
 }
 
@@ -116,6 +140,7 @@ func (s *Server) ListenAndServe() error {
 	mux.HandleFunc("GET /", s.handleIndex)
 	mux.HandleFunc("GET /ws", s.handleWebSocket)
 	mux.HandleFunc("GET /events", s.handleSSE)
+	mux.HandleFunc("POST /cursor", s.handleCursor)
 
 	// Serve embedded vendor assets (Mermaid, KaTeX, highlight.js).
 	vendorFS, err := fs.Sub(assets.FS, "vendor")
@@ -223,4 +248,29 @@ func (s *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 	}
+}
+
+// cursorRequest is the JSON body for POST /cursor.
+type cursorRequest struct {
+	Line int `json:"line"`
+}
+
+func (s *Server) handleCursor(w http.ResponseWriter, r *http.Request) {
+	if !s.cfg.ScrollSync {
+		http.Error(w, "scroll sync disabled", http.StatusNotFound)
+		return
+	}
+
+	var req cursorRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	if err := s.SendCursor(req.Line); err != nil {
+		http.Error(w, "broadcast failed", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

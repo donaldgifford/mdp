@@ -1,4 +1,4 @@
-// mdp preview client — handles WebSocket/SSE connection and DOM updates.
+// mdp preview client — handles WebSocket/SSE connection, DOM updates, and scroll sync.
 "use strict";
 
 (function () {
@@ -62,6 +62,75 @@
   // Run on initial page load.
   renderClientSide();
 
+  // --- Scroll Sync ---
+
+  // Find the nearest element with data-source-line <= targetLine.
+  function findScrollTarget(targetLine) {
+    if (!content) return null;
+
+    var elements = content.querySelectorAll("[data-source-line]");
+    var best = null;
+
+    for (var i = 0; i < elements.length; i++) {
+      var line = parseInt(elements[i].getAttribute("data-source-line"), 10);
+      if (isNaN(line)) continue;
+      if (line <= targetLine) {
+        best = elements[i];
+      } else {
+        break;
+      }
+    }
+
+    return best;
+  }
+
+  var highlightTimer = null;
+
+  function scrollToLine(line) {
+    if (line <= 0) return;
+
+    var target = findScrollTarget(line);
+
+    if (!target) {
+      // Cursor past end of document — scroll to bottom.
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+      return;
+    }
+
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    // Brief highlight for visual feedback.
+    target.classList.add("scroll-target");
+    if (highlightTimer) clearTimeout(highlightTimer);
+    // Remove previous highlights.
+    var prev = content.querySelectorAll(".scroll-target");
+    for (var i = 0; i < prev.length; i++) {
+      if (prev[i] !== target) prev[i].classList.remove("scroll-target");
+    }
+    highlightTimer = setTimeout(function () {
+      target.classList.remove("scroll-target");
+    }, 1000);
+  }
+
+  // --- Message Handling ---
+
+  function handleMessage(raw) {
+    var msg;
+    try {
+      msg = JSON.parse(raw);
+    } catch (e) {
+      // Fallback: treat as raw HTML for backward compatibility.
+      updateContent(raw);
+      return;
+    }
+
+    if (msg.type === "content") {
+      updateContent(msg.html);
+    } else if (msg.type === "cursor") {
+      scrollToLine(msg.line);
+    }
+  }
+
   function connectWebSocket() {
     var proto = location.protocol === "https:" ? "wss:" : "ws:";
     var ws = new WebSocket(proto + "//" + location.host + "/ws");
@@ -73,7 +142,7 @@
     };
 
     ws.onmessage = function (event) {
-      updateContent(event.data);
+      handleMessage(event.data);
     };
 
     ws.onclose = function () {
@@ -96,7 +165,7 @@
     };
 
     source.onmessage = function (event) {
-      updateContent(event.data);
+      handleMessage(event.data);
     };
 
     source.onerror = function () {

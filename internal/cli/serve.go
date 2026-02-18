@@ -15,9 +15,10 @@ const debounceInterval = 50 * time.Millisecond
 
 func newServeCmd() *cobra.Command {
 	var (
-		port    int
-		browser bool
-		theme   string
+		port       int
+		browser    bool
+		theme      string
+		scrollSync bool
 	)
 
 	cmd := &cobra.Command{
@@ -33,6 +34,7 @@ func newServeCmd() *cobra.Command {
 				Port:        port,
 				OpenBrowser: browser,
 				Theme:       theme,
+				ScrollSync:  scrollSync,
 			}
 
 			srv, err := server.New(cfg)
@@ -64,6 +66,7 @@ func newServeCmd() *cobra.Command {
 	cmd.Flags().IntVar(&port, "port", 0, "Port to listen on (0 = auto-assign)")
 	cmd.Flags().BoolVar(&browser, "browser", true, "Open browser automatically")
 	cmd.Flags().StringVar(&theme, "theme", "auto", "Theme: auto, light, or dark")
+	cmd.Flags().BoolVar(&scrollSync, "scroll-sync", true, "Enable scroll sync with cursor position")
 
 	return cmd
 }
