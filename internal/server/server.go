@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gorilla/websocket"
+
 	"github.com/donaldgifford/mdp/assets"
 	"github.com/donaldgifford/mdp/internal/parser"
 )
@@ -23,10 +25,12 @@ type Config struct {
 
 // Server is the HTTP preview server.
 type Server struct {
-	cfg    Config
-	addr   string
-	parser *parser.Parser
-	tmpl   *template.Template
+	cfg      Config
+	addr     string
+	parser   *parser.Parser
+	tmpl     *template.Template
+	hub      *hub
+	upgrader websocket.Upgrader
 }
 
 // New creates a new Server from the given config. The listen address is
@@ -53,12 +57,42 @@ func New(cfg Config) (*Server, error) {
 		addr:   addr,
 		parser: parser.New(),
 		tmpl:   tmpl,
+		hub:    newHub(),
+		upgrader: websocket.Upgrader{
+			// Allow connections from any origin — this is a local dev tool.
+			CheckOrigin: func(_ *http.Request) bool { return true },
+		},
 	}, nil
 }
 
 // Addr returns the resolved listen address (host:port).
 func (s *Server) Addr() string {
 	return s.addr
+}
+
+// Broadcast parses the given markdown and sends the rendered HTML to all
+// connected WebSocket clients.
+func (s *Server) Broadcast(md []byte) error {
+	html, err := s.parser.Render(md)
+	if err != nil {
+		return fmt.Errorf("rendering markdown: %w", err)
+	}
+	s.hub.broadcast(html)
+	return nil
+}
+
+// BroadcastFile reads the configured file and broadcasts its rendered content.
+func (s *Server) BroadcastFile() error {
+	md, err := os.ReadFile(s.cfg.File)
+	if err != nil {
+		return fmt.Errorf("reading file: %w", err)
+	}
+	return s.Broadcast(md)
+}
+
+// Close shuts down the server, closing all WebSocket connections.
+func (s *Server) Close() {
+	s.hub.closeAll()
 }
 
 // pageData is the template data for preview.html.
@@ -73,6 +107,7 @@ type pageData struct {
 func (s *Server) ListenAndServe() error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", s.handleIndex)
+	mux.HandleFunc("GET /ws", s.handleWebSocket)
 
 	slog.Info("serving", "addr", "http://"+s.addr, "file", s.cfg.File)
 
@@ -140,5 +175,31 @@ func (s *Server) handleIndex(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := s.tmpl.Execute(w, data); err != nil {
 		slog.Error("executing template", "error", err)
+	}
+}
+
+func (s *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
+	conn, err := s.upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		slog.Error("websocket upgrade failed", "error", err)
+		return
+	}
+	s.hub.add(conn)
+	slog.Debug("websocket client connected", "addr", conn.RemoteAddr())
+
+	// Keep the connection open; remove on close.
+	defer func() {
+		s.hub.remove(conn)
+		if closeErr := conn.Close(); closeErr != nil {
+			slog.Debug("closing websocket client", "error", closeErr)
+		}
+	}()
+
+	// Read loop — we don't expect messages from the client, but we need
+	// to drain reads so the connection stays alive and close is detected.
+	for {
+		if _, _, err := conn.ReadMessage(); err != nil {
+			break
+		}
 	}
 }

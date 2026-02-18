@@ -56,10 +56,10 @@ page refresh. The preview updates in real time.
 
 ### Tasks
 
-- [ ] Add `gorilla/websocket` dependency
-- [ ] Implement WebSocket hub (connection registry, broadcast to all clients)
-- [ ] Add `/ws` endpoint to HTTP server
-- [ ] Implement client-side WebSocket connection in `preview.js`:
+- [x] Add `gorilla/websocket` dependency
+- [x] Implement WebSocket hub (connection registry, broadcast to all clients)
+- [x] Add `/ws` endpoint to HTTP server
+- [x] Implement client-side WebSocket connection in `preview.js`:
   - Connect on page load
   - Reconnect with exponential backoff on disconnect
   - On message: replace `#content` innerHTML with received HTML

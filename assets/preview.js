@@ -2,36 +2,58 @@
 "use strict";
 
 (function () {
-  const content = document.getElementById("content");
-  const status = document.getElementById("connection-status");
+  var content = document.getElementById("content");
+  var status = document.getElementById("connection-status");
+  var ws = null;
+  var reconnectDelay = 250;
+  var maxReconnectDelay = 5000;
 
-  // Phase 2 will add WebSocket live-reload here.
-  // For now this is a static page; the JS scaffold is ready for extension.
+  function connect() {
+    var proto = location.protocol === "https:" ? "wss:" : "ws:";
+    ws = new WebSocket(proto + "//" + location.host + "/ws");
 
-  /**
-   * Update the preview content.
-   * @param {string} html - Rendered HTML to display.
-   */
+    ws.onopen = function () {
+      reconnectDelay = 250;
+      setConnectionStatus(true);
+    };
+
+    ws.onmessage = function (event) {
+      updateContent(event.data);
+    };
+
+    ws.onclose = function () {
+      setConnectionStatus(false);
+      scheduleReconnect();
+    };
+
+    ws.onerror = function () {
+      if (ws) ws.close();
+    };
+  }
+
+  function scheduleReconnect() {
+    setTimeout(function () {
+      reconnectDelay = Math.min(reconnectDelay * 2, maxReconnectDelay);
+      connect();
+    }, reconnectDelay);
+  }
+
   function updateContent(html) {
     if (content) {
       content.innerHTML = html;
     }
   }
 
-  /**
-   * Set connection status indicator.
-   * @param {boolean} connected
-   */
   function setConnectionStatus(connected) {
     if (!status) return;
     if (connected) {
       status.className = "connected";
     } else {
       status.className = "disconnected";
-      status.textContent = "Disconnected — reconnecting\u2026";
+      status.textContent = "Disconnected \u2014 reconnecting\u2026";
     }
   }
 
-  // Export for use by future WebSocket handler.
-  window.mdp = { updateContent, setConnectionStatus };
+  // Connect on page load.
+  connect();
 })();
