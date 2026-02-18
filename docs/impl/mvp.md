@@ -63,9 +63,9 @@ page refresh. The preview updates in real time.
   - Connect on page load
   - Reconnect with exponential backoff on disconnect
   - On message: replace `#content` innerHTML with received HTML
-- [ ] Add `fsnotify` file watcher
-- [ ] Wire watcher → goldmark parse → WebSocket broadcast pipeline
-- [ ] Debounce rapid file changes (50ms window) to avoid excessive re-renders
+- [x] Add `fsnotify` file watcher
+- [x] Wire watcher → goldmark parse → WebSocket broadcast pipeline
+- [x] Debounce rapid file changes (50ms window) to avoid excessive re-renders
 - [ ] Implement graceful shutdown: close WebSocket connections, stop watcher,
       release port
 - [ ] Add SSE (`/events`) as fallback transport for environments where WebSocket

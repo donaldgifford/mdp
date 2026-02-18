@@ -3,11 +3,15 @@ package cli
 import (
 	"fmt"
 	"log/slog"
+	"time"
 
 	"github.com/spf13/cobra"
 
 	"github.com/donaldgifford/mdp/internal/server"
+	"github.com/donaldgifford/mdp/internal/watcher"
 )
+
+const debounceInterval = 50 * time.Millisecond
 
 func newServeCmd() *cobra.Command {
 	var (
@@ -33,6 +37,23 @@ func newServeCmd() *cobra.Command {
 			if err != nil {
 				return fmt.Errorf("creating server: %w", err)
 			}
+			defer srv.Close()
+
+			// Start file watcher.
+			w, err := watcher.New(file, debounceInterval, func() {
+				if broadcastErr := srv.BroadcastFile(); broadcastErr != nil {
+					slog.Error("broadcast failed", "error", broadcastErr)
+				}
+			})
+			if err != nil {
+				return fmt.Errorf("creating watcher: %w", err)
+			}
+			defer func() {
+				if closeErr := w.Close(); closeErr != nil {
+					slog.Error("closing watcher", "error", closeErr)
+				}
+			}()
+			go w.Start()
 
 			return srv.ListenAndServe()
 		},
