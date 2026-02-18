@@ -99,16 +99,16 @@ correctly in the browser using embedded JS libraries.
       `<div class="mermaid">` blocks)
 - [x] Add KaTeX support: configure goldmark to identify `$...$` (inline) and
       `$$...$$` (block) math delimiters and emit appropriate markup
-- [ ] Implement client-side rendering pipeline in `preview.js`:
+- [x] Implement client-side rendering pipeline in `preview.js`:
   - After DOM update, call `mermaid.run()` on all `.mermaid` elements
   - After DOM update, call `renderMathInElement()` for KaTeX auto-render
   - After DOM update, call `hljs.highlightAll()` for any un-highlighted code
     blocks
-- [ ] Handle re-rendering correctly on live reload (Mermaid needs element
+- [x] Handle re-rendering correctly on live reload (Mermaid needs element
       cleanup before re-init)
-- [ ] Add `--theme` flag: `auto` (OS preference via `prefers-color-scheme`),
+- [x] Add `--theme` flag: `auto` (OS preference via `prefers-color-scheme`),
       `light`, `dark`
-- [ ] Implement theme switching in CSS and pass theme preference to Mermaid
+- [x] Implement theme switching in CSS and pass theme preference to Mermaid
       config
 - [ ] Create a test markdown fixture that exercises all rendering features:
   - GFM table, task list, strikethrough

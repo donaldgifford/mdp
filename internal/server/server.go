@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"log/slog"
 	"net"
 	"net/http"
@@ -21,6 +22,7 @@ type Config struct {
 	File        string
 	Port        int
 	OpenBrowser bool
+	Theme       string // "auto", "light", or "dark".
 }
 
 // Server is the HTTP preview server.
@@ -102,6 +104,7 @@ func (s *Server) Close() {
 // pageData is the template data for preview.html.
 type pageData struct {
 	Title string
+	Theme string
 	CSS   template.CSS
 	JS    template.JS
 	Body  template.HTML
@@ -113,6 +116,13 @@ func (s *Server) ListenAndServe() error {
 	mux.HandleFunc("GET /", s.handleIndex)
 	mux.HandleFunc("GET /ws", s.handleWebSocket)
 	mux.HandleFunc("GET /events", s.handleSSE)
+
+	// Serve embedded vendor assets (Mermaid, KaTeX, highlight.js).
+	vendorFS, err := fs.Sub(assets.FS, "vendor")
+	if err != nil {
+		return fmt.Errorf("creating vendor sub-filesystem: %w", err)
+	}
+	mux.Handle("GET /vendor/", http.StripPrefix("/vendor/", http.FileServer(http.FS(vendorFS))))
 
 	slog.Info("serving", "addr", "http://"+s.addr, "file", s.cfg.File)
 
@@ -169,9 +179,15 @@ func (s *Server) handleIndex(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 
+	theme := s.cfg.Theme
+	if theme == "" {
+		theme = "auto"
+	}
+
 	//nolint:gosec // All values are from our own embedded assets and renderer.
 	data := pageData{
 		Title: s.cfg.File,
+		Theme: theme,
 		CSS:   template.CSS(cssData),
 		JS:    template.JS(jsData),
 		Body:  template.HTML(html),

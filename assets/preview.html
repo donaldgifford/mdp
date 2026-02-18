@@ -5,10 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{.Title}} — mdp</title>
   <style>{{.CSS}}</style>
+  <link rel="stylesheet" href="/vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="/vendor/hljs/github.min.css" media="(prefers-color-scheme: light)">
+  <link rel="stylesheet" href="/vendor/hljs/github-dark.min.css" media="(prefers-color-scheme: dark)">
 </head>
-<body>
+<body data-theme="{{.Theme}}">
   <div id="connection-status"></div>
   <div id="content">{{.Body}}</div>
+  <script src="/vendor/mermaid.min.js"></script>
+  <script src="/vendor/katex/katex.min.js"></script>
+  <script src="/vendor/katex/auto-render.min.js"></script>
+  <script src="/vendor/hljs/highlight.min.js"></script>
   <script>{{.JS}}</script>
 </body>
 </html>
