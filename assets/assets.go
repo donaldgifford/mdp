@@ -3,7 +3,7 @@ package assets
 
 import "embed"
 
-// FS contains the embedded preview assets (HTML template, CSS, JS).
+// FS contains the embedded preview assets (HTML template, CSS, JS, vendor libs).
 //
-//go:embed preview.html preview.css preview.js
+//go:embed preview.html preview.css preview.js vendor
 var FS embed.FS

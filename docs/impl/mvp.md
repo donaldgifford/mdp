@@ -90,10 +90,10 @@ correctly in the browser using embedded JS libraries.
 
 ### Tasks
 
-- [ ] Download and vendor latest `mermaid.min.js` into `assets/vendor/`
-- [ ] Download and vendor latest `katex.min.js`, `katex.min.css`, and KaTeX font
+- [x] Download and vendor latest `mermaid.min.js` into `assets/vendor/`
+- [x] Download and vendor latest `katex.min.js`, `katex.min.css`, and KaTeX font
       files into `assets/vendor/`
-- [ ] Download and vendor `highlight.min.js` + commonly used language packs into
+- [x] Download and vendor `highlight.min.js` + commonly used language packs into
       `assets/vendor/`
 - [ ] Configure goldmark-mermaid extension in client-side render mode (emits
       `<div class="mermaid">` blocks)
