@@ -171,32 +171,32 @@ tracking.
 
 ### Tasks
 
-- [ ] Create `nvim/lua/mdp/init.lua` — plugin entry point with setup function
-- [ ] Implement process management:
+- [x] Create `nvim/lua/mdp/init.lua` — plugin entry point with setup function
+- [x] Implement process management:
   - Start `mdp` binary as a background job via `vim.fn.jobstart()`
   - Track PID, manage lifecycle
   - Kill on `:MdpStop` or when Neovim exits (`VimLeavePre` autocmd)
-- [ ] Implement buffer content sync:
+- [x] Implement buffer content sync:
   - On `BufWritePost` and `TextChangedI` (debounced), send full buffer content
     to mdp via stdin
   - Protocol: newline-delimited JSON
     `{"type":"content","data":"...","file":"..."}`
-- [ ] Implement cursor position sync:
+- [x] Implement cursor position sync:
   - On `CursorMoved` and `CursorMovedI` (throttled to ~60fps), send cursor line
   - Protocol: `{"type":"cursor","line":N}`
-- [ ] Define the stdin protocol between plugin and binary:
+- [x] Define the stdin protocol between plugin and binary:
   - Length-prefixed JSON messages OR newline-delimited JSON
   - Support `content`, `cursor`, and `config` message types
-- [ ] Implement `:MdpStart` command
+- [x] Implement `:MdpStart` command
   - Resolve `mdp` binary path (`vim.fn.exepath()` or configurable)
   - Start with appropriate flags based on user opts
   - Open browser (or let the binary handle it)
-- [ ] Implement `:MdpStop` command — graceful shutdown
-- [ ] Implement `:MdpToggle` command
-- [ ] Implement `:MdpOpen` command — re-open browser without restarting
+- [x] Implement `:MdpStop` command — graceful shutdown
+- [x] Implement `:MdpToggle` command
+- [x] Implement `:MdpOpen` command — re-open browser without restarting
 - [ ] Add LazyVim plugin spec in README with `build` step for `go install`
-- [ ] Add support for `opts` table: `port`, `browser`, `theme`, `scroll_sync`
-- [ ] Handle edge cases:
+- [x] Add support for `opts` table: `port`, `browser`, `theme`, `scroll_sync`
+- [x] Handle edge cases:
   - Multiple markdown buffers open (switch preview when buffer changes)
   - Binary not found (clear error message with install instructions)
   - Port conflict (retry with different port)

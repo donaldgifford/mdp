@@ -1,0 +1,346 @@
+-- mdp.nvim — Markdown preview plugin for Neovim
+-- Provides :MdpStart, :MdpStop, :MdpToggle, :MdpOpen commands.
+
+local M = {}
+
+--- Default configuration.
+local defaults = {
+  port = 0,
+  browser = true,
+  theme = "auto",
+  scroll_sync = true,
+  binary = "", -- Empty means auto-detect via exepath.
+  debounce_ms = 300,
+}
+
+--- Active state.
+local state = {
+  job_id = nil,
+  addr = nil,
+  augroup = nil,
+  cursor_timer = nil,
+  content_timer = nil,
+}
+
+--- Merged user configuration.
+local config = {}
+
+--- Resolve the mdp binary path.
+---@return string|nil path, string|nil error
+local function resolve_binary()
+  if config.binary ~= "" then
+    if vim.fn.executable(config.binary) == 1 then
+      return config.binary, nil
+    end
+    return nil, "mdp binary not found at: " .. config.binary
+  end
+
+  local path = vim.fn.exepath("mdp")
+  if path ~= "" then
+    return path, nil
+  end
+
+  return nil, "mdp binary not found in PATH. Install with: go install github.com/donaldgifford/mdp/cmd/mdp@latest"
+end
+
+--- Send a JSON message to the mdp process via stdin.
+---@param msg table
+local function send_message(msg)
+  if not state.job_id then
+    return
+  end
+
+  local ok, encoded = pcall(vim.fn.json_encode, msg)
+  if not ok then
+    vim.notify("[mdp] Failed to encode message", vim.log.levels.ERROR)
+    return
+  end
+
+  vim.fn.chansend(state.job_id, encoded .. "\n")
+end
+
+--- Send the current buffer content to mdp.
+local function send_content()
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  local content = table.concat(lines, "\n") .. "\n"
+  local file = vim.api.nvim_buf_get_name(0)
+
+  send_message({
+    type = "content",
+    data = content,
+    file = file,
+  })
+end
+
+--- Send the current cursor position to mdp.
+local function send_cursor()
+  local line = vim.api.nvim_win_get_cursor(0)[1]
+  send_message({
+    type = "cursor",
+    line = line,
+  })
+end
+
+--- Debounced content send for TextChangedI.
+local function debounced_content()
+  if state.content_timer then
+    vim.fn.timer_stop(state.content_timer)
+  end
+  state.content_timer = vim.fn.timer_start(config.debounce_ms, function()
+    state.content_timer = nil
+    send_content()
+  end)
+end
+
+--- Throttled cursor send (~60fps = ~16ms, but 50ms is sufficient).
+local function throttled_cursor()
+  if state.cursor_timer then
+    return
+  end
+  state.cursor_timer = vim.fn.timer_start(50, function()
+    state.cursor_timer = nil
+    send_cursor()
+  end)
+end
+
+--- Check if the current buffer is a markdown file.
+---@return boolean
+local function is_markdown_buffer()
+  local ft = vim.bo.filetype
+  return ft == "markdown" or ft == "mdx"
+end
+
+--- Set up autocmds for buffer sync and cursor tracking.
+local function setup_autocmds()
+  if state.augroup then
+    return
+  end
+
+  state.augroup = vim.api.nvim_create_augroup("MdpPreview", { clear = true })
+
+  -- Content sync on save.
+  vim.api.nvim_create_autocmd("BufWritePost", {
+    group = state.augroup,
+    pattern = { "*.md", "*.mdx", "*.markdown" },
+    callback = send_content,
+  })
+
+  -- Content sync on insert mode changes (debounced).
+  vim.api.nvim_create_autocmd("TextChangedI", {
+    group = state.augroup,
+    pattern = { "*.md", "*.mdx", "*.markdown" },
+    callback = debounced_content,
+  })
+
+  -- Cursor sync.
+  if config.scroll_sync then
+    vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+      group = state.augroup,
+      pattern = { "*.md", "*.mdx", "*.markdown" },
+      callback = throttled_cursor,
+    })
+  end
+
+  -- Switch preview when entering a different markdown buffer.
+  vim.api.nvim_create_autocmd("BufEnter", {
+    group = state.augroup,
+    pattern = { "*.md", "*.mdx", "*.markdown" },
+    callback = function()
+      if state.job_id then
+        send_content()
+        if config.scroll_sync then
+          send_cursor()
+        end
+      end
+    end,
+  })
+end
+
+--- Remove autocmds.
+local function teardown_autocmds()
+  if state.augroup then
+    vim.api.nvim_del_augroup_by_id(state.augroup)
+    state.augroup = nil
+  end
+
+  if state.cursor_timer then
+    vim.fn.timer_stop(state.cursor_timer)
+    state.cursor_timer = nil
+  end
+  if state.content_timer then
+    vim.fn.timer_stop(state.content_timer)
+    state.content_timer = nil
+  end
+end
+
+--- Start the mdp preview server.
+function M.start()
+  if state.job_id then
+    vim.notify("[mdp] Already running", vim.log.levels.WARN)
+    return
+  end
+
+  if not is_markdown_buffer() then
+    vim.notify("[mdp] Not a markdown buffer", vim.log.levels.WARN)
+    return
+  end
+
+  local binary, err = resolve_binary()
+  if not binary then
+    vim.notify("[mdp] " .. err, vim.log.levels.ERROR)
+    return
+  end
+
+  local file = vim.api.nvim_buf_get_name(0)
+  if file == "" then
+    vim.notify("[mdp] Buffer has no file name. Save first.", vim.log.levels.WARN)
+    return
+  end
+
+  local cmd = {
+    binary, "serve",
+    "--stdin",
+    "--scroll-sync=" .. tostring(config.scroll_sync),
+    "--theme", config.theme,
+  }
+
+  if config.port > 0 then
+    table.insert(cmd, "--port")
+    table.insert(cmd, tostring(config.port))
+  end
+
+  if config.browser then
+    table.insert(cmd, "--browser")
+  else
+    table.insert(cmd, "--browser=false")
+  end
+
+  table.insert(cmd, file)
+
+  local job_id = vim.fn.jobstart(cmd, {
+    stdin_mode = "pipe",
+    on_stdout = function(_, data)
+      -- Capture the server address from stdout/log output.
+      for _, line in ipairs(data) do
+        local addr = line:match("addr=http://([%w%.%-:]+)")
+        if addr then
+          state.addr = addr
+        end
+      end
+    end,
+    on_stderr = function(_, data)
+      for _, line in ipairs(data) do
+        if line ~= "" then
+          local addr = line:match("addr=http://([%w%.%-:]+)")
+          if addr then
+            state.addr = addr
+          end
+        end
+      end
+    end,
+    on_exit = function(_, exit_code)
+      if exit_code ~= 0 and state.job_id then
+        vim.schedule(function()
+          vim.notify("[mdp] Process exited with code " .. exit_code, vim.log.levels.WARN)
+        end)
+      end
+      state.job_id = nil
+      state.addr = nil
+      teardown_autocmds()
+    end,
+  })
+
+  if job_id <= 0 then
+    vim.notify("[mdp] Failed to start process", vim.log.levels.ERROR)
+    return
+  end
+
+  state.job_id = job_id
+  setup_autocmds()
+
+  -- Send initial content after a brief delay for server startup.
+  vim.defer_fn(function()
+    if state.job_id then
+      send_content()
+    end
+  end, 200)
+
+  vim.notify("[mdp] Preview started")
+end
+
+--- Stop the mdp preview server.
+function M.stop()
+  if not state.job_id then
+    vim.notify("[mdp] Not running", vim.log.levels.WARN)
+    return
+  end
+
+  vim.fn.jobstop(state.job_id)
+  state.job_id = nil
+  state.addr = nil
+  teardown_autocmds()
+
+  vim.notify("[mdp] Preview stopped")
+end
+
+--- Toggle the mdp preview server.
+function M.toggle()
+  if state.job_id then
+    M.stop()
+  else
+    M.start()
+  end
+end
+
+--- Re-open the browser without restarting the server.
+function M.open()
+  if not state.addr then
+    vim.notify("[mdp] Not running", vim.log.levels.WARN)
+    return
+  end
+
+  local url = "http://" .. state.addr
+  local open_cmd
+
+  if vim.fn.has("mac") == 1 then
+    open_cmd = { "open", url }
+  elseif vim.fn.has("wsl") == 1 then
+    open_cmd = { "wslview", url }
+  elseif vim.fn.executable("xdg-open") == 1 then
+    open_cmd = { "xdg-open", url }
+  else
+    vim.notify("[mdp] Cannot detect browser opener", vim.log.levels.ERROR)
+    return
+  end
+
+  vim.fn.jobstart(open_cmd, { detach = true })
+end
+
+--- Check if mdp is currently running.
+---@return boolean
+function M.is_running()
+  return state.job_id ~= nil
+end
+
+--- Plugin setup function.
+---@param opts table|nil User configuration.
+function M.setup(opts)
+  config = vim.tbl_deep_extend("force", defaults, opts or {})
+
+  -- Register commands.
+  vim.api.nvim_create_user_command("MdpStart", M.start, { desc = "Start mdp preview" })
+  vim.api.nvim_create_user_command("MdpStop", M.stop, { desc = "Stop mdp preview" })
+  vim.api.nvim_create_user_command("MdpToggle", M.toggle, { desc = "Toggle mdp preview" })
+  vim.api.nvim_create_user_command("MdpOpen", M.open, { desc = "Re-open mdp preview in browser" })
+
+  -- Clean up on Neovim exit.
+  vim.api.nvim_create_autocmd("VimLeavePre", {
+    callback = function()
+      if state.job_id then
+        vim.fn.jobstop(state.job_id)
+      end
+    end,
+  })
+end
+
+return M
