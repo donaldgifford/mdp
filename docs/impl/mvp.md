@@ -232,7 +232,7 @@ binaries, and documentation.
   - Configuration
   - Supported markdown features
   - Screenshots / GIFs
-- [ ] Add Homebrew formula (or tap)
+- [x] Add Homebrew formula (or tap)
 - [x] Add `go install` instructions
 - [x] Handle relative image paths: resolve them relative to the markdown file
       and serve via the HTTP server
