@@ -153,7 +153,7 @@ any editor that provides line numbers).
   - Cursor past end of document (scroll to bottom)
   - Cursor on an empty line between blocks (snap to nearest block above)
 - [x] Add `--scroll-sync` flag (default: `true`) to disable if unwanted
-- [ ] Write test: send cursor position, assert correct element receives scroll
+- [x] Write test: send cursor position, assert correct element receives scroll
 
 ### Success Criteria
 
