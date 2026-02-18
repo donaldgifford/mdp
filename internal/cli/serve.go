@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"log/slog"
+	"os"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -19,6 +20,7 @@ func newServeCmd() *cobra.Command {
 		browser    bool
 		theme      string
 		scrollSync bool
+		stdin      bool
 	)
 
 	cmd := &cobra.Command{
@@ -43,21 +45,15 @@ func newServeCmd() *cobra.Command {
 			}
 			defer srv.Close()
 
-			// Start file watcher.
-			w, err := watcher.New(file, debounceInterval, func() {
-				if broadcastErr := srv.BroadcastFile(); broadcastErr != nil {
-					slog.Error("broadcast failed", "error", broadcastErr)
+			if stdin {
+				go srv.ReadStdin(os.Stdin)
+			} else {
+				cleanup, watchErr := startWatcher(file, srv)
+				if watchErr != nil {
+					return watchErr
 				}
-			})
-			if err != nil {
-				return fmt.Errorf("creating watcher: %w", err)
+				defer cleanup()
 			}
-			defer func() {
-				if closeErr := w.Close(); closeErr != nil {
-					slog.Error("closing watcher", "error", closeErr)
-				}
-			}()
-			go w.Start()
 
 			return srv.ListenAndServe()
 		},
@@ -67,6 +63,28 @@ func newServeCmd() *cobra.Command {
 	cmd.Flags().BoolVar(&browser, "browser", true, "Open browser automatically")
 	cmd.Flags().StringVar(&theme, "theme", "auto", "Theme: auto, light, or dark")
 	cmd.Flags().BoolVar(&scrollSync, "scroll-sync", true, "Enable scroll sync with cursor position")
+	cmd.Flags().BoolVar(&stdin, "stdin", false, "Read content/cursor updates from stdin (for editor plugins)")
 
 	return cmd
+}
+
+// startWatcher creates and starts a file watcher that broadcasts on change.
+// It returns a cleanup function and any error.
+func startWatcher(file string, srv *server.Server) (cleanup func(), err error) {
+	w, err := watcher.New(file, debounceInterval, func() {
+		if broadcastErr := srv.BroadcastFile(); broadcastErr != nil {
+			slog.Error("broadcast failed", "error", broadcastErr)
+		}
+	})
+	if err != nil {
+		return nil, fmt.Errorf("creating watcher: %w", err)
+	}
+
+	go w.Start()
+
+	return func() {
+		if closeErr := w.Close(); closeErr != nil {
+			slog.Error("closing watcher", "error", closeErr)
+		}
+	}, nil
 }
