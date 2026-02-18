@@ -246,7 +246,7 @@ binaries, and documentation.
       `0.0.0.0`, print URL with hostname)
 - [x] Security: when listening on non-localhost, add a random token to the URL
       to prevent unauthorized access
-- [ ] Write CONTRIBUTING.md with instructions for updating vendored JS libraries
+- [x] Write CONTRIBUTING.md with instructions for updating vendored JS libraries
 
 ### Success Criteria
 
