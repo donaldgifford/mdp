@@ -8,11 +8,17 @@ builds:
     goos:
       - linux
       - darwin
+      - windows
     goarch:
       - amd64
       - arm64
     env:
       - CGO_ENABLED=0
+    ldflags:
+      - -s -w
+      - -X github.com/donaldgifford/mdp/internal/cli.version={{ .Version }}
+      - -X github.com/donaldgifford/mdp/internal/cli.commit={{ .ShortCommit }}
+      - -X github.com/donaldgifford/mdp/internal/cli.date={{ .Date }}
 
 archives:
   - id: default
