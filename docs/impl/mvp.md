@@ -28,8 +28,8 @@ HTML, and serve it over HTTP with embedded assets.
 - [x] Add goldmark with GFM extensions (tables, strikethrough, task lists,
       autolinks)
 - [x] Add goldmark-highlighting for syntax class annotation on code blocks
-- [ ] Build the HTML template (`preview.html`) with GitHub-like markdown CSS
-- [ ] Implement `//go:embed` for the `assets/` directory
+- [x] Build the HTML template (`preview.html`) with GitHub-like markdown CSS
+- [x] Implement `//go:embed` for the `assets/` directory
 - [ ] Wire up a basic `cobra` CLI: `mdp serve <file>`
 - [ ] Implement HTTP server that serves the rendered HTML on `localhost:<port>`
 - [ ] Add `--port` flag (default: auto-assign from ephemeral range)
