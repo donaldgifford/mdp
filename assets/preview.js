@@ -59,8 +59,21 @@
     }
   }
 
+  // Rewrite relative image paths to use the /local/ prefix.
+  function rewriteImagePaths() {
+    if (!content) return;
+    var imgs = content.querySelectorAll("img");
+    for (var i = 0; i < imgs.length; i++) {
+      var src = imgs[i].getAttribute("src");
+      if (src && !src.match(/^(https?:|\/|data:)/)) {
+        imgs[i].setAttribute("src", "/local/" + src);
+      }
+    }
+  }
+
   // Run on initial page load.
   renderClientSide();
+  rewriteImagePaths();
 
   // --- Scroll Sync ---
 
@@ -194,6 +207,7 @@
     if (content) {
       content.innerHTML = html;
       renderClientSide();
+      rewriteImagePaths();
     }
   }
 

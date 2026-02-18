@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/gorilla/websocket"
 
@@ -20,11 +21,13 @@ import (
 
 // Config holds the server configuration.
 type Config struct {
-	File        string
-	Port        int
-	OpenBrowser bool
-	Theme       string // "auto", "light", or "dark".
-	ScrollSync  bool   // Enable scroll sync via /cursor endpoint.
+	File          string
+	Port          int
+	OpenBrowser   bool
+	Theme         string // "auto", "light", or "dark".
+	ScrollSync    bool   // Enable scroll sync via /cursor endpoint.
+	CustomCSS     string // Path to custom CSS file to inject after default styles.
+	OpenToNetwork bool   // Listen on 0.0.0.0 instead of localhost.
 }
 
 // Server is the HTTP preview server.
@@ -41,7 +44,7 @@ type Server struct {
 // New creates a new Server from the given config. The listen address is
 // resolved eagerly so callers can read it via Addr() before calling
 // ListenAndServe.
-func New(cfg Config) (*Server, error) {
+func New(cfg Config) (*Server, error) { //nolint:gocritic // Config is intentionally passed by value.
 	tmplData, err := assets.FS.ReadFile("preview.html")
 	if err != nil {
 		return nil, fmt.Errorf("reading template: %w", err)
@@ -52,7 +55,7 @@ func New(cfg Config) (*Server, error) {
 		return nil, fmt.Errorf("parsing template: %w", err)
 	}
 
-	addr, err := resolveAddr(cfg.Port)
+	addr, err := resolveAddr(cfg.Port, cfg.OpenToNetwork)
 	if err != nil {
 		return nil, err
 	}
@@ -127,11 +130,12 @@ func (s *Server) Close() {
 
 // pageData is the template data for preview.html.
 type pageData struct {
-	Title string
-	Theme string
-	CSS   template.CSS
-	JS    template.JS
-	Body  template.HTML
+	Title     string
+	Theme     string
+	CSS       template.CSS
+	CustomCSS template.CSS
+	JS        template.JS
+	Body      template.HTML
 }
 
 // ListenAndServe starts the HTTP server and blocks until it exits.
@@ -149,6 +153,10 @@ func (s *Server) ListenAndServe() error {
 	}
 	mux.Handle("GET /vendor/", http.StripPrefix("/vendor/", http.FileServer(http.FS(vendorFS))))
 
+	// Serve local files (images, etc.) relative to the markdown file's directory.
+	mdDir := filepath.Dir(s.cfg.File)
+	mux.Handle("GET /local/", http.StripPrefix("/local/", http.FileServer(http.Dir(mdDir))))
+
 	slog.Info("serving", "addr", "http://"+s.addr, "file", s.cfg.File)
 
 	if s.cfg.OpenBrowser {
@@ -160,14 +168,19 @@ func (s *Server) ListenAndServe() error {
 }
 
 // resolveAddr returns the listen address, auto-assigning a port if needed.
-func resolveAddr(port int) (string, error) {
+func resolveAddr(port int, openToNetwork bool) (string, error) {
+	host := "localhost"
+	if openToNetwork {
+		host = "0.0.0.0"
+	}
+
 	if port != 0 {
-		return fmt.Sprintf("localhost:%d", port), nil
+		return fmt.Sprintf("%s:%d", host, port), nil
 	}
 
 	// Bind to :0 to get an ephemeral port, then close and reuse it.
 	var lc net.ListenConfig
-	ln, err := lc.Listen(context.Background(), "tcp", "localhost:0")
+	ln, err := lc.Listen(context.Background(), "tcp", host+":0")
 	if err != nil {
 		return "", fmt.Errorf("finding free port: %w", err)
 	}
@@ -209,13 +222,24 @@ func (s *Server) handleIndex(w http.ResponseWriter, _ *http.Request) {
 		theme = "auto"
 	}
 
+	var customCSS template.CSS
+	if s.cfg.CustomCSS != "" {
+		customData, cssErr := os.ReadFile(s.cfg.CustomCSS)
+		if cssErr != nil {
+			slog.Error("reading custom CSS", "error", cssErr)
+		} else {
+			customCSS = template.CSS(customData) //nolint:gosec // User-provided CSS file.
+		}
+	}
+
 	//nolint:gosec // All values are from our own embedded assets and renderer.
 	data := pageData{
-		Title: s.cfg.File,
-		Theme: theme,
-		CSS:   template.CSS(cssData),
-		JS:    template.JS(jsData),
-		Body:  template.HTML(html),
+		Title:     s.cfg.File,
+		Theme:     theme,
+		CSS:       template.CSS(cssData),
+		CustomCSS: customCSS,
+		JS:        template.JS(jsData),
+		Body:      template.HTML(html),
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

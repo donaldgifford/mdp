@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="/vendor/katex/katex.min.css">
   <link rel="stylesheet" href="/vendor/hljs/github.min.css" media="(prefers-color-scheme: light)">
   <link rel="stylesheet" href="/vendor/hljs/github-dark.min.css" media="(prefers-color-scheme: dark)">
+  {{if .CustomCSS}}<style>{{.CustomCSS}}</style>{{end}}
 </head>
 <body data-theme="{{.Theme}}">
   <div id="connection-status"></div>

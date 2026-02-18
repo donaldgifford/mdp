@@ -233,16 +233,16 @@ binaries, and documentation.
   - Supported markdown features
   - Screenshots / GIFs
 - [ ] Add Homebrew formula (or tap)
-- [ ] Add `go install` instructions
-- [ ] Handle relative image paths: resolve them relative to the markdown file
+- [x] Add `go install` instructions
+- [x] Handle relative image paths: resolve them relative to the markdown file
       and serve via the HTTP server
-- [ ] Add custom CSS support: `--css style.css` injects user CSS after default
+- [x] Add custom CSS support: `--css style.css` injects user CSS after default
       styles
 - [ ] Add frontmatter display option: render YAML frontmatter as a styled table
       at the top
-- [ ] Performance: benchmark goldmark parse time + WebSocket push for large
+- [x] Performance: benchmark goldmark parse time + WebSocket push for large
       files (target: <50ms for 10K line files)
-- [ ] Add `--open-to-network` flag for remote dev scenarios (listen on
+- [x] Add `--open-to-network` flag for remote dev scenarios (listen on
       `0.0.0.0`, print URL with hostname)
 - [ ] Security: when listening on non-localhost, add a random token to the URL
       to prevent unauthorized access

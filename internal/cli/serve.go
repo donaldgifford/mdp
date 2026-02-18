@@ -16,11 +16,13 @@ const debounceInterval = 50 * time.Millisecond
 
 func newServeCmd() *cobra.Command {
 	var (
-		port       int
-		browser    bool
-		theme      string
-		scrollSync bool
-		stdin      bool
+		port          int
+		browser       bool
+		theme         string
+		scrollSync    bool
+		stdin         bool
+		customCSS     string
+		openToNetwork bool
 	)
 
 	cmd := &cobra.Command{
@@ -32,11 +34,13 @@ func newServeCmd() *cobra.Command {
 			slog.Info("starting preview server", "file", file, "port", port, "browser", browser)
 
 			cfg := server.Config{
-				File:        file,
-				Port:        port,
-				OpenBrowser: browser,
-				Theme:       theme,
-				ScrollSync:  scrollSync,
+				File:          file,
+				Port:          port,
+				OpenBrowser:   browser,
+				Theme:         theme,
+				ScrollSync:    scrollSync,
+				CustomCSS:     customCSS,
+				OpenToNetwork: openToNetwork,
 			}
 
 			srv, err := server.New(cfg)
@@ -64,6 +68,8 @@ func newServeCmd() *cobra.Command {
 	cmd.Flags().StringVar(&theme, "theme", "auto", "Theme: auto, light, or dark")
 	cmd.Flags().BoolVar(&scrollSync, "scroll-sync", true, "Enable scroll sync with cursor position")
 	cmd.Flags().BoolVar(&stdin, "stdin", false, "Read content/cursor updates from stdin (for editor plugins)")
+	cmd.Flags().StringVar(&customCSS, "css", "", "Path to custom CSS file to inject after default styles")
+	cmd.Flags().BoolVar(&openToNetwork, "open-to-network", false, "Listen on 0.0.0.0 instead of localhost")
 
 	return cmd
 }
