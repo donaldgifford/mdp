@@ -30,11 +30,11 @@ HTML, and serve it over HTTP with embedded assets.
 - [x] Add goldmark-highlighting for syntax class annotation on code blocks
 - [x] Build the HTML template (`preview.html`) with GitHub-like markdown CSS
 - [x] Implement `//go:embed` for the `assets/` directory
-- [ ] Wire up a basic `cobra` CLI: `mdp serve <file>`
-- [ ] Implement HTTP server that serves the rendered HTML on `localhost:<port>`
-- [ ] Add `--port` flag (default: auto-assign from ephemeral range)
-- [ ] Add `--browser` / `--no-browser` flag to control auto-open behavior
-- [ ] Implement browser auto-open using `os/exec` (respects `$BROWSER`, falls
+- [x] Wire up a basic `cobra` CLI: `mdp serve <file>`
+- [x] Implement HTTP server that serves the rendered HTML on `localhost:<port>`
+- [x] Add `--port` flag (default: auto-assign from ephemeral range)
+- [x] Add `--browser` / `--no-browser` flag to control auto-open behavior
+- [x] Implement browser auto-open using `os/exec` (respects `$BROWSER`, falls
       back to `xdg-open` / `open` / `start`)
 - [ ] Write integration test: parse a markdown fixture, assert expected HTML
       output
