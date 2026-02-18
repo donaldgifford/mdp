@@ -3,6 +3,8 @@ package server
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -34,6 +36,7 @@ type Config struct {
 type Server struct {
 	cfg      Config
 	addr     string
+	token    string // Auth token for network-exposed servers.
 	parser   *parser.Parser
 	tmpl     *template.Template
 	hub      *hub
@@ -60,9 +63,18 @@ func New(cfg Config) (*Server, error) { //nolint:gocritic // Config is intention
 		return nil, err
 	}
 
+	var token string
+	if cfg.OpenToNetwork {
+		token, err = generateToken()
+		if err != nil {
+			return nil, fmt.Errorf("generating auth token: %w", err)
+		}
+	}
+
 	return &Server{
 		cfg:    cfg,
 		addr:   addr,
+		token:  token,
 		parser: parser.New(),
 		tmpl:   tmpl,
 		hub:    newHub(),
@@ -72,6 +84,15 @@ func New(cfg Config) (*Server, error) { //nolint:gocritic // Config is intention
 			CheckOrigin: func(_ *http.Request) bool { return true },
 		},
 	}, nil
+}
+
+// generateToken creates a random 16-byte hex token.
+func generateToken() (string, error) {
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
 }
 
 // Addr returns the resolved listen address (host:port).
@@ -157,14 +178,23 @@ func (s *Server) ListenAndServe() error {
 	mdDir := filepath.Dir(s.cfg.File)
 	mux.Handle("GET /local/", http.StripPrefix("/local/", http.FileServer(http.Dir(mdDir))))
 
-	slog.Info("serving", "addr", "http://"+s.addr, "file", s.cfg.File)
+	var handler http.Handler = mux
+	baseURL := "http://" + s.addr
+
+	// When exposed to the network, require a token in the query string.
+	if s.token != "" {
+		baseURL += "?token=" + s.token
+		handler = s.tokenMiddleware(mux)
+	}
+
+	slog.Info("serving", "addr", baseURL, "file", s.cfg.File)
 
 	if s.cfg.OpenBrowser {
-		go openBrowser("http://" + s.addr)
+		go openBrowser(baseURL)
 	}
 
 	//nolint:gosec // Bind address is intentionally configurable.
-	return http.ListenAndServe(s.addr, mux)
+	return http.ListenAndServe(s.addr, handler)
 }
 
 // resolveAddr returns the listen address, auto-assigning a port if needed.
@@ -297,4 +327,23 @@ func (s *Server) handleCursor(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// tokenMiddleware checks for a valid token in the query string.
+// Vendor assets are exempted so stylesheets and scripts load correctly.
+func (s *Server) tokenMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Allow vendor assets without auth (they're public embedded files).
+		if len(r.URL.Path) >= 8 && r.URL.Path[:8] == "/vendor/" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		if r.URL.Query().Get("token") != s.token {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }

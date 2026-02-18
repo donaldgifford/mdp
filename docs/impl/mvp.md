@@ -244,7 +244,7 @@ binaries, and documentation.
       files (target: <50ms for 10K line files)
 - [x] Add `--open-to-network` flag for remote dev scenarios (listen on
       `0.0.0.0`, print URL with hostname)
-- [ ] Security: when listening on non-localhost, add a random token to the URL
+- [x] Security: when listening on non-localhost, add a random token to the URL
       to prevent unauthorized access
 - [ ] Write CONTRIBUTING.md with instructions for updating vendored JS libraries
 
