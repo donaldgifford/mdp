@@ -25,9 +25,9 @@ HTML, and serve it over HTTP with embedded assets.
   ├── nvim/             # Lua plugin
   └── go.mod
   ```
-- [ ] Add goldmark with GFM extensions (tables, strikethrough, task lists,
+- [x] Add goldmark with GFM extensions (tables, strikethrough, task lists,
       autolinks)
-- [ ] Add goldmark-highlighting for syntax class annotation on code blocks
+- [x] Add goldmark-highlighting for syntax class annotation on code blocks
 - [ ] Build the HTML template (`preview.html`) with GitHub-like markdown CSS
 - [ ] Implement `//go:embed` for the `assets/` directory
 - [ ] Wire up a basic `cobra` CLI: `mdp serve <file>`
