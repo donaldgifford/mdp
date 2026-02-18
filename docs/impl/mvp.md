@@ -95,9 +95,9 @@ correctly in the browser using embedded JS libraries.
       files into `assets/vendor/`
 - [x] Download and vendor `highlight.min.js` + commonly used language packs into
       `assets/vendor/`
-- [ ] Configure goldmark-mermaid extension in client-side render mode (emits
+- [x] Configure goldmark-mermaid extension in client-side render mode (emits
       `<div class="mermaid">` blocks)
-- [ ] Add KaTeX support: configure goldmark to identify `$...$` (inline) and
+- [x] Add KaTeX support: configure goldmark to identify `$...$` (inline) and
       `$$...$$` (block) math delimiters and emit appropriate markup
 - [ ] Implement client-side rendering pipeline in `preview.js`:
   - After DOM update, call `mermaid.run()` on all `.mermaid` elements
