@@ -24,7 +24,7 @@ instantly.
 ```lua
 {
   "donaldgifford/mdp",
-  build = "go install ./cmd/mdp",
+  build = "./scripts/install.sh",
   ft = "markdown",
   cmd = { "MdpStart", "MdpStop", "MdpToggle", "MdpOpen" },
   keys = {
@@ -43,14 +43,21 @@ instantly.
 }
 ```
 
+The install script downloads a pre-built binary from GitHub releases. If no
+release is available (e.g., testing a branch), it falls back to building from
+source with `go build`. You can also run `:MdpInstall` to re-download or
+`:MdpInstall!` to force a source build.
+
 ### Commands
 
-| Command      | Description                           |
-| ------------ | ------------------------------------- |
-| `:MdpStart`  | Start the preview server              |
-| `:MdpStop`   | Stop the preview server               |
-| `:MdpToggle` | Toggle the preview server             |
-| `:MdpOpen`   | Re-open the browser (without restart) |
+| Command         | Description                              |
+| --------------- | ---------------------------------------- |
+| `:MdpStart`     | Start the preview server                 |
+| `:MdpStop`      | Stop the preview server                  |
+| `:MdpToggle`    | Toggle the preview server                |
+| `:MdpOpen`      | Re-open the browser (without restart)    |
+| `:MdpInstall`   | Download release binary                  |
+| `:MdpInstall!`  | Build binary from source                 |
 
 ### How It Works
 

@@ -33,4 +33,5 @@ go.work.sum
 
 # Build directories
 build/
+/bin/
 /mdp
