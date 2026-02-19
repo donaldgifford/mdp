@@ -21,32 +21,33 @@ instantly.
 
 ### lazy.nvim / LazyVim
 
+Minimal — defaults are provided by the plugin's `lazy.lua`:
+
+```lua
+{ "donaldgifford/mdp" }
+```
+
+With custom options and keybindings:
+
 ```lua
 {
   "donaldgifford/mdp",
-  build = "./scripts/install.sh",
-  ft = "markdown",
-  cmd = { "MdpStart", "MdpStop", "MdpToggle", "MdpOpen" },
   keys = {
     { "<leader>mp", "<cmd>MdpToggle<cr>", desc = "Toggle markdown preview" },
     { "<leader>mo", "<cmd>MdpOpen<cr>", desc = "Open preview in browser" },
   },
-  config = function()
-    require("mdp").setup({
-      -- Default values shown:
-      port = 0,           -- 0 = auto-assign
-      browser = true,     -- Open browser on start
-      theme = "auto",     -- "auto", "light", or "dark"
-      scroll_sync = true, -- Sync preview scroll with cursor
-    })
-  end,
+  opts = {
+    port = 0,           -- 0 = auto-assign
+    browser = true,     -- Open browser on start
+    theme = "auto",     -- "auto", "light", or "dark"
+    scroll_sync = true, -- Sync preview scroll with cursor
+  },
 }
 ```
 
-The install script downloads a pre-built binary from GitHub releases. If no
-release is available (e.g., testing a branch), it falls back to building from
-source with `go build`. You can also run `:MdpInstall` to re-download or
-`:MdpInstall!` to force a source build.
+On install/update, `build.lua` downloads a pre-built binary from GitHub
+releases. If no release is available (e.g., testing a branch), it falls
+back to building from source with `go build`.
 
 ### Commands
 
