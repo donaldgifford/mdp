@@ -35,7 +35,7 @@ internal/
   server/        -> HTTP server, WebSocket/SSE hubs, stdin reader, auth token
   watcher/       -> fsnotify file watcher with 50ms debounce
 assets/          -> Embedded: preview.html/css/js + vendored Mermaid, KaTeX, highlight.js
-nvim/lua/mdp/    -> Neovim plugin: setup(), MdpStart/Stop/Toggle/Open commands
+lua/mdp/         -> Neovim plugin: setup(), MdpStart/Stop/Toggle/Open commands
 ```
 
 **Data flow:** Neovim buffer -> Lua plugin -> stdin JSON -> Go binary -> goldmark parse -> WebSocket/SSE hub -> browser. Browser handles Mermaid, KaTeX, highlight.js client-side.
