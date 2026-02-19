@@ -8,7 +8,6 @@ builds:
     goos:
       - linux
       - darwin
-      - windows
     goarch:
       - amd64
       - arm64
@@ -19,13 +18,6 @@ builds:
       - -X github.com/donaldgifford/mdp/internal/cli.version={{ .Version }}
       - -X github.com/donaldgifford/mdp/internal/cli.commit={{ .ShortCommit }}
       - -X github.com/donaldgifford/mdp/internal/cli.date={{ .Date }}
-
-archives:
-  - id: default
-    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-    format: "tar.gz"
-    files:
-      - none*
 
 checksum:
   name_template: 'checksums.txt'
@@ -61,7 +53,22 @@ changelog:
     - title: Others
       order: 999
 
+archives:
+  - id: default
+    name_template: >-
+      {{ .ProjectName }}-v{{ .Version }}- {{- .Os }}- {{- if eq .Arch "amd64" }}x86_64 {{- else if eq .Arch "386" }}i386 {{-
+      else }}{{ .Arch }}{{ end }} {{- if .Arm }}v{{ .Arm }}{{ end }}
+    format: "tar.gz"
+    files:
+      - none*
+
+sboms:
+  - artifacts: archive
+    documents:
+      - "{{ .ArtifactName }}.sbom.spdx.json"
+
 release:
+  name_template: 'Release {{.Tag}}'
   github:
     owner: donaldgifford
     name: mdp
