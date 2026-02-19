@@ -25,7 +25,11 @@ local state = {
 --- Merged user configuration.
 local config = {}
 
+--- Plugin root directory (3 levels up from lua/mdp/init.lua).
+local plugin_dir = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":h:h:h")
+
 --- Resolve the mdp binary path.
+--- Search order: config.binary > plugin bin/ dir > PATH
 ---@return string|nil path, string|nil error
 local function resolve_binary()
   if config.binary ~= "" then
@@ -35,12 +39,19 @@ local function resolve_binary()
     return nil, "mdp binary not found at: " .. config.binary
   end
 
+  -- Check the plugin's own bin/ directory (populated by install.sh).
+  local local_bin = plugin_dir .. "/bin/mdp"
+  if vim.fn.executable(local_bin) == 1 then
+    return local_bin, nil
+  end
+
+  -- Check PATH (e.g., from go install).
   local path = vim.fn.exepath("mdp")
   if path ~= "" then
     return path, nil
   end
 
-  return nil, "mdp binary not found in PATH. Install with: go install github.com/donaldgifford/mdp/cmd/mdp@latest"
+  return nil, "mdp binary not found. Run :MdpInstall or install with: go install github.com/donaldgifford/mdp/cmd/mdp@latest"
 end
 
 --- Send a JSON message to the mdp process via stdin.
@@ -322,6 +333,37 @@ function M.is_running()
   return state.job_id ~= nil
 end
 
+--- Run the install script. Pass "--source" to force a build from source.
+---@param args table|nil Command arguments from nvim_create_user_command.
+function M.install(args)
+  local install_script = plugin_dir .. "/scripts/install.sh"
+  if vim.fn.filereadable(install_script) ~= 1 then
+    vim.notify("[mdp] Install script not found: " .. install_script, vim.log.levels.ERROR)
+    return
+  end
+
+  local cmd = { "bash", install_script }
+  local bang = args and args.bang
+  if bang then
+    table.insert(cmd, "--source")
+  end
+
+  vim.notify("[mdp] Installing... " .. (bang and "(from source)" or "(downloading release)"))
+
+  vim.fn.jobstart(cmd, {
+    cwd = plugin_dir,
+    on_exit = function(_, exit_code)
+      vim.schedule(function()
+        if exit_code == 0 then
+          vim.notify("[mdp] Install complete")
+        else
+          vim.notify("[mdp] Install failed (exit " .. exit_code .. ")", vim.log.levels.ERROR)
+        end
+      end)
+    end,
+  })
+end
+
 --- Plugin setup function.
 ---@param opts table|nil User configuration.
 function M.setup(opts)
@@ -332,6 +374,10 @@ function M.setup(opts)
   vim.api.nvim_create_user_command("MdpStop", M.stop, { desc = "Stop mdp preview" })
   vim.api.nvim_create_user_command("MdpToggle", M.toggle, { desc = "Toggle mdp preview" })
   vim.api.nvim_create_user_command("MdpOpen", M.open, { desc = "Re-open mdp preview in browser" })
+  vim.api.nvim_create_user_command("MdpInstall", M.install, {
+    desc = "Install/update mdp binary (use ! for source build)",
+    bang = true,
+  })
 
   -- Clean up on Neovim exit.
   vim.api.nvim_create_autocmd("VimLeavePre", {
