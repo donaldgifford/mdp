@@ -119,6 +119,26 @@ Editor (Neovim)                    Browser
    +-----------------------------------+
 ```
 
+## Install
+
+### Neovim plugin (recommended)
+
+The lazy.nvim plugin spec handles everything — see [Neovim Plugin](#neovim-plugin)
+above. `build.lua` downloads a pre-built binary on install/update.
+
+### Standalone binary
+
+```bash
+# Via Go
+go install github.com/donaldgifford/mdp/cmd/mdp@latest
+
+# Via Homebrew (when tap is set up)
+brew install donaldgifford/tap/mdp
+
+# From GitHub releases
+# Download the archive for your platform from the releases page
+```
+
 ## Development
 
 ```bash
@@ -129,6 +149,16 @@ make lint           # Run golangci-lint
 make fmt            # Format code
 make update-vendor  # Update vendored JS libraries from CDN
 ```
+
+To test a development branch in Neovim, add `branch` to your spec:
+
+```lua
+{ "donaldgifford/mdp", branch = "feat/your-branch" }
+```
+
+Then `:Lazy update mdp`. With no release for the branch, `build.lua` falls
+back to building from source. See [CONTRIBUTING.md](CONTRIBUTING.md) for
+more details.
 
 ## License
 

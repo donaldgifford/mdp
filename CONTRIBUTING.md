@@ -16,6 +16,43 @@ make test
 make lint
 ```
 
+## Testing the Neovim Plugin
+
+To test plugin changes from a development branch, add `branch` to your
+lazy.nvim spec:
+
+```lua
+{
+  "donaldgifford/mdp",
+  branch = "feat/your-branch",
+  keys = {
+    { "<leader>mp", "<cmd>MdpToggle<cr>", desc = "Toggle markdown preview" },
+  },
+  opts = {},
+}
+```
+
+After changing the branch, run `:Lazy update mdp` in Neovim to pull the
+latest commits.
+
+When `build.lua` runs against a branch with no GitHub release, it
+automatically falls back to building the Go binary from source (requires
+Go toolchain). You can also force a source build at any time with
+`:MdpInstall!` inside Neovim.
+
+### Plugin file layout
+
+```
+lazy.lua         -> Default lazy.nvim plugin spec (main, ft, cmd, opts)
+build.lua        -> Auto-run by lazy.nvim on install/update (binary download)
+lua/mdp/init.lua -> Plugin module: setup(), commands, buffer/cursor sync
+scripts/install.sh -> CLI alternative to build.lua (same logic in bash)
+```
+
+`build.lua` and `scripts/install.sh` both install the binary to `bin/`
+inside the plugin directory. The plugin checks `bin/mdp` before `$PATH`
+when resolving the binary.
+
 ## Updating Vendored JS Libraries
 
 The `assets/vendor/` directory contains Mermaid, KaTeX, and highlight.js

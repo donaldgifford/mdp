@@ -28,14 +28,17 @@ go test -bench=. ./internal/parser/
 ## Architecture
 
 ```
-cmd/mdp/         -> CLI entrypoint (cobra with --version, --verbose)
+cmd/mdp/           -> CLI entrypoint (cobra with --version, --verbose)
 internal/
-  cli/           -> Root and serve commands with flag handling
-  parser/        -> Goldmark pipeline: GFM, highlighting, mermaid, math, line annotations
-  server/        -> HTTP server, WebSocket/SSE hubs, stdin reader, auth token
-  watcher/       -> fsnotify file watcher with 50ms debounce
-assets/          -> Embedded: preview.html/css/js + vendored Mermaid, KaTeX, highlight.js
-lua/mdp/         -> Neovim plugin: setup(), MdpStart/Stop/Toggle/Open commands
+  cli/             -> Root and serve commands with flag handling
+  parser/          -> Goldmark pipeline: GFM, highlighting, mermaid, math, line annotations
+  server/          -> HTTP server, WebSocket/SSE hubs, stdin reader, auth token
+  watcher/         -> fsnotify file watcher with 50ms debounce
+assets/            -> Embedded: preview.html/css/js + vendored Mermaid, KaTeX, highlight.js
+lua/mdp/init.lua   -> Neovim plugin: setup(), commands, buffer/cursor sync
+lazy.lua           -> Default lazy.nvim plugin spec (main, ft, cmd, opts)
+build.lua          -> Auto-run by lazy.nvim on install/update (binary download/build)
+scripts/install.sh -> CLI alternative to build.lua (same logic in bash)
 ```
 
 **Data flow:** Neovim buffer -> Lua plugin -> stdin JSON -> Go binary -> goldmark parse -> WebSocket/SSE hub -> browser. Browser handles Mermaid, KaTeX, highlight.js client-side.
@@ -47,6 +50,15 @@ lua/mdp/         -> Neovim plugin: setup(), MdpStart/Stop/Toggle/Open commands
 **JSON protocol (WS/SSE):** `{"type":"content","html":"..."}` for content updates, `{"type":"cursor","line":N}` for scroll sync.
 
 **Stdin protocol (Neovim -> binary):** Newline-delimited JSON: `{"type":"content","data":"..."}` and `{"type":"cursor","line":N}`.
+
+## Neovim Plugin
+
+- `lazy.lua` provides default spec with `main = "mdp"` so lazy.nvim can auto-detect the module for `opts`-based setup
+- `build.lua` runs as a coroutine in lazy.nvim's build runner: downloads release binary from GitHub, falls back to `go build` from source
+- Binary is installed to `<plugin-dir>/bin/mdp`; `resolve_binary()` in `lua/mdp/init.lua` checks there before `$PATH`
+- `scripts/install.sh` is the bash equivalent of `build.lua` for CLI use
+- To test a dev branch: add `branch = "feat/your-branch"` to the lazy.nvim spec, then `:Lazy update mdp`
+- `:MdpInstall` re-downloads the release binary; `:MdpInstall!` forces a source build
 
 ## Code Style
 
@@ -66,4 +78,4 @@ lua/mdp/         -> Neovim plugin: setup(), MdpStart/Stop/Toggle/Open commands
 
 ## CI/CD
 
-GitHub Actions: lint -> test -> build on push/PR. Releases use GoReleaser with GPG signing and semver (PR labels: `major`, `minor`, `patch`, `dont-release`).
+GitHub Actions: lint -> test -> build on push/PR. License check uses `go-licenses` (goldmark-mathjax is ignored since it declares MIT but has no LICENSE file). Releases use GoReleaser with GPG signing and semver (PR labels: `major`, `minor`, `patch`, `dont-release`). Archive naming: `mdp_<os>_<arch>.tar.gz`.
