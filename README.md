@@ -26,17 +26,20 @@ instantly.
   "donaldgifford/mdp",
   build = "go install ./cmd/mdp",
   ft = "markdown",
-  opts = {
-    -- Default values shown:
-    port = 0,           -- 0 = auto-assign
-    browser = true,     -- Open browser on start
-    theme = "auto",     -- "auto", "light", or "dark"
-    scroll_sync = true, -- Sync preview scroll with cursor
-  },
+  cmd = { "MdpStart", "MdpStop", "MdpToggle", "MdpOpen" },
   keys = {
     { "<leader>mp", "<cmd>MdpToggle<cr>", desc = "Toggle markdown preview" },
     { "<leader>mo", "<cmd>MdpOpen<cr>", desc = "Open preview in browser" },
   },
+  config = function()
+    require("mdp").setup({
+      -- Default values shown:
+      port = 0,           -- 0 = auto-assign
+      browser = true,     -- Open browser on start
+      theme = "auto",     -- "auto", "light", or "dark"
+      scroll_sync = true, -- Sync preview scroll with cursor
+    })
+  end,
 }
 ```
 
