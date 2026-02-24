@@ -42,6 +42,7 @@ With custom options and keybindings:
     theme = "auto",         -- "auto", "light", or "dark"
     scroll_sync = true,     -- Sync preview scroll with cursor
     idle_timeout_secs = 30, -- Shut down after N seconds with no open tab (0 = disabled)
+    log_file = vim.fn.stdpath("log") .. "/mdp.log", -- "" to disable
   },
 }
 ```

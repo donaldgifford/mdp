@@ -3,6 +3,9 @@
 
 local M = {}
 
+--- Default log file path: ~/.local/state/nvim/mdp.log (XDG-compliant).
+local default_log_file = vim.fn.stdpath("log") .. "/mdp.log"
+
 --- Default configuration.
 local defaults = {
   port = 0,
@@ -10,6 +13,7 @@ local defaults = {
   theme = "auto",
   scroll_sync = true,
   idle_timeout_secs = 30, -- Shut down after this many seconds with no browser tab open (0 = disabled).
+  log_file = default_log_file, -- Server log output. Empty string disables logging.
   binary = "", -- Empty means auto-detect via exepath.
   debounce_ms = 300,
 }
@@ -28,6 +32,24 @@ local config = {}
 
 --- Plugin root directory (3 levels up from lua/mdp/init.lua).
 local plugin_dir = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":h:h:h")
+
+--- Append lines to the configured log file, if one is set.
+---@param lines string[]
+local function write_log(lines)
+  if not config.log_file or config.log_file == "" then
+    return
+  end
+  local f = io.open(config.log_file, "a")
+  if not f then
+    return
+  end
+  for _, line in ipairs(lines) do
+    if line ~= "" then
+      f:write(line .. "\n")
+    end
+  end
+  f:close()
+end
 
 --- Resolve the mdp binary path.
 --- Search order: config.binary > plugin bin/ dir > PATH
@@ -230,10 +252,12 @@ function M.start()
 
   table.insert(cmd, file)
 
+  write_log({ "=== mdp session start: " .. file .. " ===" })
+
   local job_id = vim.fn.jobstart(cmd, {
     stdin_mode = "pipe",
     on_stdout = function(_, data)
-      -- Capture the server address from stdout/log output.
+      write_log(data)
       for _, line in ipairs(data) do
         local addr = line:match("addr=http://([%w%.%-:]+)")
         if addr then
@@ -242,6 +266,7 @@ function M.start()
       end
     end,
     on_stderr = function(_, data)
+      write_log(data)
       for _, line in ipairs(data) do
         if line ~= "" then
           local addr = line:match("addr=http://([%w%.%-:]+)")
@@ -252,6 +277,7 @@ function M.start()
       end
     end,
     on_exit = function(_, exit_code)
+      write_log({ "=== mdp session end (exit " .. exit_code .. ") ===" })
       if exit_code ~= 0 and state.job_id then
         vim.schedule(function()
           vim.notify("[mdp] Process exited with code " .. exit_code, vim.log.levels.WARN)
@@ -370,6 +396,11 @@ end
 ---@param opts table|nil User configuration.
 function M.setup(opts)
   config = vim.tbl_deep_extend("force", defaults, opts or {})
+
+  -- Ensure the log directory exists.
+  if config.log_file and config.log_file ~= "" then
+    vim.fn.mkdir(vim.fn.fnamemodify(config.log_file, ":h"), "p")
+  end
 
   -- Register commands.
   vim.api.nvim_create_user_command("MdpStart", M.start, { desc = "Start mdp preview" })
