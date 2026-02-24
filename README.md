@@ -53,21 +53,41 @@ back to building from source with `go build`.
 
 ### Commands
 
-| Command         | Description                              |
-| --------------- | ---------------------------------------- |
-| `:MdpStart`     | Start the preview server                 |
-| `:MdpStop`      | Stop the preview server                  |
-| `:MdpToggle`    | Toggle the preview server                |
-| `:MdpOpen`      | Re-open the browser (without restart)    |
-| `:MdpInstall`   | Download release binary                  |
-| `:MdpInstall!`  | Build binary from source                 |
+| Command        | Description                           |
+| -------------- | ------------------------------------- |
+| `:MdpStart`    | Start the preview server              |
+| `:MdpStop`     | Stop the preview server               |
+| `:MdpToggle`   | Toggle the preview server             |
+| `:MdpOpen`     | Re-open the browser (without restart) |
+| `:MdpInstall`  | Download latest release binary        |
+| `:MdpInstall!` | Build binary from source              |
+
+### Idle Timeout
+
+By default the server shuts down automatically 30 seconds after the last
+browser tab is closed. This prevents orphaned processes when switching
+between tmux sessions or Neovim instances. Set `idle_timeout_secs = 0`
+to disable.
+
+### Logging
+
+Server output is written to `~/.local/state/nvim/mdp.log` by default
+(XDG-compliant, same directory as other Neovim logs). Each session is
+delimited by start/end markers so multiple runs are easy to distinguish.
+
+```bash
+# Watch logs in real time
+tail -f ~/.local/state/nvim/mdp.log
+```
+
+Set `log_file = ""` in `opts` to disable logging.
 
 ### How It Works
 
-The plugin starts `mdp serve --stdin <file>` as a background job. Buffer content
-is sent over stdin as newline-delimited JSON on every save and during insert
-mode (debounced). Cursor position is sent on every cursor movement (throttled)
-for scroll sync.
+The plugin starts `mdp serve --stdin <file>` as a background job. Buffer
+content is sent over stdin as newline-delimited JSON on every save and
+during insert mode (debounced). Cursor position is sent on every cursor
+movement (throttled) for scroll sync.
 
 ## CLI Reference
 
@@ -77,18 +97,18 @@ mdp serve [flags] <file>
 
 ### Flags
 
-| Flag                | Default | Description                            |
-| ------------------- | ------- | -------------------------------------- |
-| `--port`            | `0`     | Port to listen on (0 = auto-assign)    |
-| `--browser`         | `true`  | Open browser automatically             |
-| `--theme`           | `auto`  | Theme: `auto`, `light`, or `dark`      |
-| `--scroll-sync`     | `true`  | Enable scroll sync via cursor tracking |
-| `--stdin`           | `false` | Read content/cursor updates from stdin |
-| `--css`             | `""`    | Path to custom CSS file                |
-| `--open-to-network` | `false` | Listen on 0.0.0.0 instead of localhost           |
-| `--idle-timeout`    | `30s`   | Shut down after no clients connected for this long (0 = disabled) |
-| `-v, --verbose`     | `false` | Enable debug logging                             |
-| `--version`         |         | Print version, commit, and build date            |
+| Flag                | Default | Description                                              |
+| ------------------- | ------- | -------------------------------------------------------- |
+| `--port`            | `0`     | Port to listen on (0 = auto-assign)                      |
+| `--browser`         | `true`  | Open browser automatically                               |
+| `--theme`           | `auto`  | Theme: `auto`, `light`, or `dark`                        |
+| `--scroll-sync`     | `true`  | Enable scroll sync via cursor tracking                   |
+| `--stdin`           | `false` | Read content/cursor updates from stdin                   |
+| `--css`             | `""`    | Path to custom CSS file                                  |
+| `--open-to-network` | `false` | Listen on `0.0.0.0` instead of `localhost`               |
+| `--idle-timeout`    | `30s`   | Shut down after no clients for this duration (0=disabled)|
+| `-v, --verbose`     | `false` | Enable debug logging                                     |
+| `--version`         |         | Print version, commit, and build date                    |
 
 ## Supported Markdown Features
 
