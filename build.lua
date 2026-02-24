@@ -133,9 +133,22 @@ local function build_from_source()
   coroutine.yield("Building from source...")
   vim.fn.mkdir(bin_dir, "p")
 
+  -- Resolve version info from git for ldflags (mirrors Makefile).
+  local ldflags_pkg = "github.com/donaldgifford/" .. binary_name .. "/internal/cli"
+  local version = vim.fn.system("git -C " .. vim.fn.shellescape(plugin_dir) .. " describe --tags --always --dirty 2>/dev/null"):gsub("\n", "")
+  if vim.v.shell_error ~= 0 or version == "" then version = "dev" end
+  local commit = vim.fn.system("git -C " .. vim.fn.shellescape(plugin_dir) .. " rev-parse --short HEAD 2>/dev/null"):gsub("\n", "")
+  if vim.v.shell_error ~= 0 or commit == "" then commit = "none" end
+  local date = vim.fn.system("date -u +%Y-%m-%dT%H:%M:%SZ"):gsub("\n", "")
+  local ldflags = string.format(
+    "-X %s.version=%s -X %s.commit=%s -X %s.date=%s",
+    ldflags_pkg, version, ldflags_pkg, commit, ldflags_pkg, date
+  )
+
   local output = vim.fn.system(string.format(
-    "cd %s && go build -o %s/%s ./cmd/mdp",
+    "cd %s && go build -ldflags %s -o %s/%s ./cmd/mdp",
     vim.fn.shellescape(plugin_dir),
+    vim.fn.shellescape(ldflags),
     vim.fn.shellescape(bin_dir),
     binary_name
   ))
@@ -145,7 +158,7 @@ local function build_from_source()
     return false
   end
 
-  coroutine.yield("Built " .. binary_name .. " from source")
+  coroutine.yield("Built " .. binary_name .. " from source (" .. version .. ")")
   return true
 end
 
