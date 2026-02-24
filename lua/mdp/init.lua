@@ -25,6 +25,7 @@ local state = {
   augroup = nil,
   cursor_timer = nil,
   content_timer = nil,
+  shutdown_timer = nil, -- Lua-side idle timer started when last markdown buffer closes.
 }
 
 --- Merged user configuration.
@@ -144,6 +145,21 @@ local function is_markdown_buffer()
   return ft == "markdown" or ft == "mdx"
 end
 
+--- Return true if any loaded buffer other than `exclude_buf` is markdown.
+---@param exclude_buf integer Buffer handle to ignore (the one being deleted).
+---@return boolean
+local function has_other_markdown_buffer(exclude_buf)
+  for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+    if buf ~= exclude_buf and vim.api.nvim_buf_is_loaded(buf) then
+      local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+      if ft == "markdown" or ft == "mdx" then
+        return true
+      end
+    end
+  end
+  return false
+end
+
 --- Set up autocmds for buffer sync and cursor tracking.
 local function setup_autocmds()
   if state.augroup then
@@ -181,11 +197,41 @@ local function setup_autocmds()
     pattern = { "*.md", "*.mdx", "*.markdown" },
     callback = function()
       if state.job_id then
+        -- Cancel any pending buffer-close shutdown — user is back in markdown.
+        if state.shutdown_timer then
+          vim.fn.timer_stop(state.shutdown_timer)
+          state.shutdown_timer = nil
+        end
         send_content()
         if config.scroll_sync then
           send_cursor()
         end
       end
+    end,
+  })
+
+  -- Start idle shutdown when the last markdown buffer is closed.
+  vim.api.nvim_create_autocmd({ "BufDelete", "BufWipeout" }, {
+    group = state.augroup,
+    pattern = { "*.md", "*.mdx", "*.markdown" },
+    callback = function(ev)
+      if not state.job_id or config.idle_timeout_secs <= 0 then
+        return
+      end
+      if has_other_markdown_buffer(ev.buf) then
+        return
+      end
+      -- No markdown buffers remain — start the shutdown timer.
+      local captured_job = state.job_id
+      state.shutdown_timer = vim.fn.timer_start(
+        config.idle_timeout_secs * 1000,
+        function()
+          state.shutdown_timer = nil
+          if state.job_id == captured_job then
+            M.stop()
+          end
+        end
+      )
     end,
   })
 end
@@ -204,6 +250,10 @@ local function teardown_autocmds()
   if state.content_timer then
     vim.fn.timer_stop(state.content_timer)
     state.content_timer = nil
+  end
+  if state.shutdown_timer then
+    vim.fn.timer_stop(state.shutdown_timer)
+    state.shutdown_timer = nil
   end
 end
 
