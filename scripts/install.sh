@@ -122,10 +122,17 @@ build_from_source() {
     return 1
   fi
 
+  local ldflags_pkg="github.com/donaldgifford/${BINARY_NAME}/internal/cli"
+  local version commit date ldflags
+  version="$(git -C "${PLUGIN_DIR}" describe --tags --always --dirty 2>/dev/null || echo dev)"
+  commit="$(git -C "${PLUGIN_DIR}" rev-parse --short HEAD 2>/dev/null || echo none)"
+  date="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  ldflags="-X ${ldflags_pkg}.version=${version} -X ${ldflags_pkg}.commit=${commit} -X ${ldflags_pkg}.date=${date}"
+
   mkdir -p "${BIN_DIR}"
   (cd "${PLUGIN_DIR}" \
-    && go build -o "${BIN_DIR}/${BINARY_NAME}" ./cmd/mdp)
-  log "Built ${BIN_DIR}/${BINARY_NAME} from source"
+    && go build -ldflags "${ldflags}" -o "${BIN_DIR}/${BINARY_NAME}" ./cmd/mdp)
+  log "Built ${BIN_DIR}/${BINARY_NAME} from source (${version})"
 }
 
 main() {

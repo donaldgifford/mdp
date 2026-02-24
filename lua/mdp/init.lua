@@ -25,6 +25,7 @@ local state = {
   augroup = nil,
   cursor_timer = nil,
   content_timer = nil,
+  shutdown_timer = nil, -- Lua-side idle timer started when last markdown buffer closes.
 }
 
 --- Merged user configuration.
@@ -144,6 +145,42 @@ local function is_markdown_buffer()
   return ft == "markdown" or ft == "mdx"
 end
 
+--- Start the shutdown timer if no markdown buffers remain after a buffer close.
+--- Uses vim.schedule so the check runs after the current event cycle, and
+--- excludes deleted_buf explicitly because BufDelete fires before Neovim
+--- removes the buffer — it may still appear loaded during the scheduled scan.
+---@param deleted_buf integer The buffer handle being deleted/unloaded.
+local function maybe_start_shutdown_timer(deleted_buf)
+  vim.schedule(function()
+    if not state.job_id or config.idle_timeout_secs <= 0 then
+      return
+    end
+    if state.shutdown_timer then
+      return
+    end
+    for _, buf in ipairs(vim.api.nvim_list_bufs()) do
+      if buf ~= deleted_buf and vim.api.nvim_buf_is_loaded(buf) then
+        local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
+        if ft == "markdown" or ft == "mdx" then
+          return
+        end
+      end
+    end
+    -- No markdown buffers remain — start the shutdown timer.
+    write_log({ "[mdp] no markdown buffers open, idle shutdown in " .. config.idle_timeout_secs .. "s" })
+    local captured_job = state.job_id
+    state.shutdown_timer = vim.fn.timer_start(
+      config.idle_timeout_secs * 1000,
+      function()
+        state.shutdown_timer = nil
+        if state.job_id == captured_job then
+          M.stop()
+        end
+      end
+    )
+  end)
+end
+
 --- Set up autocmds for buffer sync and cursor tracking.
 local function setup_autocmds()
   if state.augroup then
@@ -181,11 +218,28 @@ local function setup_autocmds()
     pattern = { "*.md", "*.mdx", "*.markdown" },
     callback = function()
       if state.job_id then
+        -- Cancel any pending buffer-close shutdown — user is back in markdown.
+        if state.shutdown_timer then
+          vim.fn.timer_stop(state.shutdown_timer)
+          state.shutdown_timer = nil
+        end
         send_content()
         if config.scroll_sync then
           send_cursor()
         end
       end
+    end,
+  })
+
+  -- Start idle shutdown when the last markdown buffer is closed.
+  -- BufDelete fires before the buffer is removed; vim.schedule defers the scan
+  -- to after the event completes so the buffer list is in its final state.
+  -- Listening to all three events covers delete, wipeout, and unload paths used
+  -- by buffer management plugins (bufferline.nvim, etc.).
+  vim.api.nvim_create_autocmd({ "BufDelete", "BufWipeout", "BufUnload" }, {
+    group = state.augroup,
+    callback = function(ev)
+      maybe_start_shutdown_timer(ev.buf)
     end,
   })
 end
@@ -204,6 +258,10 @@ local function teardown_autocmds()
   if state.content_timer then
     vim.fn.timer_stop(state.content_timer)
     state.content_timer = nil
+  end
+  if state.shutdown_timer then
+    vim.fn.timer_stop(state.shutdown_timer)
+    state.shutdown_timer = nil
   end
 end
 
@@ -331,6 +389,30 @@ function M.toggle()
   end
 end
 
+--- Show the preview for the current buffer.
+--- If the server is not running, starts it (opens browser automatically).
+--- If already running, pushes the current buffer and opens a browser tab.
+--- Stopping is handled by idle timeout or :MdpStop — this command never stops.
+function M.preview()
+  if not state.job_id then
+    if not is_markdown_buffer() then
+      vim.notify("[mdp] Not a markdown buffer", vim.log.levels.WARN)
+      return
+    end
+    M.start()
+    return
+  end
+
+  -- Already running: sync current buffer if markdown, then open browser.
+  if is_markdown_buffer() then
+    send_content()
+    if config.scroll_sync then
+      send_cursor()
+    end
+  end
+  M.open()
+end
+
 --- Re-open the browser without restarting the server.
 function M.open()
   if not state.addr then
@@ -403,6 +485,7 @@ function M.setup(opts)
   end
 
   -- Register commands.
+  vim.api.nvim_create_user_command("MdpPreview", M.preview, { desc = "Show markdown preview (start or switch buffer)" })
   vim.api.nvim_create_user_command("MdpStart", M.start, { desc = "Start mdp preview" })
   vim.api.nvim_create_user_command("MdpStop", M.stop, { desc = "Stop mdp preview" })
   vim.api.nvim_create_user_command("MdpToggle", M.toggle, { desc = "Toggle mdp preview" })

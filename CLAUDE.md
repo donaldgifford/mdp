@@ -76,6 +76,16 @@ scripts/install.sh -> CLI alternative to build.lua (same logic in bash)
 - `github.com/fsnotify/fsnotify` -- file watching
 - `github.com/spf13/cobra` -- CLI framework
 
+## Git Workflow
+
+**Never commit or push directly to `main`.** Always:
+1. Create a branch: `git checkout -b feat/<description>` (or `fix/`, `chore/`, `docs/`)
+2. Commit to the branch
+3. Push the branch: `git push origin <branch>`
+4. Open a PR targeting `main`
+
+`main` is branch-protected — force pushes are rejected by GitHub.
+
 ## CI/CD
 
 GitHub Actions: lint -> test -> build on push/PR. License check uses `go-licenses` (goldmark-mathjax is ignored since it declares MIT but has no LICENSE file). Releases use GoReleaser with GPG signing and semver (PR labels: `major`, `minor`, `patch`, `dont-release`). Archive naming: `mdp_<os>_<arch>.tar.gz`.
