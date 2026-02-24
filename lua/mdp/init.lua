@@ -165,6 +165,7 @@ local function maybe_start_shutdown_timer()
       end
     end
     -- No markdown buffers remain — start the shutdown timer.
+    write_log({ "[mdp] no markdown buffers open, idle shutdown in " .. config.idle_timeout_secs .. "s" })
     local captured_job = state.job_id
     state.shutdown_timer = vim.fn.timer_start(
       config.idle_timeout_secs * 1000,
