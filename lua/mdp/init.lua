@@ -331,6 +331,30 @@ function M.toggle()
   end
 end
 
+--- Show the preview for the current buffer.
+--- If the server is not running, starts it (opens browser automatically).
+--- If already running, pushes the current buffer and opens a browser tab.
+--- Stopping is handled by idle timeout or :MdpStop — this command never stops.
+function M.preview()
+  if not state.job_id then
+    if not is_markdown_buffer() then
+      vim.notify("[mdp] Not a markdown buffer", vim.log.levels.WARN)
+      return
+    end
+    M.start()
+    return
+  end
+
+  -- Already running: sync current buffer if markdown, then open browser.
+  if is_markdown_buffer() then
+    send_content()
+    if config.scroll_sync then
+      send_cursor()
+    end
+  end
+  M.open()
+end
+
 --- Re-open the browser without restarting the server.
 function M.open()
   if not state.addr then
@@ -403,6 +427,7 @@ function M.setup(opts)
   end
 
   -- Register commands.
+  vim.api.nvim_create_user_command("MdpPreview", M.preview, { desc = "Show markdown preview (start or switch buffer)" })
   vim.api.nvim_create_user_command("MdpStart", M.start, { desc = "Start mdp preview" })
   vim.api.nvim_create_user_command("MdpStop", M.stop, { desc = "Stop mdp preview" })
   vim.api.nvim_create_user_command("MdpToggle", M.toggle, { desc = "Toggle mdp preview" })

@@ -27,15 +27,11 @@ Minimal — defaults are provided by the plugin's `lazy.lua`:
 { "donaldgifford/mdp" }
 ```
 
-With custom options and keybindings:
+With custom options:
 
 ```lua
 {
   "donaldgifford/mdp",
-  keys = {
-    { "<leader>mp", "<cmd>MdpToggle<cr>", desc = "Toggle markdown preview" },
-    { "<leader>mo", "<cmd>MdpOpen<cr>", desc = "Open preview in browser" },
-  },
   opts = {
     port = 0,               -- 0 = auto-assign
     browser = true,         -- Open browser on start
@@ -53,14 +49,19 @@ back to building from source with `go build`.
 
 ### Commands
 
-| Command        | Description                           |
-| -------------- | ------------------------------------- |
-| `:MdpStart`    | Start the preview server              |
-| `:MdpStop`     | Stop the preview server               |
-| `:MdpToggle`   | Toggle the preview server             |
-| `:MdpOpen`     | Re-open the browser (without restart) |
-| `:MdpInstall`  | Download latest release binary        |
-| `:MdpInstall!` | Build binary from source              |
+| Command        | Description                                              |
+| -------------- | -------------------------------------------------------- |
+| `:MdpPreview`  | Show preview — starts if needed, otherwise syncs buffer  |
+| `:MdpStop`     | Stop the preview server                                  |
+| `:MdpStart`    | Start the preview server explicitly                      |
+| `:MdpToggle`   | Toggle start/stop                                        |
+| `:MdpOpen`     | Re-open the browser tab without restarting               |
+| `:MdpInstall`  | Download latest release binary                           |
+| `:MdpInstall!` | Build binary from source                                 |
+
+The default keybinding is `<leader>mp` → `:MdpPreview`. This is the only
+key you need for day-to-day use. `:MdpStop` is available if you want to
+shut down explicitly rather than waiting for the idle timeout.
 
 ### Idle Timeout
 
