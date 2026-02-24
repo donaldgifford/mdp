@@ -9,6 +9,7 @@ local defaults = {
   browser = true,
   theme = "auto",
   scroll_sync = true,
+  idle_timeout_secs = 30, -- Shut down after this many seconds with no browser tab open (0 = disabled).
   binary = "", -- Empty means auto-detect via exepath.
   debounce_ms = 300,
 }
@@ -213,6 +214,7 @@ function M.start()
     "--stdin",
     "--scroll-sync=" .. tostring(config.scroll_sync),
     "--theme", config.theme,
+    "--idle-timeout=" .. tostring(config.idle_timeout_secs) .. "s",
   }
 
   if config.port > 0 then

@@ -37,10 +37,11 @@ With custom options and keybindings:
     { "<leader>mo", "<cmd>MdpOpen<cr>", desc = "Open preview in browser" },
   },
   opts = {
-    port = 0,           -- 0 = auto-assign
-    browser = true,     -- Open browser on start
-    theme = "auto",     -- "auto", "light", or "dark"
-    scroll_sync = true, -- Sync preview scroll with cursor
+    port = 0,               -- 0 = auto-assign
+    browser = true,         -- Open browser on start
+    theme = "auto",         -- "auto", "light", or "dark"
+    scroll_sync = true,     -- Sync preview scroll with cursor
+    idle_timeout_secs = 30, -- Shut down after N seconds with no open tab (0 = disabled)
   },
 }
 ```
@@ -83,9 +84,10 @@ mdp serve [flags] <file>
 | `--scroll-sync`     | `true`  | Enable scroll sync via cursor tracking |
 | `--stdin`           | `false` | Read content/cursor updates from stdin |
 | `--css`             | `""`    | Path to custom CSS file                |
-| `--open-to-network` | `false` | Listen on 0.0.0.0 instead of localhost |
-| `-v, --verbose`     | `false` | Enable debug logging                   |
-| `--version`         |         | Print version, commit, and build date  |
+| `--open-to-network` | `false` | Listen on 0.0.0.0 instead of localhost           |
+| `--idle-timeout`    | `30s`   | Shut down after no clients connected for this long (0 = disabled) |
+| `-v, --verbose`     | `false` | Enable debug logging                             |
+| `--version`         |         | Print version, commit, and build date            |
 
 ## Supported Markdown Features
 

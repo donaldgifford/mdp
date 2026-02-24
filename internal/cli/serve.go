@@ -23,6 +23,7 @@ func newServeCmd() *cobra.Command {
 		stdin         bool
 		customCSS     string
 		openToNetwork bool
+		idleTimeout   time.Duration
 	)
 
 	cmd := &cobra.Command{
@@ -41,6 +42,7 @@ func newServeCmd() *cobra.Command {
 				ScrollSync:    scrollSync,
 				CustomCSS:     customCSS,
 				OpenToNetwork: openToNetwork,
+				IdleTimeout:   idleTimeout,
 			}
 
 			srv, err := server.New(cfg)
@@ -70,6 +72,7 @@ func newServeCmd() *cobra.Command {
 	cmd.Flags().BoolVar(&stdin, "stdin", false, "Read content/cursor updates from stdin (for editor plugins)")
 	cmd.Flags().StringVar(&customCSS, "css", "", "Path to custom CSS file to inject after default styles")
 	cmd.Flags().BoolVar(&openToNetwork, "open-to-network", false, "Listen on 0.0.0.0 instead of localhost")
+	cmd.Flags().DurationVar(&idleTimeout, "idle-timeout", 30*time.Second, "Shut down after no clients connected for this duration (0 = disabled)")
 
 	return cmd
 }
