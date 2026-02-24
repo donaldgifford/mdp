@@ -145,10 +145,12 @@ local function is_markdown_buffer()
   return ft == "markdown" or ft == "mdx"
 end
 
---- Start the shutdown timer if no markdown buffers are loaded.
---- Called via vim.schedule so the buffer list reflects the final state
---- after a delete/unload event has fully completed.
-local function maybe_start_shutdown_timer()
+--- Start the shutdown timer if no markdown buffers remain after a buffer close.
+--- Uses vim.schedule so the check runs after the current event cycle, and
+--- excludes deleted_buf explicitly because BufDelete fires before Neovim
+--- removes the buffer — it may still appear loaded during the scheduled scan.
+---@param deleted_buf integer The buffer handle being deleted/unloaded.
+local function maybe_start_shutdown_timer(deleted_buf)
   vim.schedule(function()
     if not state.job_id or config.idle_timeout_secs <= 0 then
       return
@@ -157,7 +159,7 @@ local function maybe_start_shutdown_timer()
       return
     end
     for _, buf in ipairs(vim.api.nvim_list_bufs()) do
-      if vim.api.nvim_buf_is_loaded(buf) then
+      if buf ~= deleted_buf and vim.api.nvim_buf_is_loaded(buf) then
         local ft = vim.api.nvim_get_option_value("filetype", { buf = buf })
         if ft == "markdown" or ft == "mdx" then
           return
@@ -236,7 +238,9 @@ local function setup_autocmds()
   -- by buffer management plugins (bufferline.nvim, etc.).
   vim.api.nvim_create_autocmd({ "BufDelete", "BufWipeout", "BufUnload" }, {
     group = state.augroup,
-    callback = maybe_start_shutdown_timer,
+    callback = function(ev)
+      maybe_start_shutdown_timer(ev.buf)
+    end,
   })
 end
 
