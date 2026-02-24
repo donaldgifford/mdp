@@ -45,6 +45,13 @@ func (h *sseHub) broadcast(msg []byte) {
 	}
 }
 
+// count returns the number of connected SSE clients.
+func (h *sseHub) count() int {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	return len(h.clients)
+}
+
 func (h *sseHub) closeAll() {
 	h.mu.Lock()
 	defer h.mu.Unlock()

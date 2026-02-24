@@ -45,6 +45,13 @@ func (h *hub) broadcast(msg []byte) {
 	}
 }
 
+// count returns the number of connected WebSocket clients.
+func (h *hub) count() int {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	return len(h.clients)
+}
+
 // closeAll closes all WebSocket connections.
 func (h *hub) closeAll() {
 	h.mu.Lock()

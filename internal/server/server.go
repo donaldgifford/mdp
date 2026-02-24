@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"io/fs"
@@ -14,6 +15,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sync"
+	"time"
 
 	"github.com/gorilla/websocket"
 
@@ -26,10 +29,11 @@ type Config struct {
 	File          string
 	Port          int
 	OpenBrowser   bool
-	Theme         string // "auto", "light", or "dark".
-	ScrollSync    bool   // Enable scroll sync via /cursor endpoint.
-	CustomCSS     string // Path to custom CSS file to inject after default styles.
-	OpenToNetwork bool   // Listen on 0.0.0.0 instead of localhost.
+	Theme         string        // "auto", "light", or "dark".
+	ScrollSync    bool          // Enable scroll sync via /cursor endpoint.
+	CustomCSS     string        // Path to custom CSS file to inject after default styles.
+	OpenToNetwork bool          // Listen on 0.0.0.0 instead of localhost.
+	IdleTimeout   time.Duration // Shut down when no clients connected for this long (0 = disabled).
 }
 
 // Server is the HTTP preview server.
@@ -42,6 +46,8 @@ type Server struct {
 	hub      *hub
 	sse      *sseHub
 	upgrader websocket.Upgrader
+	httpSrv  *http.Server
+	httpMu   sync.Mutex
 }
 
 // New creates a new Server from the given config. The listen address is
@@ -147,6 +153,18 @@ func (s *Server) BroadcastFile() error {
 func (s *Server) Close() {
 	s.hub.closeAll()
 	s.sse.closeAll()
+
+	s.httpMu.Lock()
+	srv := s.httpSrv
+	s.httpMu.Unlock()
+
+	if srv != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := srv.Shutdown(ctx); err != nil {
+			slog.Error("shutting down http server", "error", err)
+		}
+	}
 }
 
 // pageData is the template data for preview.html.
@@ -160,6 +178,7 @@ type pageData struct {
 }
 
 // ListenAndServe starts the HTTP server and blocks until it exits.
+// Returns nil on clean shutdown (e.g. idle timeout or Close()).
 func (s *Server) ListenAndServe() error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", s.handleIndex)
@@ -187,14 +206,69 @@ func (s *Server) ListenAndServe() error {
 		handler = s.tokenMiddleware(mux)
 	}
 
+	//nolint:gosec // Bind address is intentionally configurable.
+	httpSrv := &http.Server{Addr: s.addr, Handler: handler}
+
+	s.httpMu.Lock()
+	s.httpSrv = httpSrv
+	s.httpMu.Unlock()
+
 	slog.Info("serving", "addr", baseURL, "file", s.cfg.File)
+
+	if s.cfg.IdleTimeout > 0 {
+		go s.idleWatcher(httpSrv)
+	}
 
 	if s.cfg.OpenBrowser {
 		go openBrowser(baseURL)
 	}
 
-	//nolint:gosec // Bind address is intentionally configurable.
-	return http.ListenAndServe(s.addr, handler)
+	if err := httpSrv.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
+		return err
+	}
+	return nil
+}
+
+// idleWatcher shuts down the HTTP server after IdleTimeout elapses with no
+// active clients. The poll interval scales with the timeout so tests stay fast.
+func (s *Server) idleWatcher(httpSrv *http.Server) {
+	pollInterval := s.cfg.IdleTimeout / 6
+	if pollInterval < 50*time.Millisecond {
+		pollInterval = 50 * time.Millisecond
+	}
+	if pollInterval > 5*time.Second {
+		pollInterval = 5 * time.Second
+	}
+
+	ticker := time.NewTicker(pollInterval)
+	defer ticker.Stop()
+
+	var idleSince time.Time
+
+	for range ticker.C {
+		if s.hub.count()+s.sse.count() > 0 {
+			// Clients are connected — reset the idle clock.
+			idleSince = time.Time{}
+			continue
+		}
+
+		if idleSince.IsZero() {
+			idleSince = time.Now()
+			slog.Info("no clients connected, idle timer started", "timeout", s.cfg.IdleTimeout)
+			continue
+		}
+
+		if time.Since(idleSince) >= s.cfg.IdleTimeout {
+			slog.Info("idle timeout reached, shutting down")
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			err := httpSrv.Shutdown(ctx)
+			cancel()
+			if err != nil {
+				slog.Error("idle shutdown", "error", err)
+			}
+			return
+		}
+	}
 }
 
 // resolveAddr returns the listen address, auto-assigning a port if needed.
