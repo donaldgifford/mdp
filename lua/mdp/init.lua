@@ -211,10 +211,15 @@ local function setup_autocmds()
   })
 
   -- Start idle shutdown when the last markdown buffer is closed.
+  -- Use no pattern — pattern matching for BufDelete is unreliable with buffer
+  -- management plugins (e.g. bufferline.nvim). Check filetype in callback instead.
   vim.api.nvim_create_autocmd({ "BufDelete", "BufWipeout" }, {
     group = state.augroup,
-    pattern = { "*.md", "*.mdx", "*.markdown" },
     callback = function(ev)
+      local ft = vim.api.nvim_get_option_value("filetype", { buf = ev.buf })
+      if ft ~= "markdown" and ft ~= "mdx" then
+        return
+      end
       if not state.job_id or config.idle_timeout_secs <= 0 then
         return
       end
