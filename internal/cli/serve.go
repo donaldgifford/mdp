@@ -32,7 +32,7 @@ func newServeCmd() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
 			file := args[0]
-			slog.Info("starting preview server", "file", file, "port", port, "browser", browser)
+			slog.Info("starting preview server", "version", version, "commit", commit, "built", date, "file", file, "port", port, "browser", browser)
 
 			cfg := server.Config{
 				File:          file,
