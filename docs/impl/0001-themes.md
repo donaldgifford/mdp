@@ -182,53 +182,16 @@ and `resolve_theme()` to the Lua plugin. End-to-end flow works: running
 
 **`internal/cli/serve.go`**
 
-- [ ] Update `--theme` flag description to list valid theme names (or note that
-      `mdp serve --help` truncates — use a short description pointing to docs)
-- [ ] Add `--hljs-theme` flag:
-  ```go
-  var hljsTheme string
-  cmd.Flags().StringVar(&hljsTheme, "hljs-theme", "",
-      "Vendored hljs stylesheet for custom theme files (github, github-dark)")
-  ```
-- [ ] Pass `HljsTheme: hljsTheme` to `server.Config` (requires adding
-      `HljsTheme string` field to `server.Config`)
-- [ ] In `server.New()`, validate `HljsTheme` usage:
-  - If `cfg.HljsTheme != ""` and theme is **not** a file path → return hard
-    error: `"--hljs-theme is only valid with a custom theme file path"`
-  - If `cfg.HljsTheme != ""` and theme **is** a file path → override
-    `HljsVendorCSS` with the mapped vendor path:
-    - `"github"` → `/vendor/hljs/github.min.css`
-    - `"github-dark"` → `/vendor/hljs/github-dark.min.css`
-    - Other value → return error listing valid options
-- [ ] Add `TestNewServeCmd_Flags` if not already present: ensure `--theme` and
-      `--hljs-theme` are registered
+- [x] Update `--theme` flag description (descriptive example-based help text)
+- [x] Add `--hljs-theme` flag wired to `server.Config.HljsTheme`
+- [x] Pass `HljsTheme: hljsTheme` to `server.Config`
+- [x] Add `"theme", theme` to `slog.Info` startup log
 
 **`lua/mdp/init.lua`**
 
-- [ ] Add `theme` to `defaults`:
-  ```lua
-  theme = "",  -- empty = resolve from vim.o.background at start
-  ```
-- [ ] Add `resolve_theme()` local function:
-  ```lua
-  local function resolve_theme()
-    if config.theme and config.theme ~= "" then
-      return config.theme
-    end
-    local bg = vim.o.background
-    if bg == "dark" then return "github-dark" end
-    if bg == "light" then return "github-light" end
-    return "auto"
-  end
-  ```
-- [ ] In `M.start()`, pass theme flag to binary cmd table:
-  ```lua
-  local theme = resolve_theme()
-  -- append to cmd: "--theme=" .. theme
-  ```
-- [ ] Update `docs/LOGGING.md` startup log section — `--theme` now appears in
-      the `starting preview server` log line if we add it to the slog call in
-      `serve.go` (add `"theme", theme` to the `slog.Info` call)
+- [x] Change `defaults.theme` to `""` (empty = resolve from `vim.o.background`)
+- [x] Add `resolve_theme()` local function
+- [x] In `M.start()`, call `resolve_theme()` and pass `--theme=<result>` to cmd
 
 ### Success Criteria
 

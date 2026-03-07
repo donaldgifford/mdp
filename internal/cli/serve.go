@@ -19,6 +19,7 @@ func newServeCmd() *cobra.Command {
 		port          int
 		browser       bool
 		theme         string
+		hljsTheme     string
 		scrollSync    bool
 		stdin         bool
 		customCSS     string
@@ -32,13 +33,30 @@ func newServeCmd() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(_ *cobra.Command, args []string) error {
 			file := args[0]
-			slog.Info("starting preview server", "version", version, "commit", commit, "built", date, "file", file, "port", port, "browser", browser)
+			slog.Info(
+				"starting preview server",
+				"version",
+				version,
+				"commit",
+				commit,
+				"built",
+				date,
+				"file",
+				file,
+				"port",
+				port,
+				"browser",
+				browser,
+				"theme",
+				theme,
+			)
 
 			cfg := server.Config{
 				File:          file,
 				Port:          port,
 				OpenBrowser:   browser,
 				Theme:         theme,
+				HljsTheme:     hljsTheme,
 				ScrollSync:    scrollSync,
 				CustomCSS:     customCSS,
 				OpenToNetwork: openToNetwork,
@@ -67,7 +85,10 @@ func newServeCmd() *cobra.Command {
 
 	cmd.Flags().IntVar(&port, "port", 0, "Port to listen on (0 = auto-assign)")
 	cmd.Flags().BoolVar(&browser, "browser", true, "Open browser automatically")
-	cmd.Flags().StringVar(&theme, "theme", "auto", "Theme: auto, light, or dark")
+	cmd.Flags().StringVar(&theme, "theme", "auto",
+		`Preview theme name or path to CSS file (e.g. "auto", "tokyo-night", "/path/to/custom.css")`)
+	cmd.Flags().StringVar(&hljsTheme, "hljs-theme", "",
+		`Vendored hljs stylesheet for custom theme files (github, github-dark). Only valid with --theme=<file>.`)
 	cmd.Flags().BoolVar(&scrollSync, "scroll-sync", true, "Enable scroll sync with cursor position")
 	cmd.Flags().BoolVar(&stdin, "stdin", false, "Read content/cursor updates from stdin (for editor plugins)")
 	cmd.Flags().StringVar(&customCSS, "css", "", "Path to custom CSS file to inject after default styles")
