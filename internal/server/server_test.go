@@ -2,6 +2,7 @@ package server_test
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"time"
 
 	"github.com/donaldgifford/mdp/internal/server"
+	"github.com/donaldgifford/mdp/internal/theme"
 )
 
 func TestServer_ServesRenderedMarkdown(t *testing.T) {
@@ -323,6 +325,26 @@ func TestServer_HljsTheme_WithBuiltinTheme_Errors(t *testing.T) {
 	})
 	if err == nil {
 		t.Fatal("expected error when --hljs-theme used with built-in theme")
+	}
+}
+
+func TestServer_AllBuiltinThemes(t *testing.T) {
+	t.Parallel()
+
+	for _, name := range theme.Names() {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			body := fetchBody(t, &server.Config{
+				File:        tempMDFile(t),
+				Port:        0,
+				OpenBrowser: false,
+				Theme:       name,
+			})
+			want := fmt.Sprintf("data-theme=%q", name)
+			if !strings.Contains(body, want) {
+				t.Errorf("response body missing %q for theme %q", want, name)
+			}
+		})
 	}
 }
 

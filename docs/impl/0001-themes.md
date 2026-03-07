@@ -446,10 +446,10 @@ Cross-cutting validation, test coverage check, and user-facing docs update.
 
 **Testing**
 
-- [ ] `make test-coverage` — confirm `internal/theme` coverage ≥ 80%
-- [ ] Add `TestResolve_AllBuiltins` — table-driven test looping over `Names()`
+- [x] `make test-coverage` — confirm `internal/theme` coverage ≥ 80% (93.5%)
+- [x] Add `TestResolve_AllBuiltins` — table-driven test looping over `Names()`
       and asserting each resolves to a non-zero `Theme` struct
-- [ ] Add `TestServer_AllBuiltinThemes` — table-driven test starting a server
+- [x] Add `TestServer_AllBuiltinThemes` — table-driven test starting a server
       for each built-in theme name and asserting the rendered page contains the
       expected `data-theme` attribute
 - [ ] Manually test the full flow end-to-end:
@@ -463,20 +463,20 @@ Cross-cutting validation, test coverage check, and user-facing docs update.
 
 **Documentation**
 
-- [ ] Update `README.md`:
+- [x] Update `README.md`:
   - Add `--theme` to the flags table
   - Add `Themes` section listing all built-in names with a one-liner each
   - Note that `vim.o.background` drives the default
-- [ ] Update `lua/mdp/init.lua` docstring / comment on the `theme` option to
+- [x] Update `lua/mdp/init.lua` docstring / comment on the `theme` option to
       describe the `vim.o.background` fallback behaviour
-- [ ] Update `docs/LOGGING.md` if the startup log line now includes `theme=`
+- [x] Update `docs/LOGGING.md` if the startup log line now includes `theme=`
       field (it should, if Phase 3 adds it to the `slog.Info` call)
 
 **Release prep**
 
-- [ ] `make lint` clean on all new files
-- [ ] `make build` produces a binary where `--theme=nonexistent` exits non-zero
-- [ ] Update `CLAUDE.md` with any new patterns or conventions introduced
+- [x] `make lint` clean on all new files
+- [x] `make build` produces a binary where `--theme=nonexistent` exits non-zero
+- [x] Update `CLAUDE.md` with any new patterns or conventions introduced
 
 ### Success Criteria
 

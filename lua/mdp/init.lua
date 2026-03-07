@@ -10,7 +10,10 @@ local default_log_file = vim.fn.stdpath("log") .. "/mdp.log"
 local defaults = {
   port = 0,
   browser = true,
-  theme = "", -- empty = resolve from vim.o.background at start (dark→github-dark, light→github-light, else→auto)
+  theme = "", -- "" = auto-resolve from vim.o.background (dark→github-dark, light→github-light, else→auto)
+             -- Built-in names: github-{light,dark,dimmed}, tokyo-night{,-moon,-storm,-day},
+             -- rose-pine{,-moon,-dawn}, catppuccin-{latte,frappe,macchiato,mocha}
+             -- Or a file path ("/path/to/my-theme.css") for a custom theme.
   scroll_sync = true,
   idle_timeout_secs = 30, -- Shut down after this many seconds with no browser tab open (0 = disabled).
   log_file = default_log_file, -- Server log output. Empty string disables logging.
