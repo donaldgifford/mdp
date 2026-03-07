@@ -1,275 +1,388 @@
 ---
 id: DESIGN-0001
 title: "Themes"
-status: Draft
+status: In Review
 author: Donald Gifford
 created: 2026-03-05
+updated: 2026-03-06
 ---
 
 # DESIGN 0001: Themes
 
-**Status:** Draft
+**Status:** In Review
 **Author:** Donald Gifford
-**Date:** 2026-03-05
+**Created:** 2026-03-05
+**Updated:** 2026-03-06
 
 ## Overview
 
-Add a theme system to mdp so users can control the visual appearance of the
-preview page beyond the current implicit GitHub light/dark default. A theme
-bundles prose CSS, code syntax highlighting CSS, and Mermaid theme settings
-into a named, selectable unit. The `auto` default preserves existing behavior
-(follows `prefers-color-scheme`).
+Add a first-class theme system to mdp. Built-in themes are self-contained CSS
+files that fully own prose styling, code syntax highlighting, and Mermaid
+diagram colours — no dependency on vendored hljs theme sheets beyond the two
+already present for the `github` family. The default theme is driven by
+`vim.o.background` so the preview matches the editor without any configuration.
 
 ## Goals and Non-Goals
 
 ### Goals
 
 - Named built-in themes selectable via CLI flag and Lua plugin option
-- `auto` default that respects system `prefers-color-scheme` (no regression)
-- Force light or dark regardless of system preference (`light`, `dark`)
-- Code syntax highlighting (hljs) theme coordinated with prose theme
-- Mermaid diagram theme coordinated with prose theme
+- `auto` special value: reads `vim.o.background` at startup; falls back to
+  `prefers-color-scheme` when background is unset
+- Full theme set for v1: Tokyo Night (4 variants), Rosé Pine (3 variants),
+  GitHub (dark, light, dimmed), Catppuccin (4 variants) — 12 named themes
+- Built-in themes are **first class**: each owns its complete CSS including hljs
+  token colours; no additional hljs vendoring required
+- Mermaid diagrams coordinated per theme via Mermaid's `theme: 'base'` + CSS
+  variables
+- User-defined theme files on disk (`--theme=/path/to/theme.css`)
 - `custom_css` remains as an escape hatch layered on top of any theme
 - Zero breaking changes to the existing config surface
 
 ### Non-Goals
 
-- Runtime theme switching without restarting the server (can revisit later)
-- User-defined theme files on disk (custom_css covers most of this need)
+- Runtime theme switching without restarting the server
 - A theme editor or preview UI
-- Fonts — typography is intentionally outside theme scope for now
-- Packaging and distributing third-party themes
+- Fonts — typography stays outside theme scope
+- Vendoring additional hljs CSS sheets (first-class themes write their own
+  token colours)
+- Packaging or distributing third-party themes
 
 ## Background
 
-The preview page (`assets/preview.html`) already has `{{.Theme}}` and
-`{{.CustomCSS}}` template fields wired in and a `data-theme` attribute on
-`<body>`. The prose CSS (`assets/preview.css`) uses CSS custom properties
-(`--color-fg-default`, `--color-canvas-default`, etc.) for all colours, with a
-`@media (prefers-color-scheme: dark)` block for the automatic dark variant.
-Two hljs CSS files are already vendored (`github.min.css`,
-`github-dark.min.css`) and switched via `media` attributes on their `<link>`
-tags.
+`assets/preview.html` already has `{{.Theme}}` and `{{.CustomCSS}}` template
+fields and a `data-theme` attribute on `<body>`. `assets/preview.css` uses CSS
+custom properties for all colours with a `@media (prefers-color-scheme: dark)`
+block for the automatic dark variant. Two hljs sheets are vendored
+(`github.min.css`, `github-dark.min.css`) and switched via `media` attributes.
 
-The infrastructure is mostly in place. What's missing is the theme selection
-logic in the Go server, the CLI flag, and the Lua plugin option.
+The wiring is in place. What's missing is the theme registry, the CLI flag, the
+Lua plugin option, and the theme CSS files themselves.
+
+## Decisions
+
+Answers to the open questions raised in the initial draft:
+
+| # | Question | Decision |
+|---|----------|----------|
+| 1 | `vim.o.background` as default? | **Yes** — plugin reads background at startup and maps to the appropriate named theme before passing to the binary |
+| 2 | Which built-in themes? | **Tokyo Night** (night/moon/storm/day), **Rosé Pine** (pine/moon/dawn), **GitHub** (dark/light/dimmed), **Catppuccin** (latte/frappé/macchiato/mocha) |
+| 3 | User-defined theme files? | **Yes** — `--theme=/abs/path/to/theme.css`; file is treated as a complete theme CSS |
+| 4 | hljs pairing for custom file themes? | **Yes** — custom theme files should include hljs token CSS; an optional `--hljs-theme=<vendored-name>` flag lets users opt into a vendored hljs sheet instead |
+| 5 | Vendor more hljs sheets? | **No** — first-class built-in themes write their own hljs token CSS; no new vendored sheets added |
+| 6 | Mermaid granularity? | Each built-in theme defines its own Mermaid CSS variables using `theme: 'base'` |
+
+**Core philosophy:** Built-in themes are first class. They own their full visual
+surface — prose, syntax highlighting, and diagrams — in a single embedded CSS
+file. hljs is still used for tokenisation; we just supply our own colours for
+the output classes (`.hljs-keyword`, `.hljs-string`, etc.) rather than relying
+on vendored hljs stylesheets. The vendored github sheets are retained only for
+the `github-light` and `github-dark` variants that already match them exactly.
 
 ## Detailed Design
 
 ### Theme definition
 
-A theme is a named set of four things:
+A built-in theme is a single embedded CSS file containing:
 
-| Component       | Mechanism                                    |
-|-----------------|----------------------------------------------|
-| Prose CSS       | CSS custom property overrides in `:root`     |
-| Code CSS        | hljs stylesheet name (vendored)              |
-| Mermaid theme   | String passed to `mermaid.initialize()`      |
-| Dark flag       | Boolean — tells JS which hljs sheet to load  |
+1. **Prose variables** — `:root` overrides for `--color-*` custom properties
+   defined in `preview.css`
+2. **hljs token colours** — `.hljs-*` rules scoped to `[data-theme="<name>"]`
+   so they only apply when that theme is active
+3. **Mermaid variables** — `--mermaid-*` CSS variables consumed by
+   `mermaid.initialize({ theme: 'base', themeVariables: { ... } })`
 
-Built-in themes are embedded in the binary as small CSS snippets that override
-the custom properties defined in `preview.css`. Only the overrides ship — the
-base layout, typography, and structural rules stay in `preview.css` unchanged.
+```css
+/* Example: assets/themes/tokyo-night.css */
 
-### Built-in theme set (initial)
+[data-theme="tokyo-night"] {
+  --color-fg-default:    #c0caf5;
+  --color-canvas-default:#1a1b26;
+  --color-canvas-subtle: #16161e;
+  --color-border-default:#29293d;
+  --color-accent-fg:     #7aa2f7;
+  /* ... */
 
-| Name          | Prose base     | hljs theme       | Mermaid theme | Notes                        |
-|---------------|----------------|------------------|---------------|------------------------------|
-| `auto`        | system default | github / dark    | default/dark  | Current behaviour, default   |
-| `light`       | github light   | github           | default       | Force light regardless of OS |
-| `dark`        | github dark    | github-dark      | dark          | Force dark regardless of OS  |
-| `gruvbox-dark`| gruvbox dark   | github-dark      | dark          | Warm dark palette            |
+  /* hljs tokens */
+  --hljs-keyword:  #bb9af7;
+  --hljs-string:   #9ece6a;
+  --hljs-comment:  #565f89;
+  /* ... */
 
-Starting with four keeps the binary size impact negligible. Additional themes
-can be added later by adding a CSS file to `assets/themes/` and an entry to the
-theme registry.
+  /* Mermaid (theme: 'base') */
+  --mermaid-primaryColor:      #7aa2f7;
+  --mermaid-primaryTextColor:  #c0caf5;
+  --mermaid-lineColor:         #565f89;
+  --mermaid-background:        #1a1b26;
+  /* ... */
+}
+```
+
+The `[data-theme]` scope ensures themes don't bleed if the attribute is missing.
+
+### Built-in theme registry
+
+| Theme name           | Family       | Dark? |
+|----------------------|--------------|-------|
+| `auto`               | —            | auto  |
+| `tokyo-night`        | Tokyo Night  | dark  |
+| `tokyo-night-moon`   | Tokyo Night  | dark  |
+| `tokyo-night-storm`  | Tokyo Night  | dark  |
+| `tokyo-night-day`    | Tokyo Night  | light |
+| `rose-pine`          | Rosé Pine    | dark  |
+| `rose-pine-moon`     | Rosé Pine    | dark  |
+| `rose-pine-dawn`     | Rosé Pine    | light |
+| `github-dark`        | GitHub       | dark  |
+| `github-light`       | GitHub       | light |
+| `github-dimmed`      | GitHub       | dark  |
+| `catppuccin-latte`   | Catppuccin   | light |
+| `catppuccin-frappe`  | Catppuccin   | dark  |
+| `catppuccin-macchiato`| Catppuccin  | dark  |
+| `catppuccin-mocha`   | Catppuccin   | dark  |
+
+`github-light` and `github-dark` re-use the vendored hljs sheets (no new
+tokens to write). All others write their own token colours.
+
+### `auto` theme resolution
+
+`auto` is a special value, not a real theme CSS file. Resolution order:
+
+1. Lua plugin reads `vim.o.background` at server start time
+2. If `"dark"` → passes `--theme=github-dark` (or user-configured dark default)
+3. If `"light"` → passes `--theme=github-light`
+4. If unset or `""` → passes `--theme=auto`; the browser's
+   `prefers-color-scheme` media query takes over (existing behaviour)
+
+This means the binary never sees `auto` unless the Lua plugin explicitly passes
+it. The binary's default is still `auto` for direct CLI use.
 
 ### Asset layout
 
 ```
 assets/
-  preview.css          # base prose CSS (custom properties, layout, structure)
-  preview.html         # template — already has {{.Theme}}, {{.CustomCSS}}
+  preview.css               # base prose CSS — layout, typography, custom props
+  preview.html              # template
   preview.js
   themes/
-    auto.css           # empty — auto uses media query in preview.css
-    light.css          # :root override to pin github light vars
-    dark.css           # :root override to pin github dark vars
-    gruvbox-dark.css   # :root override for gruvbox palette
+    tokyo-night.css
+    tokyo-night-moon.css
+    tokyo-night-storm.css
+    tokyo-night-day.css
+    rose-pine.css
+    rose-pine-moon.css
+    rose-pine-dawn.css
+    github-dark.css          # prose vars only — hljs handled by vendored sheet
+    github-light.css         # prose vars only — hljs handled by vendored sheet
+    github-dimmed.css        # prose vars + hljs tokens (no matching vendored sheet)
+    catppuccin-latte.css
+    catppuccin-frappe.css
+    catppuccin-macchiato.css
+    catppuccin-mocha.css
   vendor/
     hljs/
-      github.min.css
-      github-dark.min.css
+      github.min.css         # used by github-light and auto-light
+      github-dark.min.css    # used by github-dark and auto-dark
       highlight.min.js
     katex/
     mermaid.min.js
 ```
 
-### Go server changes
+### Go: `internal/theme` package
 
-**`internal/server/server.go`**
-
-Add `Theme string` to `Config`. Default to `"auto"`.
-
-**`assets/assets.go`** (or a new `internal/theme/theme.go`)
-
-A small theme registry:
+New package `internal/theme` owns theme resolution and keeps it out of the
+server package.
 
 ```go
+package theme
+
+// Theme holds everything the server needs to render a page with the
+// correct styling.
 type Theme struct {
-    CSS          string // contents of assets/themes/<name>.css
-    HljsLight    string // e.g. "github"
-    HljsDark     string // e.g. "github-dark"
-    MermaidTheme string // e.g. "default"
-    ForceDark    bool   // true = skip media query, always use dark hljs
-    ForceLight   bool   // true = skip media query, always use light hljs
+    // CSS is the complete theme stylesheet (prose + hljs tokens + mermaid vars).
+    // Empty for "auto" — the base preview.css handles auto via media query.
+    CSS string
+
+    // HljsVendorCSS is the path to a vendored hljs sheet to inject via <link>.
+    // Only set for github-light / github-dark. Empty for all other themes.
+    HljsVendorCSS string
+
+    // MermaidTheme is the string passed to mermaid.initialize().
+    // "base" for named themes (uses CSS vars), "default"/"dark" for auto.
+    MermaidTheme string
+
+    // IsAuto skips server-side CSS injection and lets the browser's
+    // prefers-color-scheme media query drive appearance.
+    IsAuto bool
 }
 
-var builtinThemes = map[string]Theme{
-    "auto":         {...},
-    "light":        {...},
-    "dark":         {...},
-    "gruvbox-dark": {...},
-}
+// Resolve returns the Theme for the given name.
+// name may be a built-in name or an absolute path to a CSS file.
+func Resolve(name string) (Theme, error)
 
-func Resolve(name string) (Theme, error) { ... }
+// Names returns all valid built-in theme names.
+func Names() []string
 ```
 
-**`assets/preview.html`** template already supports injection — the resolved
-theme's CSS populates `{{.Theme}}` (currently a bare string, reuse as CSS) or
-we add a dedicated `{{.ThemeCSS}}` field to the template data struct.
+Themes are loaded once at binary init via `go:embed assets/themes/*.css`.
 
-**`internal/server/handler.go`** (wherever the template is rendered)
+### Go: server changes
 
-Resolve the theme at startup, cache it, inject into every page render. No
-per-request resolution needed.
+`server.Config` gains:
+
+```go
+Theme string  // resolved theme name or file path; default "auto"
+```
+
+The handler resolves the theme once at startup and stores the `theme.Theme`
+value. Each page render injects `ThemeCSS` and `HljsVendorCSS` into the
+template data.
+
+### HTML template changes
+
+Replace the current hardcoded hljs `<link>` tags with injected fields:
+
+```html
+<head>
+  <style>{{.BaseCSS}}</style>
+  {{if .ThemeCSS}}<style>{{.ThemeCSS}}</style>{{end}}
+  {{if .HljsVendorCSS}}<link rel="stylesheet" href="{{.HljsVendorCSS}}">{{end}}
+  {{if .IsAuto}}
+  <link rel="stylesheet" href="/vendor/hljs/github.min.css"
+        media="(prefers-color-scheme: light)">
+  <link rel="stylesheet" href="/vendor/hljs/github-dark.min.css"
+        media="(prefers-color-scheme: dark)">
+  {{end}}
+  {{if .CustomCSS}}<style>{{.CustomCSS}}</style>{{end}}
+</head>
+<body data-theme="{{.Theme}}" data-mermaid-theme="{{.MermaidTheme}}">
+```
+
+Injection order (last wins): base prose CSS → theme CSS → vendored hljs (if
+any) → custom CSS. This lets `custom_css` override everything.
+
+### JS: Mermaid initialisation
+
+`preview.js` reads `data-mermaid-theme` from `<body>` and initialises Mermaid:
+
+```js
+const mermaidTheme = document.body.dataset.mermaidTheme || 'default';
+mermaid.initialize({
+  startOnLoad: false,
+  theme: mermaidTheme,  // 'base' for named themes, 'default'/'dark' for auto
+});
+```
+
+For `theme: 'base'`, Mermaid reads `--mermaid-*` CSS variables from the theme
+stylesheet. For `auto`, the browser's colour scheme picks `default` or `dark`.
+
+### User-defined theme files
+
+`--theme=/absolute/path/to/theme.css` is detected by a leading `/` (or `./`).
+The file is read at startup, validated as non-empty, and treated identically to
+a built-in theme CSS string. `HljsVendorCSS` is empty (user owns hljs token
+colours in their CSS); `MermaidTheme` defaults to `"base"`.
+
+An optional companion flag handles users who want a vendored hljs sheet instead
+of writing their own tokens:
+
+```
+--hljs-theme string   Vendored hljs theme to pair with a custom theme file
+                      (github, github-dark). Only used with --theme=<file>.
+```
 
 ### CLI changes
 
-**`internal/cli/serve.go`**
-
 ```
---theme string   Preview theme (auto, light, dark, gruvbox-dark) (default "auto")
+--theme string       Preview theme name or path to CSS file (default "auto")
+--hljs-theme string  Vendored hljs stylesheet for custom theme files
+                     (github, github-dark) (default "")
 ```
 
-Valid theme names are validated at startup; unknown names return a clear error.
+Valid built-in names are validated at startup with a clear error listing
+available themes. File paths are validated for existence and readability.
 
 ### Lua plugin changes
 
-**`lua/mdp/init.lua`**
-
-Add `theme` to defaults:
-
 ```lua
 local defaults = {
-  -- ...existing fields...
-  theme = "auto",
+  -- ... existing fields ...
+  theme = "",        -- empty = resolve from vim.o.background at start time
 }
+
+--- Resolve the effective theme name from vim.o.background when not set.
+local function resolve_theme()
+  if config.theme and config.theme ~= "" then
+    return config.theme
+  end
+  local bg = vim.o.background
+  if bg == "dark" then
+    return "github-dark"
+  elseif bg == "light" then
+    return "github-light"
+  end
+  return "auto"
+end
+
+-- In M.start(), build cmd:
+local theme = resolve_theme()
+local cmd = { binary, "serve", "--stdin", "--theme=" .. theme, ... }
 ```
-
-Pass to the binary:
-
-```lua
-local cmd = { binary, "serve", "--stdin", "--theme=" .. config.theme, ... }
-```
-
-### Browser-side hljs coordination
-
-Currently `preview.html` uses two `<link>` tags with `media` attributes to
-switch hljs CSS automatically. For forced light/dark themes the JS needs to
-swap to the correct sheet instead.
-
-Two approaches:
-
-**Option A** — Inject the correct hljs CSS as a `<style>` block alongside the
-theme CSS at server render time. No JS needed. Simpler.
-
-**Option B** — Keep the media-query links and have JS check `data-theme` on
-`<body>` at init to override them. More dynamic but adds JS complexity.
-
-Prefer **Option A** for the initial implementation. The server resolves
-everything; the browser just renders.
-
-### Mermaid coordination
-
-`preview.js` calls `mermaid.initialize()`. The resolved theme name (or a
-derived Mermaid theme string) needs to reach the browser. Two options:
-
-- Embed it as a `data-mermaid-theme` attribute on `<body>` (server-rendered).
-- Include it in the injected theme CSS as a custom property that JS reads.
-
-Prefer the `data-mermaid-theme` attribute — explicit and no JS parsing needed.
 
 ## API / Interface Changes
 
-| Surface              | Change                                                     |
-|----------------------|------------------------------------------------------------|
-| `serve` CLI flag     | `--theme=<name>` added, default `auto`                     |
-| Lua plugin option    | `theme = "auto"` added to defaults                         |
-| `server.Config`      | `Theme string` field added                                 |
-| HTML template data   | `ThemeCSS string` and `HljsCSS string` fields added        |
-| `<body>` attributes  | `data-mermaid-theme` added alongside existing `data-theme` |
+| Surface             | Change                                                              |
+|---------------------|---------------------------------------------------------------------|
+| `serve` CLI flag    | `--theme=<name\|path>` added, default `"auto"`                      |
+| `serve` CLI flag    | `--hljs-theme=<name>` added, default `""`                           |
+| Lua plugin option   | `theme = ""` added (empty = auto-resolve from `vim.o.background`)   |
+| `server.Config`     | `Theme string` field added                                          |
+| HTML template data  | `ThemeCSS`, `HljsVendorCSS`, `IsAuto`, `MermaidTheme` fields added  |
+| `<body>` attributes | `data-mermaid-theme` added alongside existing `data-theme`          |
+| New package         | `internal/theme` — `Resolve()`, `Names()`                           |
+| New directory       | `assets/themes/` — 14 embedded CSS files                            |
 
 No existing flags, options, or wire formats are removed or changed.
 
 ## Data Model
 
-No persistent state. Theme is resolved once at server startup from the CLI
-flag and held in `server.Config` for the lifetime of the process.
+No persistent state. Theme is resolved once at server startup from the CLI flag
+and held for the lifetime of the process.
 
 ## Testing Strategy
 
-- Unit tests for `theme.Resolve()` — valid names, unknown name error, case
-  sensitivity behaviour
-- Unit test that `server.Config` with each built-in theme name renders a page
-  where `data-theme` matches the expected value
-- Existing server tests continue to pass with `theme = "auto"` default
-- Manual visual check of each theme against a fixture markdown file
+- Unit tests for `theme.Resolve()`:
+  - Each built-in name returns the expected struct fields
+  - Unknown name returns an error listing valid names
+  - File path is read and returned as CSS string
+  - Empty/unreadable file path returns error
+- Server handler tests:
+  - `data-theme` attribute on rendered page matches configured theme
+  - `data-mermaid-theme` attribute correct per theme
+  - `ThemeCSS` non-empty for named themes, empty for `auto`
+  - `HljsVendorCSS` set only for `github-light` / `github-dark`
+  - `custom_css` appears after theme CSS in rendered output
+- Existing server tests continue to pass with default `auto`
+- Manual visual check: fixture markdown file rendered with each theme
 
 ## Migration / Rollout Plan
 
-- Default is `auto` — zero change for existing users
-- New `--theme` flag is additive; existing configs and plugin specs are
-  unaffected
-- Themes are embedded in the binary; no external files or network access
-  required
+- Default is `auto` (binary) / resolved from `vim.o.background` (plugin) — no
+  change for existing users who haven't set a theme
+- New flags are additive; existing configs and plugin specs are unaffected
+- Themes are embedded in the binary; no external files or network access needed
 - Release as a minor version bump
 
 ## Open Questions
 
-1. **Should `vim.o.background` drive the default?** If Neovim is in dark mode
-   (`vim.o.background == "dark"`), should mdp default to `dark` instead of
-   `auto`? This would be a better out-of-the-box experience for terminal users
-   whose system `prefers-color-scheme` may be light while their editor is dark.
-
-2. **How many built-in themes for v1?** Four (auto/light/dark/gruvbox-dark) is
-   a minimal set. Is there a specific theme (Nord, Catppuccin, Tokyo Night,
-   Dracula) worth including before the first release, or should we ship minimal
-   and add by request?
-
-3. **Custom theme files on disk?** Should `--theme=/path/to/theme.css` be
-   supported as an alternative to a named built-in? This would satisfy power
-   users without bloating the binary. `custom_css` already exists as an overlay
-   but a full theme file would replace the base prose colours entirely.
-
-4. **hljs theme for custom themes?** If a user provides a custom theme CSS
-   (question 3), how do we know which hljs stylesheet to pair with it?
-   Options: always `auto`, require a flag like `--hljs-theme=monokai`, or infer
-   dark/light from a CSS property.
-
-5. **Should we vendor more hljs themes?** Currently only github light/dark are
-   vendored. Themes like gruvbox-dark would ideally pair with a matching hljs
-   theme (e.g. `gruvbox-dark` from hljs). We could vendor a handful of extras
-   or generate them from hljs at build time via `update-vendor`.
-
-6. **Mermaid theme granularity?** Mermaid themes are coarse (`default`, `dark`,
-   `forest`, `neutral`, `base`). Is `default`/`dark` enough, or should each
-   built-in prose theme map to a specific Mermaid theme?
+All questions from the initial draft have been answered — see [Decisions](#decisions).
 
 ## References
 
-- [highlight.js theme gallery](https://highlightjs.org/demo)
-- [Mermaid themes](https://mermaid.js.org/config/theming.html)
-- [CSS custom properties — MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties)
+- [Tokyo Night colour palette](https://github.com/enkia/tokyo-night-vscode-theme)
+- [Rosé Pine colour palette](https://rosepinetheme.com/palette/)
+- [GitHub Primer colour system](https://primer.style/foundations/color)
+- [Catppuccin colour palette](https://github.com/catppuccin/catppuccin)
+- [highlight.js token class reference](https://highlightjs.readthedocs.io/en/latest/css-classes-reference.html)
+- [Mermaid theming — `theme: 'base'` and CSS variables](https://mermaid.js.org/config/theming.html#customizing-themes-with-themevariables)
 - `assets/preview.css` — existing CSS custom property structure
 - `assets/preview.html` — existing `{{.Theme}}`, `{{.CustomCSS}}`, `data-theme` hooks
