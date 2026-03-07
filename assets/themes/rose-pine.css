@@ -1,0 +1,45 @@
+/* Rosé Pine theme */
+
+[data-theme="rose-pine"] {
+  /* Prose variables */
+  --color-fg-default: #e0def4;
+  --color-canvas-default: #191724;
+  --color-canvas-subtle: #1f1d2e;
+  --color-border-default: #403d52;
+  --color-border-muted: #26233a;
+  --color-accent-fg: #c4a7e7;
+  --color-danger-fg: #eb6f92;
+  --color-success-fg: #9ccfd8;
+
+  /* hljs syntax highlighting tokens */
+  --hljs-keyword: #c4a7e7;
+  --hljs-string: #9ccfd8;
+  --hljs-comment: #6e6a86;
+  --hljs-number: #f6c177;
+  --hljs-function: #ebbcba;
+  --hljs-type: #31748f;
+  --hljs-variable: #e0def4;
+
+  /* Mermaid variables */
+  --mermaid-primaryColor: #c4a7e7;
+  --mermaid-primaryTextColor: #e0def4;
+  --mermaid-primaryBorderColor: #403d52;
+  --mermaid-lineColor: #6e6a86;
+  --mermaid-secondaryColor: #1f1d2e;
+  --mermaid-tertiaryColor: #191724;
+  --mermaid-background: #191724;
+  --mermaid-noteBkgColor: #1f1d2e;
+  --mermaid-noteTextColor: #e0def4;
+  --mermaid-edgeLabelBackground: #191724;
+  --mermaid-actorBkg: #1f1d2e;
+  --mermaid-actorTextColor: #e0def4;
+}
+
+/* Direct scoped hljs token rules */
+[data-theme="rose-pine"] .hljs-keyword { color: var(--hljs-keyword); }
+[data-theme="rose-pine"] .hljs-string { color: var(--hljs-string); }
+[data-theme="rose-pine"] .hljs-comment { color: var(--hljs-comment); }
+[data-theme="rose-pine"] .hljs-number { color: var(--hljs-number); }
+[data-theme="rose-pine"] .hljs-function { color: var(--hljs-function); }
+[data-theme="rose-pine"] .hljs-type { color: var(--hljs-type); }
+[data-theme="rose-pine"] .hljs-variable { color: var(--hljs-variable); }

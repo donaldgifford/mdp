@@ -1,0 +1,45 @@
+/* Tokyo Night Day theme */
+
+[data-theme="tokyo-night-day"] {
+  /* Prose variables */
+  --color-fg-default: #3760bf;
+  --color-canvas-default: #e1e2e7;
+  --color-canvas-subtle: #d5d6db;
+  --color-border-default: #b4b5c9;
+  --color-border-muted: #c4c8da;
+  --color-accent-fg: #2e7de9;
+  --color-danger-fg: #f52a65;
+  --color-success-fg: #587539;
+
+  /* hljs syntax highlighting tokens */
+  --hljs-keyword: #9854f1;
+  --hljs-string: #587539;
+  --hljs-comment: #848cb8;
+  --hljs-number: #b15c00;
+  --hljs-function: #2e7de9;
+  --hljs-type: #007197;
+  --hljs-variable: #3760bf;
+
+  /* Mermaid variables */
+  --mermaid-primaryColor: #2e7de9;
+  --mermaid-primaryTextColor: #3760bf;
+  --mermaid-primaryBorderColor: #b4b5c9;
+  --mermaid-lineColor: #c4c8da;
+  --mermaid-secondaryColor: #d5d6db;
+  --mermaid-tertiaryColor: #e1e2e7;
+  --mermaid-background: #e1e2e7;
+  --mermaid-noteBkgColor: #d5d6db;
+  --mermaid-noteTextColor: #3760bf;
+  --mermaid-edgeLabelBackground: #e1e2e7;
+  --mermaid-actorBkg: #d5d6db;
+  --mermaid-actorTextColor: #3760bf;
+}
+
+/* Direct scoped hljs token rules */
+[data-theme="tokyo-night-day"] .hljs-keyword { color: var(--hljs-keyword); }
+[data-theme="tokyo-night-day"] .hljs-string { color: var(--hljs-string); }
+[data-theme="tokyo-night-day"] .hljs-comment { color: var(--hljs-comment); }
+[data-theme="tokyo-night-day"] .hljs-number { color: var(--hljs-number); }
+[data-theme="tokyo-night-day"] .hljs-function { color: var(--hljs-function); }
+[data-theme="tokyo-night-day"] .hljs-type { color: var(--hljs-type); }
+[data-theme="tokyo-night-day"] .hljs-variable { color: var(--hljs-variable); }

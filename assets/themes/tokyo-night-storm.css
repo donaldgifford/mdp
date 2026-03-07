@@ -1,0 +1,45 @@
+/* Tokyo Night Storm theme */
+
+[data-theme="tokyo-night-storm"] {
+  /* Prose variables */
+  --color-fg-default: #c0caf5;
+  --color-canvas-default: #24283b;
+  --color-canvas-subtle: #1f2335;
+  --color-border-default: #292e42;
+  --color-border-muted: #1d2021;
+  --color-accent-fg: #7aa2f7;
+  --color-danger-fg: #f7768e;
+  --color-success-fg: #9ece6a;
+
+  /* hljs syntax highlighting tokens */
+  --hljs-keyword: #bb9af7;
+  --hljs-string: #9ece6a;
+  --hljs-comment: #565f89;
+  --hljs-number: #ff9e64;
+  --hljs-function: #7aa2f7;
+  --hljs-type: #2ac3de;
+  --hljs-variable: #c0caf5;
+
+  /* Mermaid variables */
+  --mermaid-primaryColor: #7aa2f7;
+  --mermaid-primaryTextColor: #c0caf5;
+  --mermaid-primaryBorderColor: #292e42;
+  --mermaid-lineColor: #565f89;
+  --mermaid-secondaryColor: #1f2335;
+  --mermaid-tertiaryColor: #24283b;
+  --mermaid-background: #24283b;
+  --mermaid-noteBkgColor: #1f2335;
+  --mermaid-noteTextColor: #c0caf5;
+  --mermaid-edgeLabelBackground: #24283b;
+  --mermaid-actorBkg: #1f2335;
+  --mermaid-actorTextColor: #c0caf5;
+}
+
+/* Direct scoped hljs token rules */
+[data-theme="tokyo-night-storm"] .hljs-keyword { color: var(--hljs-keyword); }
+[data-theme="tokyo-night-storm"] .hljs-string { color: var(--hljs-string); }
+[data-theme="tokyo-night-storm"] .hljs-comment { color: var(--hljs-comment); }
+[data-theme="tokyo-night-storm"] .hljs-number { color: var(--hljs-number); }
+[data-theme="tokyo-night-storm"] .hljs-function { color: var(--hljs-function); }
+[data-theme="tokyo-night-storm"] .hljs-type { color: var(--hljs-type); }
+[data-theme="tokyo-night-storm"] .hljs-variable { color: var(--hljs-variable); }

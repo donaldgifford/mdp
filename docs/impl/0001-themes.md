@@ -53,55 +53,51 @@ visual changes yet — this is the foundation everything else builds on.
 
 ### Tasks
 
-- [ ] Create `assets/themes/` directory
-- [ ] Add stub CSS files for all themes (empty files are fine; content comes
+- [x] Create `assets/themes/` directory
+- [x] Add stub CSS files for all themes (empty files are fine; content comes
       in later phases). The three GitHub variants share one file:
-  - [ ] `github.css` (contains stubs for all three `[data-theme="github-*"]` blocks)
-  - [ ] `tokyo-night.css`
-  - [ ] `tokyo-night-moon.css`
-  - [ ] `tokyo-night-storm.css`
-  - [ ] `tokyo-night-day.css`
-  - [ ] `rose-pine.css`
-  - [ ] `rose-pine-moon.css`
-  - [ ] `rose-pine-dawn.css`
-  - [ ] `catppuccin-latte.css`
-  - [ ] `catppuccin-frappe.css`
-  - [ ] `catppuccin-macchiato.css`
-  - [ ] `catppuccin-mocha.css`
-- [ ] Update `assets/assets.go` embed directive to include `themes/`:
+  - [x] `github.css` (contains stubs for all three `[data-theme="github-*"]` blocks)
+  - [x] `tokyo-night.css`
+  - [x] `tokyo-night-moon.css`
+  - [x] `tokyo-night-storm.css`
+  - [x] `tokyo-night-day.css`
+  - [x] `rose-pine.css`
+  - [x] `rose-pine-moon.css`
+  - [x] `rose-pine-dawn.css`
+  - [x] `catppuccin-latte.css`
+  - [x] `catppuccin-frappe.css`
+  - [x] `catppuccin-macchiato.css`
+  - [x] `catppuccin-mocha.css`
+- [x] Update `assets/assets.go` embed directive to include `themes/`:
   ```go
   //go:embed preview.html preview.css preview.js vendor themes
   var FS embed.FS
   ```
-- [ ] Create `internal/theme/theme.go`:
-  - [ ] Define `Theme` struct with fields: `CSS string`, `HljsVendorCSS string`,
+- [x] Create `internal/theme/theme.go`:
+  - [x] Define `Theme` struct with fields: `CSS string`, `HljsVendorCSS string`,
         `MermaidTheme string`, `IsAuto bool`
-  - [ ] Embed theme CSS files via `go:embed`:
-    ```go
-    //go:embed ../../assets/themes/*.css
-    var themesFS embed.FS
-    ```
-  - [ ] Define `builtinThemes` registry mapping name → `Theme` struct. All 14
+  - [x] Load theme CSS from `assets.FS` at package init via `mustReadThemeCSS`
+        (reads `themes/<file>` from the shared embed FS)
+  - [x] Define `builtinThemes` registry mapping name → `Theme` struct. All 14
         named built-in themes set `MermaidTheme: "base"` (JS reads CSS variables
         at runtime). `github-dark` / `github-light` set `HljsVendorCSS` to the
         corresponding vendor path. All three github variants load CSS from the
         shared `github.css` file. `auto` → `IsAuto: true`, `MermaidTheme: ""`
-  - [ ] Implement `Resolve(name string) (Theme, error)`:
+  - [x] Implement `Resolve(name string) (Theme, error)`:
     - If name is `""` or `"auto"` → return auto theme
     - If name is a known built-in → return from registry
     - If name starts with `/` or `./` → read file from disk, return as CSS
     - Otherwise → return error with list of valid names via `Names()`
-  - [ ] Implement `Names() []string` returning sorted built-in names
-- [ ] Create `internal/theme/theme_test.go`:
-  - [ ] `TestResolve_Auto` — empty string and `"auto"` both return `IsAuto: true`
-  - [ ] `TestResolve_BuiltinNames` — all 14 names resolve without error and
-        return non-empty `CSS` (once CSS files have content; stubs OK for now
-        if test checks struct fields rather than CSS content)
-  - [ ] `TestResolve_UnknownName` — returns error containing valid name list
-  - [ ] `TestResolve_FilePath` — temp file with CSS content resolves correctly
-  - [ ] `TestResolve_FileNotFound` — missing path returns error
-  - [ ] `TestNames` — returns slice of length 14, sorted, no `"auto"`
-  - [ ] `TestGithubVariantsHaveVendorCSS` — `github-light` and `github-dark`
+  - [x] Implement `Names() []string` returning sorted built-in names
+- [x] Create `internal/theme/theme_test.go`:
+  - [x] `TestResolve_Auto` — empty string and `"auto"` both return `IsAuto: true`
+  - [x] `TestResolve_BuiltinNames` — all 14 names resolve without error and
+        return non-empty `CSS`
+  - [x] `TestResolve_UnknownName` — returns error containing valid name list
+  - [x] `TestResolve_FilePath` — temp file with CSS content resolves correctly
+  - [x] `TestResolve_FileNotFound` — missing path returns error
+  - [x] `TestNames` — returns slice of length 14, sorted, no `"auto"`
+  - [x] `TestGithubVariantsHaveVendorCSS` — `github-light` and `github-dark`
         have non-empty `HljsVendorCSS`, all others do not
 
 ### Success Criteria

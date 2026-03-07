@@ -1,0 +1,45 @@
+/* Catppuccin Frappé theme */
+
+[data-theme="catppuccin-frappe"] {
+  /* Prose variables */
+  --color-fg-default: #c6d0f5;
+  --color-canvas-default: #303446;
+  --color-canvas-subtle: #292c3c;
+  --color-border-default: #414559;
+  --color-border-muted: #51576d;
+  --color-accent-fg: #8caaee;
+  --color-danger-fg: #e78284;
+  --color-success-fg: #a6d189;
+
+  /* hljs syntax highlighting tokens */
+  --hljs-keyword: #ca9ee6;
+  --hljs-string: #a6d189;
+  --hljs-comment: #737994;
+  --hljs-number: #ef9f76;
+  --hljs-function: #8caaee;
+  --hljs-type: #81c8be;
+  --hljs-variable: #c6d0f5;
+
+  /* Mermaid variables */
+  --mermaid-primaryColor: #8caaee;
+  --mermaid-primaryTextColor: #c6d0f5;
+  --mermaid-primaryBorderColor: #414559;
+  --mermaid-lineColor: #51576d;
+  --mermaid-secondaryColor: #292c3c;
+  --mermaid-tertiaryColor: #303446;
+  --mermaid-background: #303446;
+  --mermaid-noteBkgColor: #292c3c;
+  --mermaid-noteTextColor: #c6d0f5;
+  --mermaid-edgeLabelBackground: #303446;
+  --mermaid-actorBkg: #292c3c;
+  --mermaid-actorTextColor: #c6d0f5;
+}
+
+/* Direct scoped hljs token rules */
+[data-theme="catppuccin-frappe"] .hljs-keyword { color: var(--hljs-keyword); }
+[data-theme="catppuccin-frappe"] .hljs-string { color: var(--hljs-string); }
+[data-theme="catppuccin-frappe"] .hljs-comment { color: var(--hljs-comment); }
+[data-theme="catppuccin-frappe"] .hljs-number { color: var(--hljs-number); }
+[data-theme="catppuccin-frappe"] .hljs-function { color: var(--hljs-function); }
+[data-theme="catppuccin-frappe"] .hljs-type { color: var(--hljs-type); }
+[data-theme="catppuccin-frappe"] .hljs-variable { color: var(--hljs-variable); }

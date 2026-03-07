@@ -1,0 +1,45 @@
+/* Rosé Pine Dawn theme */
+
+[data-theme="rose-pine-dawn"] {
+  /* Prose variables */
+  --color-fg-default: #575279;
+  --color-canvas-default: #faf4ed;
+  --color-canvas-subtle: #fffaf3;
+  --color-border-default: #dfdad9;
+  --color-border-muted: #f2e9e1;
+  --color-accent-fg: #907aa9;
+  --color-danger-fg: #b4637a;
+  --color-success-fg: #56949f;
+
+  /* hljs syntax highlighting tokens */
+  --hljs-keyword: #907aa9;
+  --hljs-string: #56949f;
+  --hljs-comment: #9893a5;
+  --hljs-number: #ea9d34;
+  --hljs-function: #d7827e;
+  --hljs-type: #286983;
+  --hljs-variable: #575279;
+
+  /* Mermaid variables */
+  --mermaid-primaryColor: #907aa9;
+  --mermaid-primaryTextColor: #575279;
+  --mermaid-primaryBorderColor: #dfdad9;
+  --mermaid-lineColor: #f2e9e1;
+  --mermaid-secondaryColor: #fffaf3;
+  --mermaid-tertiaryColor: #faf4ed;
+  --mermaid-background: #faf4ed;
+  --mermaid-noteBkgColor: #fffaf3;
+  --mermaid-noteTextColor: #575279;
+  --mermaid-edgeLabelBackground: #faf4ed;
+  --mermaid-actorBkg: #fffaf3;
+  --mermaid-actorTextColor: #575279;
+}
+
+/* Direct scoped hljs token rules */
+[data-theme="rose-pine-dawn"] .hljs-keyword { color: var(--hljs-keyword); }
+[data-theme="rose-pine-dawn"] .hljs-string { color: var(--hljs-string); }
+[data-theme="rose-pine-dawn"] .hljs-comment { color: var(--hljs-comment); }
+[data-theme="rose-pine-dawn"] .hljs-number { color: var(--hljs-number); }
+[data-theme="rose-pine-dawn"] .hljs-function { color: var(--hljs-function); }
+[data-theme="rose-pine-dawn"] .hljs-type { color: var(--hljs-type); }
+[data-theme="rose-pine-dawn"] .hljs-variable { color: var(--hljs-variable); }

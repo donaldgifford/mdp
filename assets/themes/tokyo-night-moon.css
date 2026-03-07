@@ -1,0 +1,45 @@
+/* Tokyo Night Moon theme */
+
+[data-theme="tokyo-night-moon"] {
+  /* Prose variables */
+  --color-fg-default: #c8d3f5;
+  --color-canvas-default: #222436;
+  --color-canvas-subtle: #1e2030;
+  --color-border-default: #2f334d;
+  --color-border-muted: #24283b;
+  --color-accent-fg: #82aaff;
+  --color-danger-fg: #ff757f;
+  --color-success-fg: #c3e88d;
+
+  /* hljs syntax highlighting tokens */
+  --hljs-keyword: #c099ff;
+  --hljs-string: #c3e88d;
+  --hljs-comment: #636da6;
+  --hljs-number: #ff966c;
+  --hljs-function: #82aaff;
+  --hljs-type: #4fd6be;
+  --hljs-variable: #c8d3f5;
+
+  /* Mermaid variables */
+  --mermaid-primaryColor: #82aaff;
+  --mermaid-primaryTextColor: #c8d3f5;
+  --mermaid-primaryBorderColor: #2f334d;
+  --mermaid-lineColor: #636da6;
+  --mermaid-secondaryColor: #1e2030;
+  --mermaid-tertiaryColor: #222436;
+  --mermaid-background: #222436;
+  --mermaid-noteBkgColor: #1e2030;
+  --mermaid-noteTextColor: #c8d3f5;
+  --mermaid-edgeLabelBackground: #222436;
+  --mermaid-actorBkg: #1e2030;
+  --mermaid-actorTextColor: #c8d3f5;
+}
+
+/* Direct scoped hljs token rules */
+[data-theme="tokyo-night-moon"] .hljs-keyword { color: var(--hljs-keyword); }
+[data-theme="tokyo-night-moon"] .hljs-string { color: var(--hljs-string); }
+[data-theme="tokyo-night-moon"] .hljs-comment { color: var(--hljs-comment); }
+[data-theme="tokyo-night-moon"] .hljs-number { color: var(--hljs-number); }
+[data-theme="tokyo-night-moon"] .hljs-function { color: var(--hljs-function); }
+[data-theme="tokyo-night-moon"] .hljs-type { color: var(--hljs-type); }
+[data-theme="tokyo-night-moon"] .hljs-variable { color: var(--hljs-variable); }
