@@ -1,45 +1,59 @@
-/* Tokyo Night theme */
+/* Tokyo Night — Night variant
+ * Source: https://github.com/enkia/tokyo-night-vscode-theme
+ */
 
 [data-theme="tokyo-night"] {
-  /* Prose variables */
-  --color-fg-default: #c0caf5;
+  /* Prose custom properties */
+  --color-fg-default:     #c0caf5;
+  --color-fg-muted:       #a9b1d6;
   --color-canvas-default: #1a1b26;
-  --color-canvas-subtle: #16161e;
+  --color-canvas-subtle:  #16161e;
   --color-border-default: #29293d;
-  --color-border-muted: #1f2335;
-  --color-accent-fg: #7aa2f7;
-  --color-danger-fg: #f7768e;
-  --color-success-fg: #9ece6a;
+  --color-border-muted:   #24243a;
+  --color-accent-fg:      #7aa2f7;
+  --color-danger-fg:      #f7768e;
+  --color-success-fg:     #9ece6a;
 
-  /* hljs syntax highlighting tokens */
-  --hljs-keyword: #bb9af7;
-  --hljs-string: #9ece6a;
-  --hljs-comment: #565f89;
-  --hljs-number: #ff9e64;
-  --hljs-function: #7aa2f7;
-  --hljs-type: #2ac3de;
-  --hljs-variable: #c0caf5;
-
-  /* Mermaid variables */
-  --mermaid-primaryColor: #7aa2f7;
-  --mermaid-primaryTextColor: #c0caf5;
-  --mermaid-primaryBorderColor: #29293d;
-  --mermaid-lineColor: #565f89;
-  --mermaid-secondaryColor: #16161e;
-  --mermaid-tertiaryColor: #1a1b26;
-  --mermaid-background: #1a1b26;
-  --mermaid-noteBkgColor: #16161e;
-  --mermaid-noteTextColor: #c0caf5;
+  /* Mermaid theme variables (theme: 'base') */
+  --mermaid-primaryColor:        #7aa2f7;
+  --mermaid-primaryTextColor:    #c0caf5;
+  --mermaid-primaryBorderColor:  #29293d;
+  --mermaid-lineColor:           #565f89;
+  --mermaid-secondaryColor:      #16161e;
+  --mermaid-tertiaryColor:       #24243a;
+  --mermaid-background:          #1a1b26;
+  --mermaid-noteBkgColor:        #16161e;
+  --mermaid-noteTextColor:       #a9b1d6;
   --mermaid-edgeLabelBackground: #1a1b26;
-  --mermaid-actorBkg: #16161e;
-  --mermaid-actorTextColor: #c0caf5;
+  --mermaid-actorBkg:            #16161e;
+  --mermaid-actorTextColor:      #c0caf5;
 }
 
 /* Direct scoped hljs token rules */
-[data-theme="tokyo-night"] .hljs-keyword { color: var(--hljs-keyword); }
-[data-theme="tokyo-night"] .hljs-string { color: var(--hljs-string); }
-[data-theme="tokyo-night"] .hljs-comment { color: var(--hljs-comment); }
-[data-theme="tokyo-night"] .hljs-number { color: var(--hljs-number); }
-[data-theme="tokyo-night"] .hljs-function { color: var(--hljs-function); }
-[data-theme="tokyo-night"] .hljs-type { color: var(--hljs-type); }
-[data-theme="tokyo-night"] .hljs-variable { color: var(--hljs-variable); }
+[data-theme="tokyo-night"] .hljs                        { background: #1a1b26; color: #c0caf5; }
+[data-theme="tokyo-night"] .hljs-keyword,
+[data-theme="tokyo-night"] .hljs-operator               { color: #bb9af7; }
+[data-theme="tokyo-night"] .hljs-string,
+[data-theme="tokyo-night"] .hljs-attr,
+[data-theme="tokyo-night"] .hljs-addition               { color: #9ece6a; }
+[data-theme="tokyo-night"] .hljs-comment,
+[data-theme="tokyo-night"] .hljs-quote                  { color: #565f89; font-style: italic; }
+[data-theme="tokyo-night"] .hljs-number,
+[data-theme="tokyo-night"] .hljs-literal                { color: #ff9e64; }
+[data-theme="tokyo-night"] .hljs-function,
+[data-theme="tokyo-night"] .hljs-selector-pseudo,
+[data-theme="tokyo-night"] .hljs-selector-tag           { color: #7aa2f7; }
+[data-theme="tokyo-night"] .hljs-type,
+[data-theme="tokyo-night"] .hljs-class,
+[data-theme="tokyo-night"] .hljs-built_in               { color: #2ac3de; }
+[data-theme="tokyo-night"] .hljs-variable,
+[data-theme="tokyo-night"] .hljs-template-variable      { color: #c0caf5; }
+[data-theme="tokyo-night"] .hljs-name,
+[data-theme="tokyo-night"] .hljs-title,
+[data-theme="tokyo-night"] .hljs-section                { color: #7aa2f7; }
+[data-theme="tokyo-night"] .hljs-meta,
+[data-theme="tokyo-night"] .hljs-params                 { color: #a9b1d6; }
+[data-theme="tokyo-night"] .hljs-tag                    { color: #f7768e; }
+[data-theme="tokyo-night"] .hljs-deletion               { color: #f7768e; background: #3b1f1e; }
+[data-theme="tokyo-night"] .hljs-emphasis               { font-style: italic; }
+[data-theme="tokyo-night"] .hljs-strong                 { font-weight: bold; }

@@ -1,45 +1,59 @@
-/* Catppuccin Macchiato theme */
+/* Catppuccin Macchiato variant
+ * Source: https://github.com/catppuccin/catppuccin
+ */
 
 [data-theme="catppuccin-macchiato"] {
-  /* Prose variables */
-  --color-fg-default: #cad3f5;
+  /* Prose custom properties */
+  --color-fg-default:     #cad3f5;
+  --color-fg-muted:       #6e738d;
   --color-canvas-default: #24273a;
-  --color-canvas-subtle: #1e2030;
+  --color-canvas-subtle:  #1e2030;
   --color-border-default: #363a4f;
-  --color-border-muted: #494d64;
-  --color-accent-fg: #8aadf4;
-  --color-danger-fg: #ed8796;
-  --color-success-fg: #a6da95;
+  --color-border-muted:   #494d64;
+  --color-accent-fg:      #8aadf4;
+  --color-danger-fg:      #ed8796;
+  --color-success-fg:     #a6da95;
 
-  /* hljs syntax highlighting tokens */
-  --hljs-keyword: #c6a0f6;
-  --hljs-string: #a6da95;
-  --hljs-comment: #6e738d;
-  --hljs-number: #f5a97f;
-  --hljs-function: #8aadf4;
-  --hljs-type: #8bd5ca;
-  --hljs-variable: #cad3f5;
-
-  /* Mermaid variables */
-  --mermaid-primaryColor: #8aadf4;
-  --mermaid-primaryTextColor: #cad3f5;
-  --mermaid-primaryBorderColor: #363a4f;
-  --mermaid-lineColor: #494d64;
-  --mermaid-secondaryColor: #1e2030;
-  --mermaid-tertiaryColor: #24273a;
-  --mermaid-background: #24273a;
-  --mermaid-noteBkgColor: #1e2030;
-  --mermaid-noteTextColor: #cad3f5;
+  /* Mermaid theme variables (theme: 'base') */
+  --mermaid-primaryColor:        #8aadf4;
+  --mermaid-primaryTextColor:    #cad3f5;
+  --mermaid-primaryBorderColor:  #363a4f;
+  --mermaid-lineColor:           #6e738d;
+  --mermaid-secondaryColor:      #1e2030;
+  --mermaid-tertiaryColor:       #24273a;
+  --mermaid-background:          #24273a;
+  --mermaid-noteBkgColor:        #1e2030;
+  --mermaid-noteTextColor:       #6e738d;
   --mermaid-edgeLabelBackground: #24273a;
-  --mermaid-actorBkg: #1e2030;
-  --mermaid-actorTextColor: #cad3f5;
+  --mermaid-actorBkg:            #1e2030;
+  --mermaid-actorTextColor:      #cad3f5;
 }
 
 /* Direct scoped hljs token rules */
-[data-theme="catppuccin-macchiato"] .hljs-keyword { color: var(--hljs-keyword); }
-[data-theme="catppuccin-macchiato"] .hljs-string { color: var(--hljs-string); }
-[data-theme="catppuccin-macchiato"] .hljs-comment { color: var(--hljs-comment); }
-[data-theme="catppuccin-macchiato"] .hljs-number { color: var(--hljs-number); }
-[data-theme="catppuccin-macchiato"] .hljs-function { color: var(--hljs-function); }
-[data-theme="catppuccin-macchiato"] .hljs-type { color: var(--hljs-type); }
-[data-theme="catppuccin-macchiato"] .hljs-variable { color: var(--hljs-variable); }
+[data-theme="catppuccin-macchiato"] .hljs                        { background: #24273a; color: #cad3f5; }
+[data-theme="catppuccin-macchiato"] .hljs-keyword               { color: #c6a0f6; }
+[data-theme="catppuccin-macchiato"] .hljs-operator              { color: #91d7e3; }
+[data-theme="catppuccin-macchiato"] .hljs-string,
+[data-theme="catppuccin-macchiato"] .hljs-attr,
+[data-theme="catppuccin-macchiato"] .hljs-addition              { color: #a6da95; }
+[data-theme="catppuccin-macchiato"] .hljs-comment,
+[data-theme="catppuccin-macchiato"] .hljs-quote                 { color: #6e738d; font-style: italic; }
+[data-theme="catppuccin-macchiato"] .hljs-number,
+[data-theme="catppuccin-macchiato"] .hljs-literal               { color: #f5a97f; }
+[data-theme="catppuccin-macchiato"] .hljs-function,
+[data-theme="catppuccin-macchiato"] .hljs-selector-pseudo,
+[data-theme="catppuccin-macchiato"] .hljs-selector-tag          { color: #8aadf4; }
+[data-theme="catppuccin-macchiato"] .hljs-type,
+[data-theme="catppuccin-macchiato"] .hljs-class,
+[data-theme="catppuccin-macchiato"] .hljs-built_in              { color: #8bd5ca; }
+[data-theme="catppuccin-macchiato"] .hljs-variable,
+[data-theme="catppuccin-macchiato"] .hljs-template-variable     { color: #cad3f5; }
+[data-theme="catppuccin-macchiato"] .hljs-name,
+[data-theme="catppuccin-macchiato"] .hljs-title,
+[data-theme="catppuccin-macchiato"] .hljs-section               { color: #8aadf4; }
+[data-theme="catppuccin-macchiato"] .hljs-meta,
+[data-theme="catppuccin-macchiato"] .hljs-params                { color: #6e738d; }
+[data-theme="catppuccin-macchiato"] .hljs-tag                   { color: #ed8796; }
+[data-theme="catppuccin-macchiato"] .hljs-deletion              { color: #ed8796; background: #3a1e2e; }
+[data-theme="catppuccin-macchiato"] .hljs-emphasis              { font-style: italic; }
+[data-theme="catppuccin-macchiato"] .hljs-strong                { font-weight: bold; }

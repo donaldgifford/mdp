@@ -324,13 +324,13 @@ Each file contains a single `[data-theme="X"]` block with:
 2. Direct scoped hljs token rules: `[data-theme="X"] .hljs-keyword { color: ...; }`
 3. `--mermaid-*` CSS custom properties (read by JS `theme: 'base'` at runtime)
 
-- [ ] Write `assets/themes/tokyo-night.css` (Night variant)
+- [x] Write `assets/themes/tokyo-night.css` (Night variant)
   - `[data-theme="tokyo-night"]` block — prose vars + hljs token rules + mermaid vars
-- [ ] Write `assets/themes/tokyo-night-moon.css`
+- [x] Write `assets/themes/tokyo-night-moon.css`
   - `[data-theme="tokyo-night-moon"]` block — prose vars + hljs token rules + mermaid vars
-- [ ] Write `assets/themes/tokyo-night-storm.css`
+- [x] Write `assets/themes/tokyo-night-storm.css`
   - `[data-theme="tokyo-night-storm"]` block (close to Night, slightly blue-tinted)
-- [ ] Write `assets/themes/tokyo-night-day.css`
+- [x] Write `assets/themes/tokyo-night-day.css`
   - `[data-theme="tokyo-night-day"]` block — light variant; mermaid vars use
     lighter palette colours
 - [ ] Manual visual check of all four variants against a markdown file with
@@ -376,11 +376,11 @@ Canonical source: [rose-pine/palette](https://rosepinetheme.com/palette/)
 Each file contains a single `[data-theme="X"]` block with prose vars, direct
 scoped hljs token rules, and `--mermaid-*` CSS custom properties.
 
-- [ ] Write `assets/themes/rose-pine.css` (Pine/main variant)
+- [x] Write `assets/themes/rose-pine.css` (Pine/main variant)
   - `[data-theme="rose-pine"]` block — prose vars + hljs token rules + mermaid vars
-- [ ] Write `assets/themes/rose-pine-moon.css`
+- [x] Write `assets/themes/rose-pine-moon.css`
   - `[data-theme="rose-pine-moon"]` block — prose vars + hljs token rules + mermaid vars
-- [ ] Write `assets/themes/rose-pine-dawn.css`
+- [x] Write `assets/themes/rose-pine-dawn.css`
   - `[data-theme="rose-pine-dawn"]` block — light variant; mermaid vars use
     dawn palette colours
 - [ ] Manual visual check of all three variants
@@ -422,11 +422,11 @@ Canonical source: [catppuccin/catppuccin](https://github.com/catppuccin/catppucc
 Each file contains a single `[data-theme="X"]` block with prose vars, direct
 scoped hljs token rules, and `--mermaid-*` CSS custom properties.
 
-- [ ] Write `assets/themes/catppuccin-latte.css` — light variant; mermaid vars
+- [x] Write `assets/themes/catppuccin-latte.css` — light variant; mermaid vars
       use latte palette colours
-- [ ] Write `assets/themes/catppuccin-frappe.css` — mermaid vars use frappé palette
-- [ ] Write `assets/themes/catppuccin-macchiato.css` — mermaid vars use macchiato palette
-- [ ] Write `assets/themes/catppuccin-mocha.css` — mermaid vars use mocha palette
+- [x] Write `assets/themes/catppuccin-frappe.css` — mermaid vars use frappé palette
+- [x] Write `assets/themes/catppuccin-macchiato.css` — mermaid vars use macchiato palette
+- [x] Write `assets/themes/catppuccin-mocha.css` — mermaid vars use mocha palette
 - [ ] Manual visual check of all four variants
 
 ### Success Criteria

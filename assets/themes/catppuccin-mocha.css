@@ -1,45 +1,59 @@
-/* Catppuccin Mocha theme */
+/* Catppuccin Mocha variant
+ * Source: https://github.com/catppuccin/catppuccin
+ */
 
 [data-theme="catppuccin-mocha"] {
-  /* Prose variables */
-  --color-fg-default: #cdd6f4;
+  /* Prose custom properties */
+  --color-fg-default:     #cdd6f4;
+  --color-fg-muted:       #6c7086;
   --color-canvas-default: #1e1e2e;
-  --color-canvas-subtle: #181825;
+  --color-canvas-subtle:  #181825;
   --color-border-default: #313244;
-  --color-border-muted: #45475a;
-  --color-accent-fg: #89b4fa;
-  --color-danger-fg: #f38ba8;
-  --color-success-fg: #a6e3a1;
+  --color-border-muted:   #45475a;
+  --color-accent-fg:      #89b4fa;
+  --color-danger-fg:      #f38ba8;
+  --color-success-fg:     #a6e3a1;
 
-  /* hljs syntax highlighting tokens */
-  --hljs-keyword: #cba6f7;
-  --hljs-string: #a6e3a1;
-  --hljs-comment: #6c7086;
-  --hljs-number: #fab387;
-  --hljs-function: #89b4fa;
-  --hljs-type: #94e2d5;
-  --hljs-variable: #cdd6f4;
-
-  /* Mermaid variables */
-  --mermaid-primaryColor: #89b4fa;
-  --mermaid-primaryTextColor: #cdd6f4;
-  --mermaid-primaryBorderColor: #313244;
-  --mermaid-lineColor: #45475a;
-  --mermaid-secondaryColor: #181825;
-  --mermaid-tertiaryColor: #1e1e2e;
-  --mermaid-background: #1e1e2e;
-  --mermaid-noteBkgColor: #181825;
-  --mermaid-noteTextColor: #cdd6f4;
+  /* Mermaid theme variables (theme: 'base') */
+  --mermaid-primaryColor:        #89b4fa;
+  --mermaid-primaryTextColor:    #cdd6f4;
+  --mermaid-primaryBorderColor:  #313244;
+  --mermaid-lineColor:           #6c7086;
+  --mermaid-secondaryColor:      #181825;
+  --mermaid-tertiaryColor:       #1e1e2e;
+  --mermaid-background:          #1e1e2e;
+  --mermaid-noteBkgColor:        #181825;
+  --mermaid-noteTextColor:       #6c7086;
   --mermaid-edgeLabelBackground: #1e1e2e;
-  --mermaid-actorBkg: #181825;
-  --mermaid-actorTextColor: #cdd6f4;
+  --mermaid-actorBkg:            #181825;
+  --mermaid-actorTextColor:      #cdd6f4;
 }
 
 /* Direct scoped hljs token rules */
-[data-theme="catppuccin-mocha"] .hljs-keyword { color: var(--hljs-keyword); }
-[data-theme="catppuccin-mocha"] .hljs-string { color: var(--hljs-string); }
-[data-theme="catppuccin-mocha"] .hljs-comment { color: var(--hljs-comment); }
-[data-theme="catppuccin-mocha"] .hljs-number { color: var(--hljs-number); }
-[data-theme="catppuccin-mocha"] .hljs-function { color: var(--hljs-function); }
-[data-theme="catppuccin-mocha"] .hljs-type { color: var(--hljs-type); }
-[data-theme="catppuccin-mocha"] .hljs-variable { color: var(--hljs-variable); }
+[data-theme="catppuccin-mocha"] .hljs                        { background: #1e1e2e; color: #cdd6f4; }
+[data-theme="catppuccin-mocha"] .hljs-keyword               { color: #cba6f7; }
+[data-theme="catppuccin-mocha"] .hljs-operator              { color: #89dceb; }
+[data-theme="catppuccin-mocha"] .hljs-string,
+[data-theme="catppuccin-mocha"] .hljs-attr,
+[data-theme="catppuccin-mocha"] .hljs-addition              { color: #a6e3a1; }
+[data-theme="catppuccin-mocha"] .hljs-comment,
+[data-theme="catppuccin-mocha"] .hljs-quote                 { color: #6c7086; font-style: italic; }
+[data-theme="catppuccin-mocha"] .hljs-number,
+[data-theme="catppuccin-mocha"] .hljs-literal               { color: #fab387; }
+[data-theme="catppuccin-mocha"] .hljs-function,
+[data-theme="catppuccin-mocha"] .hljs-selector-pseudo,
+[data-theme="catppuccin-mocha"] .hljs-selector-tag          { color: #89b4fa; }
+[data-theme="catppuccin-mocha"] .hljs-type,
+[data-theme="catppuccin-mocha"] .hljs-class,
+[data-theme="catppuccin-mocha"] .hljs-built_in              { color: #94e2d5; }
+[data-theme="catppuccin-mocha"] .hljs-variable,
+[data-theme="catppuccin-mocha"] .hljs-template-variable     { color: #cdd6f4; }
+[data-theme="catppuccin-mocha"] .hljs-name,
+[data-theme="catppuccin-mocha"] .hljs-title,
+[data-theme="catppuccin-mocha"] .hljs-section               { color: #89b4fa; }
+[data-theme="catppuccin-mocha"] .hljs-meta,
+[data-theme="catppuccin-mocha"] .hljs-params                { color: #6c7086; }
+[data-theme="catppuccin-mocha"] .hljs-tag                   { color: #f38ba8; }
+[data-theme="catppuccin-mocha"] .hljs-deletion              { color: #f38ba8; background: #3b1c2c; }
+[data-theme="catppuccin-mocha"] .hljs-emphasis              { font-style: italic; }
+[data-theme="catppuccin-mocha"] .hljs-strong                { font-weight: bold; }

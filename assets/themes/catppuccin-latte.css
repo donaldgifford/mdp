@@ -1,45 +1,59 @@
-/* Catppuccin Latte theme */
+/* Catppuccin Latte — light variant
+ * Source: https://github.com/catppuccin/catppuccin
+ */
 
 [data-theme="catppuccin-latte"] {
-  /* Prose variables */
-  --color-fg-default: #4c4f69;
+  /* Prose custom properties */
+  --color-fg-default:     #4c4f69;
+  --color-fg-muted:       #9ca0b0;
   --color-canvas-default: #eff1f5;
-  --color-canvas-subtle: #e6e9ef;
+  --color-canvas-subtle:  #e6e9ef;
   --color-border-default: #ccd0da;
-  --color-border-muted: #dce0e8;
-  --color-accent-fg: #1e66f5;
-  --color-danger-fg: #d20f39;
-  --color-success-fg: #40a02b;
+  --color-border-muted:   #dce0e8;
+  --color-accent-fg:      #1e66f5;
+  --color-danger-fg:      #d20f39;
+  --color-success-fg:     #40a02b;
 
-  /* hljs syntax highlighting tokens */
-  --hljs-keyword: #8839ef;
-  --hljs-string: #40a02b;
-  --hljs-comment: #9ca0b0;
-  --hljs-number: #fe640b;
-  --hljs-function: #1e66f5;
-  --hljs-type: #179299;
-  --hljs-variable: #4c4f69;
-
-  /* Mermaid variables */
-  --mermaid-primaryColor: #1e66f5;
-  --mermaid-primaryTextColor: #4c4f69;
-  --mermaid-primaryBorderColor: #ccd0da;
-  --mermaid-lineColor: #dce0e8;
-  --mermaid-secondaryColor: #e6e9ef;
-  --mermaid-tertiaryColor: #eff1f5;
-  --mermaid-background: #eff1f5;
-  --mermaid-noteBkgColor: #e6e9ef;
-  --mermaid-noteTextColor: #4c4f69;
+  /* Mermaid theme variables (theme: 'base') */
+  --mermaid-primaryColor:        #1e66f5;
+  --mermaid-primaryTextColor:    #4c4f69;
+  --mermaid-primaryBorderColor:  #ccd0da;
+  --mermaid-lineColor:           #9ca0b0;
+  --mermaid-secondaryColor:      #e6e9ef;
+  --mermaid-tertiaryColor:       #dce0e8;
+  --mermaid-background:          #eff1f5;
+  --mermaid-noteBkgColor:        #e6e9ef;
+  --mermaid-noteTextColor:       #9ca0b0;
   --mermaid-edgeLabelBackground: #eff1f5;
-  --mermaid-actorBkg: #e6e9ef;
-  --mermaid-actorTextColor: #4c4f69;
+  --mermaid-actorBkg:            #e6e9ef;
+  --mermaid-actorTextColor:      #4c4f69;
 }
 
 /* Direct scoped hljs token rules */
-[data-theme="catppuccin-latte"] .hljs-keyword { color: var(--hljs-keyword); }
-[data-theme="catppuccin-latte"] .hljs-string { color: var(--hljs-string); }
-[data-theme="catppuccin-latte"] .hljs-comment { color: var(--hljs-comment); }
-[data-theme="catppuccin-latte"] .hljs-number { color: var(--hljs-number); }
-[data-theme="catppuccin-latte"] .hljs-function { color: var(--hljs-function); }
-[data-theme="catppuccin-latte"] .hljs-type { color: var(--hljs-type); }
-[data-theme="catppuccin-latte"] .hljs-variable { color: var(--hljs-variable); }
+[data-theme="catppuccin-latte"] .hljs                        { background: #eff1f5; color: #4c4f69; }
+[data-theme="catppuccin-latte"] .hljs-keyword               { color: #8839ef; }
+[data-theme="catppuccin-latte"] .hljs-operator              { color: #04a5e5; }
+[data-theme="catppuccin-latte"] .hljs-string,
+[data-theme="catppuccin-latte"] .hljs-attr,
+[data-theme="catppuccin-latte"] .hljs-addition              { color: #40a02b; }
+[data-theme="catppuccin-latte"] .hljs-comment,
+[data-theme="catppuccin-latte"] .hljs-quote                 { color: #9ca0b0; font-style: italic; }
+[data-theme="catppuccin-latte"] .hljs-number,
+[data-theme="catppuccin-latte"] .hljs-literal               { color: #fe640b; }
+[data-theme="catppuccin-latte"] .hljs-function,
+[data-theme="catppuccin-latte"] .hljs-selector-pseudo,
+[data-theme="catppuccin-latte"] .hljs-selector-tag          { color: #1e66f5; }
+[data-theme="catppuccin-latte"] .hljs-type,
+[data-theme="catppuccin-latte"] .hljs-class,
+[data-theme="catppuccin-latte"] .hljs-built_in              { color: #179299; }
+[data-theme="catppuccin-latte"] .hljs-variable,
+[data-theme="catppuccin-latte"] .hljs-template-variable     { color: #4c4f69; }
+[data-theme="catppuccin-latte"] .hljs-name,
+[data-theme="catppuccin-latte"] .hljs-title,
+[data-theme="catppuccin-latte"] .hljs-section               { color: #1e66f5; }
+[data-theme="catppuccin-latte"] .hljs-meta,
+[data-theme="catppuccin-latte"] .hljs-params                { color: #9ca0b0; }
+[data-theme="catppuccin-latte"] .hljs-tag                   { color: #d20f39; }
+[data-theme="catppuccin-latte"] .hljs-deletion              { color: #d20f39; background: #fce2e5; }
+[data-theme="catppuccin-latte"] .hljs-emphasis              { font-style: italic; }
+[data-theme="catppuccin-latte"] .hljs-strong                { font-weight: bold; }
