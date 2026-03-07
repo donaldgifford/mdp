@@ -28,4 +28,9 @@ docz create impl "Your Implementation Title"
 - **Cancelled**: Plan was abandoned
 
 <!-- BEGIN DOCZ AUTO-GENERATED -->
+## All IMPLs
+
+| ID | Title | Status | Date | Author | Link |
+|----|-------|--------|------|--------|------|
+| IMPL-0001 | Themes | Draft | 2026-03-06 | Donald Gifford | [0001-themes.md](0001-themes.md) |
 <!-- END DOCZ AUTO-GENERATED -->
