@@ -109,6 +109,14 @@ var builtinThemes = map[string]Theme{
 		IsAuto:        false,
 	},
 
+	// donald — personal dark theme based on donald.dev palette
+	"donald": {
+		CSS:           mustReadThemeCSS("donald.css"),
+		HljsVendorCSS: "",
+		MermaidTheme:  "base",
+		IsAuto:        false,
+	},
+
 	// Catppuccin theme family
 	"catppuccin-latte": {
 		CSS:           mustReadThemeCSS("catppuccin-latte.css"),

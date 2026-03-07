@@ -1,5 +1,8 @@
 /* Tokyo Night Day — light variant
  * Source: https://github.com/enkia/tokyo-night-vscode-theme
+ * Palette: bg #e1e2e7, fg #3760bf, comment #848cb8,
+ *          purple #9854f1, blue #2e7de9, teal #007197,
+ *          green #587539, orange #b15c00, red #f52a65
  */
 
 [data-theme="tokyo-night-day"] {
@@ -31,29 +34,31 @@
 
 /* Direct scoped hljs token rules */
 [data-theme="tokyo-night-day"] .hljs                        { background: #e1e2e7; color: #3760bf; }
-[data-theme="tokyo-night-day"] .hljs-keyword,
-[data-theme="tokyo-night-day"] .hljs-operator               { color: #9854f1; }
+[data-theme="tokyo-night-day"] .hljs-keyword               { color: #9854f1; }    /* purple  */
+[data-theme="tokyo-night-day"] .hljs-operator              { color: #0db9d7; }    /* cyan    */
 [data-theme="tokyo-night-day"] .hljs-string,
 [data-theme="tokyo-night-day"] .hljs-attr,
-[data-theme="tokyo-night-day"] .hljs-addition               { color: #587539; }
+[data-theme="tokyo-night-day"] .hljs-addition              { color: #587539; }    /* green   */
 [data-theme="tokyo-night-day"] .hljs-comment,
-[data-theme="tokyo-night-day"] .hljs-quote                  { color: #848cb8; font-style: italic; }
+[data-theme="tokyo-night-day"] .hljs-quote                 { color: #848cb8; font-style: italic; } /* comment */
 [data-theme="tokyo-night-day"] .hljs-number,
-[data-theme="tokyo-night-day"] .hljs-literal                { color: #b15c00; }
+[data-theme="tokyo-night-day"] .hljs-literal               { color: #b15c00; }    /* orange  */
 [data-theme="tokyo-night-day"] .hljs-function,
 [data-theme="tokyo-night-day"] .hljs-selector-pseudo,
-[data-theme="tokyo-night-day"] .hljs-selector-tag           { color: #2e7de9; }
+[data-theme="tokyo-night-day"] .hljs-selector-tag          { color: #2e7de9; }    /* blue    */
 [data-theme="tokyo-night-day"] .hljs-type,
 [data-theme="tokyo-night-day"] .hljs-class,
-[data-theme="tokyo-night-day"] .hljs-built_in               { color: #007197; }
+[data-theme="tokyo-night-day"] .hljs-built_in              { color: #007197; }    /* teal    */
 [data-theme="tokyo-night-day"] .hljs-variable,
-[data-theme="tokyo-night-day"] .hljs-template-variable      { color: #3760bf; }
+[data-theme="tokyo-night-day"] .hljs-template-variable     { color: #3760bf; }    /* fg      */
 [data-theme="tokyo-night-day"] .hljs-name,
 [data-theme="tokyo-night-day"] .hljs-title,
-[data-theme="tokyo-night-day"] .hljs-section                { color: #2e7de9; }
+[data-theme="tokyo-night-day"] .hljs-section               { color: #2e7de9; }    /* blue    */
 [data-theme="tokyo-night-day"] .hljs-meta,
-[data-theme="tokyo-night-day"] .hljs-params                 { color: #6172b0; }
-[data-theme="tokyo-night-day"] .hljs-tag                    { color: #f52a65; }
-[data-theme="tokyo-night-day"] .hljs-deletion               { color: #f52a65; background: #ffe3e3; }
-[data-theme="tokyo-night-day"] .hljs-emphasis               { font-style: italic; }
-[data-theme="tokyo-night-day"] .hljs-strong                 { font-weight: bold; }
+[data-theme="tokyo-night-day"] .hljs-params                { color: #6172b0; }    /* fg-dim  */
+[data-theme="tokyo-night-day"] .hljs-symbol,
+[data-theme="tokyo-night-day"] .hljs-link                  { color: #188092; }    /* dark cyan */
+[data-theme="tokyo-night-day"] .hljs-tag                   { color: #f52a65; }    /* red     */
+[data-theme="tokyo-night-day"] .hljs-deletion              { color: #f52a65; background: #ffe3e3; }
+[data-theme="tokyo-night-day"] .hljs-emphasis              { font-style: italic; }
+[data-theme="tokyo-night-day"] .hljs-strong                { font-weight: bold; }

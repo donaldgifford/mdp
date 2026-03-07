@@ -43,8 +43,8 @@ func TestResolve_Auto(t *testing.T) {
 
 func TestResolve_BuiltinNames(t *testing.T) {
 	names := Names()
-	if len(names) != 14 {
-		t.Fatalf("Names() returned %d themes, want 14", len(names))
+	if len(names) != 15 {
+		t.Fatalf("Names() returned %d themes, want 15", len(names))
 	}
 
 	for _, name := range names {
@@ -167,9 +167,9 @@ func TestResolve_EmptyFile(t *testing.T) {
 func TestNames(t *testing.T) {
 	names := Names()
 
-	// Should have exactly 14 named themes (excluding "auto")
-	if len(names) != 14 {
-		t.Errorf("Names() returned %d themes, want 14", len(names))
+	// Should have exactly 15 named themes (excluding "auto")
+	if len(names) != 15 {
+		t.Errorf("Names() returned %d themes, want 15", len(names))
 	}
 
 	// Should be sorted
@@ -190,6 +190,7 @@ func TestNames(t *testing.T) {
 		"tokyo-night", "tokyo-night-moon", "tokyo-night-storm", "tokyo-night-day",
 		"rose-pine", "rose-pine-moon", "rose-pine-dawn",
 		"catppuccin-latte", "catppuccin-frappe", "catppuccin-macchiato", "catppuccin-mocha",
+		"donald",
 	}
 
 	for _, expected := range expectedFamilies {
@@ -277,6 +278,7 @@ func TestEmbeddedThemeFilesExist(t *testing.T) {
 		"tokyo-night.css", "tokyo-night-moon.css", "tokyo-night-storm.css", "tokyo-night-day.css",
 		"rose-pine.css", "rose-pine-moon.css", "rose-pine-dawn.css",
 		"catppuccin-latte.css", "catppuccin-frappe.css", "catppuccin-macchiato.css", "catppuccin-mocha.css",
+		"donald.css",
 	}
 
 	for _, filename := range expectedFiles {

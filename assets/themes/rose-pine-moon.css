@@ -1,5 +1,9 @@
 /* Rosé Pine Moon variant
- * Source: https://rosepinetheme.com/palette/
+ * Source: https://rosepinetheme.com/palette/ingredients/
+ * Palette: base #232136, surface #2a273f, overlay #393552,
+ *          muted #6e6a86, subtle #908caa, text #e0def4,
+ *          love #eb6f92, gold #f6c177, rose #ea9a97,
+ *          pine #3e8fb0, foam #9ccfd8, iris #c4a7e7
  */
 
 [data-theme="rose-pine-moon"] {
@@ -31,29 +35,31 @@
 
 /* Direct scoped hljs token rules */
 [data-theme="rose-pine-moon"] .hljs                        { background: #232136; color: #e0def4; }
-[data-theme="rose-pine-moon"] .hljs-keyword,
-[data-theme="rose-pine-moon"] .hljs-operator               { color: #c4a7e7; }
+[data-theme="rose-pine-moon"] .hljs-keyword               { color: #c4a7e7; }               /* iris  */
+[data-theme="rose-pine-moon"] .hljs-operator              { color: #eb6f92; }               /* love  */
 [data-theme="rose-pine-moon"] .hljs-string,
 [data-theme="rose-pine-moon"] .hljs-attr,
-[data-theme="rose-pine-moon"] .hljs-addition               { color: #9ccfd8; }
+[data-theme="rose-pine-moon"] .hljs-addition              { color: #9ccfd8; }               /* foam  */
 [data-theme="rose-pine-moon"] .hljs-comment,
-[data-theme="rose-pine-moon"] .hljs-quote                  { color: #6e6a86; font-style: italic; }
+[data-theme="rose-pine-moon"] .hljs-quote                 { color: #6e6a86; font-style: italic; } /* muted */
 [data-theme="rose-pine-moon"] .hljs-number,
-[data-theme="rose-pine-moon"] .hljs-literal                { color: #f6c177; }
+[data-theme="rose-pine-moon"] .hljs-literal               { color: #f6c177; }               /* gold  */
 [data-theme="rose-pine-moon"] .hljs-function,
 [data-theme="rose-pine-moon"] .hljs-selector-pseudo,
-[data-theme="rose-pine-moon"] .hljs-selector-tag           { color: #ea9a97; }
+[data-theme="rose-pine-moon"] .hljs-selector-tag          { color: #ea9a97; }               /* rose  */
 [data-theme="rose-pine-moon"] .hljs-type,
 [data-theme="rose-pine-moon"] .hljs-class,
-[data-theme="rose-pine-moon"] .hljs-built_in               { color: #3e8fb0; }
+[data-theme="rose-pine-moon"] .hljs-built_in              { color: #9ccfd8; }               /* foam — better contrast than pine */
 [data-theme="rose-pine-moon"] .hljs-variable,
-[data-theme="rose-pine-moon"] .hljs-template-variable      { color: #e0def4; }
+[data-theme="rose-pine-moon"] .hljs-template-variable     { color: #e0def4; }               /* text  */
 [data-theme="rose-pine-moon"] .hljs-name,
 [data-theme="rose-pine-moon"] .hljs-title,
-[data-theme="rose-pine-moon"] .hljs-section                { color: #ea9a97; }
+[data-theme="rose-pine-moon"] .hljs-section               { color: #ea9a97; }               /* rose  */
 [data-theme="rose-pine-moon"] .hljs-meta,
-[data-theme="rose-pine-moon"] .hljs-params                 { color: #908caa; }
-[data-theme="rose-pine-moon"] .hljs-tag                    { color: #eb6f92; }
-[data-theme="rose-pine-moon"] .hljs-deletion               { color: #eb6f92; background: #3d1a29; }
-[data-theme="rose-pine-moon"] .hljs-emphasis               { font-style: italic; }
-[data-theme="rose-pine-moon"] .hljs-strong                 { font-weight: bold; }
+[data-theme="rose-pine-moon"] .hljs-params                { color: #908caa; }               /* subtle */
+[data-theme="rose-pine-moon"] .hljs-symbol,
+[data-theme="rose-pine-moon"] .hljs-link                  { color: #c4a7e7; }               /* iris  */
+[data-theme="rose-pine-moon"] .hljs-tag                   { color: #eb6f92; }               /* love  */
+[data-theme="rose-pine-moon"] .hljs-deletion              { color: #eb6f92; background: #3d1a29; }
+[data-theme="rose-pine-moon"] .hljs-emphasis              { font-style: italic; }
+[data-theme="rose-pine-moon"] .hljs-strong                { font-weight: bold; }
