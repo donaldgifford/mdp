@@ -1,5 +1,9 @@
 /* Rosé Pine Dawn — light variant
- * Source: https://rosepinetheme.com/palette/
+ * Source: https://rosepinetheme.com/palette/ingredients/
+ * Palette: base #faf4ed, surface #fffaf3, overlay #f2e9e1,
+ *          muted #9893a5, subtle #797593, text #575279,
+ *          love #b4637a, gold #ea9d34, rose #d7827e,
+ *          pine #286983, foam #56949f, iris #907aa9
  */
 
 [data-theme="rose-pine-dawn"] {
@@ -12,7 +16,7 @@
   --color-border-muted:   #f2e9e1;
   --color-accent-fg:      #907aa9;
   --color-danger-fg:      #b4637a;
-  --color-success-fg:     #56949f;
+  --color-success-fg:     #286983;
 
   /* Mermaid theme variables (theme: 'base') */
   --mermaid-primaryColor:        #907aa9;
@@ -31,29 +35,31 @@
 
 /* Direct scoped hljs token rules */
 [data-theme="rose-pine-dawn"] .hljs                        { background: #faf4ed; color: #575279; }
-[data-theme="rose-pine-dawn"] .hljs-keyword,
-[data-theme="rose-pine-dawn"] .hljs-operator               { color: #907aa9; }
+[data-theme="rose-pine-dawn"] .hljs-keyword               { color: #907aa9; }               /* iris  */
+[data-theme="rose-pine-dawn"] .hljs-operator              { color: #b4637a; }               /* love  */
 [data-theme="rose-pine-dawn"] .hljs-string,
 [data-theme="rose-pine-dawn"] .hljs-attr,
-[data-theme="rose-pine-dawn"] .hljs-addition               { color: #56949f; }
+[data-theme="rose-pine-dawn"] .hljs-addition              { color: #286983; }               /* pine  */
 [data-theme="rose-pine-dawn"] .hljs-comment,
-[data-theme="rose-pine-dawn"] .hljs-quote                  { color: #9893a5; font-style: italic; }
+[data-theme="rose-pine-dawn"] .hljs-quote                 { color: #9893a5; font-style: italic; } /* muted */
 [data-theme="rose-pine-dawn"] .hljs-number,
-[data-theme="rose-pine-dawn"] .hljs-literal                { color: #ea9d34; }
+[data-theme="rose-pine-dawn"] .hljs-literal               { color: #ea9d34; }               /* gold  */
 [data-theme="rose-pine-dawn"] .hljs-function,
 [data-theme="rose-pine-dawn"] .hljs-selector-pseudo,
-[data-theme="rose-pine-dawn"] .hljs-selector-tag           { color: #d7827e; }
+[data-theme="rose-pine-dawn"] .hljs-selector-tag          { color: #d7827e; }               /* rose  */
 [data-theme="rose-pine-dawn"] .hljs-type,
 [data-theme="rose-pine-dawn"] .hljs-class,
-[data-theme="rose-pine-dawn"] .hljs-built_in               { color: #286983; }
+[data-theme="rose-pine-dawn"] .hljs-built_in              { color: #56949f; }               /* foam  */
 [data-theme="rose-pine-dawn"] .hljs-variable,
-[data-theme="rose-pine-dawn"] .hljs-template-variable      { color: #575279; }
+[data-theme="rose-pine-dawn"] .hljs-template-variable     { color: #575279; }               /* text  */
 [data-theme="rose-pine-dawn"] .hljs-name,
 [data-theme="rose-pine-dawn"] .hljs-title,
-[data-theme="rose-pine-dawn"] .hljs-section                { color: #d7827e; }
+[data-theme="rose-pine-dawn"] .hljs-section               { color: #d7827e; }               /* rose  */
 [data-theme="rose-pine-dawn"] .hljs-meta,
-[data-theme="rose-pine-dawn"] .hljs-params                 { color: #797593; }
-[data-theme="rose-pine-dawn"] .hljs-tag                    { color: #b4637a; }
-[data-theme="rose-pine-dawn"] .hljs-deletion               { color: #b4637a; background: #f4d9dd; }
-[data-theme="rose-pine-dawn"] .hljs-emphasis               { font-style: italic; }
-[data-theme="rose-pine-dawn"] .hljs-strong                 { font-weight: bold; }
+[data-theme="rose-pine-dawn"] .hljs-params                { color: #797593; }               /* subtle */
+[data-theme="rose-pine-dawn"] .hljs-symbol,
+[data-theme="rose-pine-dawn"] .hljs-link                  { color: #907aa9; }               /* iris  */
+[data-theme="rose-pine-dawn"] .hljs-tag                   { color: #b4637a; }               /* love  */
+[data-theme="rose-pine-dawn"] .hljs-deletion              { color: #b4637a; background: #f4d9dd; }
+[data-theme="rose-pine-dawn"] .hljs-emphasis              { font-style: italic; }
+[data-theme="rose-pine-dawn"] .hljs-strong                { font-weight: bold; }
