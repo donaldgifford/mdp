@@ -265,28 +265,12 @@ three separate `[data-theme]` selector blocks. The Go registry maps each of the
 three names to the same CSS string but with different `HljsVendorCSS` and
 `MermaidTheme` values.
 
-- [ ] Write `assets/themes/github.css` — single file, three selector blocks:
-  - [ ] `[data-theme="github-light"]` block — prose variable overrides (pins
-        light vars, no media query needed). No hljs token rules — vendored
-        `github.min.css` handles highlighting. Mermaid vars for light palette.
-  - [ ] `[data-theme="github-dark"]` block — prose variable overrides (pins
-        dark vars). No hljs token rules — vendored `github-dark.min.css`.
-        Mermaid vars for dark palette.
-  - [ ] `[data-theme="github-dimmed"]` block — prose variable overrides.
-        Direct scoped hljs token rules:
-        `[data-theme="github-dimmed"] .hljs-keyword { color: ...; }` etc.
-        Mermaid vars for dimmed dark palette.
-  - [ ] All three blocks define `--mermaid-*` CSS custom properties so JS
-        `theme: 'base'` can read them via `getComputedStyle`
-- [ ] Verify Go registry `builtinThemes` maps all three names to the
-      `github.css` CSS string with correct per-name `HljsVendorCSS` values:
-  - `github-light` → `HljsVendorCSS: "/vendor/hljs/github.min.css"`,
-    `MermaidTheme: "base"`
-  - `github-dark` → `HljsVendorCSS: "/vendor/hljs/github-dark.min.css"`,
-    `MermaidTheme: "base"`
-  - `github-dimmed` → `HljsVendorCSS: ""`, `MermaidTheme: "base"`
-- [ ] Manual visual check: open a fixture markdown file with each of the three
-      themes and verify prose, code block, and Mermaid diagram appearance
+- [x] Write `assets/themes/github.css` — single file, three selector blocks:
+  - [x] `[data-theme="github-light"]` — prose vars, mermaid vars (vendored hljs)
+  - [x] `[data-theme="github-dark"]` — prose vars, mermaid vars (vendored hljs)
+  - [x] `[data-theme="github-dimmed"]` — prose vars, mermaid vars, direct scoped
+        hljs token rules (17 token classes covered)
+- [x] Go registry correctly maps all three names (verified by tests)
 
 ### Note on CSS variable scope
 

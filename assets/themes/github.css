@@ -1,100 +1,130 @@
-/* GitHub theme family - contains all three variants in one file */
+/* GitHub theme family — all three variants in one DRY file.
+ *
+ * github-light and github-dark rely on vendored hljs sheets
+ * (github.min.css and github-dark.min.css) for syntax highlighting.
+ * github-dimmed writes its own direct scoped hljs token rules.
+ *
+ * All three define --mermaid-* CSS custom properties consumed by
+ * the preview.js Mermaid initialiser (theme: 'base').
+ */
+
+/* ── github-light ─────────────────────────────────────────────────────────── */
 
 [data-theme="github-light"] {
-  /* Prose variables */
-  --color-fg-default: #1f2328;
+  /* Prose custom properties — pins light vars, bypasses prefers-color-scheme */
+  --color-fg-default:     #1f2328;
+  --color-fg-muted:       #656d76;
   --color-canvas-default: #ffffff;
-  --color-canvas-subtle: #f6f8fa;
+  --color-canvas-subtle:  #f6f8fa;
   --color-border-default: #d0d7de;
-  --color-border-muted: #d8dee4;
-  --color-accent-fg: #0969da;
-  --color-danger-fg: #d1242f;
-  --color-success-fg: #1a7f37;
+  --color-border-muted:   #d8dee4;
+  --color-accent-fg:      #0969da;
+  --color-danger-fg:      #d1242f;
+  --color-success-fg:     #1a7f37;
 
-  /* Mermaid variables for light theme */
-  --mermaid-primaryColor: #0969da;
-  --mermaid-primaryTextColor: #1f2328;
-  --mermaid-primaryBorderColor: #d0d7de;
-  --mermaid-lineColor: #d8dee4;
-  --mermaid-secondaryColor: #f6f8fa;
-  --mermaid-tertiaryColor: #ffffff;
-  --mermaid-background: #ffffff;
-  --mermaid-noteBkgColor: #f6f8fa;
-  --mermaid-noteTextColor: #1f2328;
-  --mermaid-edgeLabelBackground: #ffffff;
-  --mermaid-actorBkg: #f6f8fa;
-  --mermaid-actorTextColor: #1f2328;
+  /* Mermaid theme variables (theme: 'base') */
+  --mermaid-primaryColor:        #0969da;
+  --mermaid-primaryTextColor:    #ffffff;
+  --mermaid-primaryBorderColor:  #0550ae;
+  --mermaid-lineColor:           #656d76;
+  --mermaid-secondaryColor:      #ddf4ff;
+  --mermaid-tertiaryColor:       #fff8c5;
+  --mermaid-background:          #ffffff;
+  --mermaid-noteBkgColor:        #fff8c5;
+  --mermaid-noteTextColor:       #1f2328;
+  --mermaid-edgeLabelBackground: #f6f8fa;
+  --mermaid-actorBkg:            #f6f8fa;
+  --mermaid-actorTextColor:      #1f2328;
 }
+
+/* ── github-dark ──────────────────────────────────────────────────────────── */
 
 [data-theme="github-dark"] {
-  /* Prose variables */
-  --color-fg-default: #e6edf3;
+  /* Prose custom properties — pins dark vars, bypasses prefers-color-scheme */
+  --color-fg-default:     #e6edf3;
+  --color-fg-muted:       #8b949e;
   --color-canvas-default: #0d1117;
-  --color-canvas-subtle: #161b22;
+  --color-canvas-subtle:  #161b22;
   --color-border-default: #30363d;
-  --color-border-muted: #21262d;
-  --color-accent-fg: #58a6ff;
-  --color-danger-fg: #f85149;
-  --color-success-fg: #3fb950;
+  --color-border-muted:   #21262d;
+  --color-accent-fg:      #58a6ff;
+  --color-danger-fg:      #f85149;
+  --color-success-fg:     #3fb950;
 
-  /* Mermaid variables for dark theme */
-  --mermaid-primaryColor: #58a6ff;
-  --mermaid-primaryTextColor: #e6edf3;
-  --mermaid-primaryBorderColor: #30363d;
-  --mermaid-lineColor: #21262d;
-  --mermaid-secondaryColor: #161b22;
-  --mermaid-tertiaryColor: #0d1117;
-  --mermaid-background: #0d1117;
-  --mermaid-noteBkgColor: #161b22;
-  --mermaid-noteTextColor: #e6edf3;
+  /* Mermaid theme variables (theme: 'base') */
+  --mermaid-primaryColor:        #388bfd;
+  --mermaid-primaryTextColor:    #e6edf3;
+  --mermaid-primaryBorderColor:  #30363d;
+  --mermaid-lineColor:           #8b949e;
+  --mermaid-secondaryColor:      #161b22;
+  --mermaid-tertiaryColor:       #21262d;
+  --mermaid-background:          #0d1117;
+  --mermaid-noteBkgColor:        #161b22;
+  --mermaid-noteTextColor:       #e6edf3;
   --mermaid-edgeLabelBackground: #0d1117;
-  --mermaid-actorBkg: #161b22;
-  --mermaid-actorTextColor: #e6edf3;
+  --mermaid-actorBkg:            #161b22;
+  --mermaid-actorTextColor:      #e6edf3;
 }
 
+/* ── github-dimmed ────────────────────────────────────────────────────────── */
+
 [data-theme="github-dimmed"] {
-  /* Prose variables */
-  --color-fg-default: #adbac7;
+  /* Prose custom properties */
+  --color-fg-default:     #adbac7;
+  --color-fg-muted:       #768390;
   --color-canvas-default: #22272e;
-  --color-canvas-subtle: #2d333b;
+  --color-canvas-subtle:  #2d333b;
   --color-border-default: #444c56;
-  --color-border-muted: #373e47;
-  --color-accent-fg: #539bf5;
-  --color-danger-fg: #f47067;
-  --color-success-fg: #57ab5a;
+  --color-border-muted:   #373e47;
+  --color-accent-fg:      #539bf5;
+  --color-danger-fg:      #f47067;
+  --color-success-fg:     #57ab5a;
 
-  /* hljs syntax highlighting tokens */
-  --hljs-keyword: #f47067;
-  --hljs-string: #96d0ff;
-  --hljs-comment: #636e7b;
-  --hljs-number: #6cb6ff;
-  --hljs-function: #dcbdfb;
-  --hljs-type: #6cb6ff;
-  --hljs-variable: #adbac7;
-
-  /* Direct scoped hljs token rules */
-}
-
-[data-theme="github-dimmed"] .hljs-keyword { color: var(--hljs-keyword); }
-[data-theme="github-dimmed"] .hljs-string { color: var(--hljs-string); }
-[data-theme="github-dimmed"] .hljs-comment { color: var(--hljs-comment); }
-[data-theme="github-dimmed"] .hljs-number { color: var(--hljs-number); }
-[data-theme="github-dimmed"] .hljs-function { color: var(--hljs-function); }
-[data-theme="github-dimmed"] .hljs-type { color: var(--hljs-type); }
-[data-theme="github-dimmed"] .hljs-variable { color: var(--hljs-variable); }
-
-[data-theme="github-dimmed"] {
-  /* Mermaid variables for dimmed theme */
-  --mermaid-primaryColor: #539bf5;
-  --mermaid-primaryTextColor: #adbac7;
-  --mermaid-primaryBorderColor: #444c56;
-  --mermaid-lineColor: #373e47;
-  --mermaid-secondaryColor: #2d333b;
-  --mermaid-tertiaryColor: #22272e;
-  --mermaid-background: #22272e;
-  --mermaid-noteBkgColor: #2d333b;
-  --mermaid-noteTextColor: #adbac7;
+  /* Mermaid theme variables (theme: 'base') */
+  --mermaid-primaryColor:        #539bf5;
+  --mermaid-primaryTextColor:    #adbac7;
+  --mermaid-primaryBorderColor:  #444c56;
+  --mermaid-lineColor:           #768390;
+  --mermaid-secondaryColor:      #2d333b;
+  --mermaid-tertiaryColor:       #22272e;
+  --mermaid-background:          #22272e;
+  --mermaid-noteBkgColor:        #2d333b;
+  --mermaid-noteTextColor:       #adbac7;
   --mermaid-edgeLabelBackground: #22272e;
-  --mermaid-actorBkg: #2d333b;
-  --mermaid-actorTextColor: #adbac7;
+  --mermaid-actorBkg:            #2d333b;
+  --mermaid-actorTextColor:      #adbac7;
 }
+
+/* Direct scoped hljs token rules for github-dimmed (no vendored sheet) */
+[data-theme="github-dimmed"] .hljs                          { background: #22272e; color: #adbac7; }
+[data-theme="github-dimmed"] .hljs-keyword,
+[data-theme="github-dimmed"] .hljs-operator,
+[data-theme="github-dimmed"] .hljs-pattern-match           { color: #f47067; }
+[data-theme="github-dimmed"] .hljs-string,
+[data-theme="github-dimmed"] .hljs-attr,
+[data-theme="github-dimmed"] .hljs-selector-attr,
+[data-theme="github-dimmed"] .hljs-template-tag,
+[data-theme="github-dimmed"] .hljs-addition                { color: #96d0ff; }
+[data-theme="github-dimmed"] .hljs-comment,
+[data-theme="github-dimmed"] .hljs-quote                   { color: #636e7b; font-style: italic; }
+[data-theme="github-dimmed"] .hljs-number,
+[data-theme="github-dimmed"] .hljs-literal,
+[data-theme="github-dimmed"] .hljs-link                    { color: #6cb6ff; }
+[data-theme="github-dimmed"] .hljs-function,
+[data-theme="github-dimmed"] .hljs-selector-pseudo,
+[data-theme="github-dimmed"] .hljs-selector-tag            { color: #dcbdfb; }
+[data-theme="github-dimmed"] .hljs-type,
+[data-theme="github-dimmed"] .hljs-class,
+[data-theme="github-dimmed"] .hljs-built_in                { color: #6cb6ff; }
+[data-theme="github-dimmed"] .hljs-variable,
+[data-theme="github-dimmed"] .hljs-template-variable       { color: #adbac7; }
+[data-theme="github-dimmed"] .hljs-name,
+[data-theme="github-dimmed"] .hljs-selector-id,
+[data-theme="github-dimmed"] .hljs-title,
+[data-theme="github-dimmed"] .hljs-section                 { color: #8ddb8c; }
+[data-theme="github-dimmed"] .hljs-meta,
+[data-theme="github-dimmed"] .hljs-params                  { color: #adbac7; }
+[data-theme="github-dimmed"] .hljs-tag                     { color: #8ddb8c; }
+[data-theme="github-dimmed"] .hljs-deletion                { color: #f47067; background: #3c1f1e; }
+[data-theme="github-dimmed"] .hljs-emphasis                { font-style: italic; }
+[data-theme="github-dimmed"] .hljs-strong                  { font-weight: bold; }
