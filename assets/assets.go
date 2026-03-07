@@ -5,5 +5,5 @@ import "embed"
 
 // FS contains the embedded preview assets (HTML template, CSS, JS, vendor libs).
 //
-//go:embed preview.html preview.css preview.js vendor
+//go:embed preview.html preview.css preview.js vendor themes
 var FS embed.FS

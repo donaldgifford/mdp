@@ -10,7 +10,10 @@ local default_log_file = vim.fn.stdpath("log") .. "/mdp.log"
 local defaults = {
   port = 0,
   browser = true,
-  theme = "auto",
+  theme = "", -- "" = auto-resolve from vim.o.background (dark→github-dark, light→github-light, else→auto)
+             -- Built-in names: github-{light,dark,dimmed}, tokyo-night{,-moon,-storm,-day},
+             -- rose-pine{,-moon,-dawn}, catppuccin-{latte,frappe,macchiato,mocha}
+             -- Or a file path ("/path/to/my-theme.css") for a custom theme.
   scroll_sync = true,
   idle_timeout_secs = 30, -- Shut down after this many seconds with no browser tab open (0 = disabled).
   log_file = default_log_file, -- Server log output. Empty string disables logging.
@@ -265,6 +268,25 @@ local function teardown_autocmds()
   end
 end
 
+--- Resolve the effective theme name.
+-- If config.theme is set and non-empty, use it directly.
+-- Otherwise, read vim.o.background and map to a default theme:
+--   "dark"  → "github-dark"
+--   "light" → "github-light"
+--   (unset) → "auto" (browser prefers-color-scheme takes over)
+local function resolve_theme()
+  if config.theme and config.theme ~= "" then
+    return config.theme
+  end
+  local bg = vim.o.background
+  if bg == "dark" then
+    return "github-dark"
+  elseif bg == "light" then
+    return "github-light"
+  end
+  return "auto"
+end
+
 --- Start the mdp preview server.
 function M.start()
   if state.job_id then
@@ -289,11 +311,12 @@ function M.start()
     return
   end
 
+  local theme = resolve_theme()
   local cmd = {
     binary, "serve",
     "--stdin",
     "--scroll-sync=" .. tostring(config.scroll_sync),
-    "--theme", config.theme,
+    "--theme=" .. theme,
     "--idle-timeout=" .. tostring(config.idle_timeout_secs) .. "s",
   }
 

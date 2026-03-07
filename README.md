@@ -35,13 +35,19 @@ With custom options:
   opts = {
     port = 0,               -- 0 = auto-assign
     browser = true,         -- Open browser on start
-    theme = "auto",         -- "auto", "light", or "dark"
+    theme = "",             -- "" = auto-detect from vim.o.background, or any built-in name
     scroll_sync = true,     -- Sync preview scroll with cursor
     idle_timeout_secs = 30, -- Shut down after N seconds with no open tab (0 = disabled)
     log_file = vim.fn.stdpath("log") .. "/mdp.log", -- "" to disable
   },
 }
 ```
+
+When `theme` is empty (the default), the plugin resolves the theme from
+`vim.o.background`: `dark` → `github-dark`, `light` → `github-light`,
+unset → `auto` (browser `prefers-color-scheme`). Set `theme` to any
+built-in name (e.g. `"tokyo-night"`) to pin a specific theme regardless
+of background setting.
 
 On install/update, `build.lua` downloads a pre-built binary from GitHub
 releases. If no release is available (e.g., testing a branch), it falls
@@ -102,10 +108,11 @@ mdp serve [flags] <file>
 | ------------------- | ------- | -------------------------------------------------------- |
 | `--port`            | `0`     | Port to listen on (0 = auto-assign)                      |
 | `--browser`         | `true`  | Open browser automatically                               |
-| `--theme`           | `auto`  | Theme: `auto`, `light`, or `dark`                        |
+| `--theme`           | `auto`  | Built-in theme name, `auto`, or path to CSS file         |
+| `--hljs-theme`      | `""`    | Path to custom hljs CSS (only with `--theme=<file>`)     |
 | `--scroll-sync`     | `true`  | Enable scroll sync via cursor tracking                   |
 | `--stdin`           | `false` | Read content/cursor updates from stdin                   |
-| `--css`             | `""`    | Path to custom CSS file                                  |
+| `--css`             | `""`    | Path to custom CSS file appended after theme CSS         |
 | `--open-to-network` | `false` | Listen on `0.0.0.0` instead of `localhost`               |
 | `--idle-timeout`    | `30s`   | Shut down after no clients for this duration (0=disabled)|
 | `-v, --verbose`     | `false` | Enable debug logging                                     |
@@ -120,6 +127,38 @@ mdp serve [flags] <file>
 - **KaTeX math**: inline `$...$` and block `$$...$$` expressions
 - **Relative images**: images referenced with relative paths are resolved from
   the markdown file's directory
+
+## Themes
+
+Pass `--theme=<name>` to pin a specific built-in theme, or `--theme=auto`
+(the default) to follow the browser's `prefers-color-scheme` setting.
+
+```bash
+mdp serve --theme=tokyo-night README.md
+mdp serve --theme=/path/to/my-theme.css README.md   # custom CSS file
+```
+
+### Built-in themes
+
+| Name | Family | Style |
+|------|--------|-------|
+| `github-light` | GitHub | Light |
+| `github-dark` | GitHub | Dark |
+| `github-dimmed` | GitHub | Dark (dimmed) |
+| `tokyo-night` | Tokyo Night | Dark |
+| `tokyo-night-moon` | Tokyo Night | Dark (blue-tinted) |
+| `tokyo-night-storm` | Tokyo Night | Dark (storm) |
+| `tokyo-night-day` | Tokyo Night | Light |
+| `rose-pine` | Rosé Pine | Dark |
+| `rose-pine-moon` | Rosé Pine | Dark (moon) |
+| `rose-pine-dawn` | Rosé Pine | Light |
+| `catppuccin-latte` | Catppuccin | Light |
+| `catppuccin-frappe` | Catppuccin | Dark |
+| `catppuccin-macchiato` | Catppuccin | Dark |
+| `catppuccin-mocha` | Catppuccin | Dark |
+
+Each built-in theme provides prose styling, syntax-highlighting token
+colours, and Mermaid diagram theming in a single embedded CSS file.
 
 ## Architecture
 

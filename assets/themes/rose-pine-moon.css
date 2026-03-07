@@ -1,0 +1,59 @@
+/* Rosé Pine Moon variant
+ * Source: https://rosepinetheme.com/palette/
+ */
+
+[data-theme="rose-pine-moon"] {
+  /* Prose custom properties */
+  --color-fg-default:     #e0def4;
+  --color-fg-muted:       #908caa;
+  --color-canvas-default: #232136;
+  --color-canvas-subtle:  #2a273f;
+  --color-border-default: #44415a;
+  --color-border-muted:   #393552;
+  --color-accent-fg:      #c4a7e7;
+  --color-danger-fg:      #eb6f92;
+  --color-success-fg:     #3e8fb0;
+
+  /* Mermaid theme variables (theme: 'base') */
+  --mermaid-primaryColor:        #c4a7e7;
+  --mermaid-primaryTextColor:    #e0def4;
+  --mermaid-primaryBorderColor:  #44415a;
+  --mermaid-lineColor:           #6e6a86;
+  --mermaid-secondaryColor:      #2a273f;
+  --mermaid-tertiaryColor:       #393552;
+  --mermaid-background:          #232136;
+  --mermaid-noteBkgColor:        #2a273f;
+  --mermaid-noteTextColor:       #908caa;
+  --mermaid-edgeLabelBackground: #232136;
+  --mermaid-actorBkg:            #2a273f;
+  --mermaid-actorTextColor:      #e0def4;
+}
+
+/* Direct scoped hljs token rules */
+[data-theme="rose-pine-moon"] .hljs                        { background: #232136; color: #e0def4; }
+[data-theme="rose-pine-moon"] .hljs-keyword,
+[data-theme="rose-pine-moon"] .hljs-operator               { color: #c4a7e7; }
+[data-theme="rose-pine-moon"] .hljs-string,
+[data-theme="rose-pine-moon"] .hljs-attr,
+[data-theme="rose-pine-moon"] .hljs-addition               { color: #9ccfd8; }
+[data-theme="rose-pine-moon"] .hljs-comment,
+[data-theme="rose-pine-moon"] .hljs-quote                  { color: #6e6a86; font-style: italic; }
+[data-theme="rose-pine-moon"] .hljs-number,
+[data-theme="rose-pine-moon"] .hljs-literal                { color: #f6c177; }
+[data-theme="rose-pine-moon"] .hljs-function,
+[data-theme="rose-pine-moon"] .hljs-selector-pseudo,
+[data-theme="rose-pine-moon"] .hljs-selector-tag           { color: #ea9a97; }
+[data-theme="rose-pine-moon"] .hljs-type,
+[data-theme="rose-pine-moon"] .hljs-class,
+[data-theme="rose-pine-moon"] .hljs-built_in               { color: #3e8fb0; }
+[data-theme="rose-pine-moon"] .hljs-variable,
+[data-theme="rose-pine-moon"] .hljs-template-variable      { color: #e0def4; }
+[data-theme="rose-pine-moon"] .hljs-name,
+[data-theme="rose-pine-moon"] .hljs-title,
+[data-theme="rose-pine-moon"] .hljs-section                { color: #ea9a97; }
+[data-theme="rose-pine-moon"] .hljs-meta,
+[data-theme="rose-pine-moon"] .hljs-params                 { color: #908caa; }
+[data-theme="rose-pine-moon"] .hljs-tag                    { color: #eb6f92; }
+[data-theme="rose-pine-moon"] .hljs-deletion               { color: #eb6f92; background: #3d1a29; }
+[data-theme="rose-pine-moon"] .hljs-emphasis               { font-style: italic; }
+[data-theme="rose-pine-moon"] .hljs-strong                 { font-weight: bold; }

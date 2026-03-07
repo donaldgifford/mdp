@@ -42,7 +42,7 @@ The first log line after the session marker is written by the Go binary itself
 and includes the version, commit hash, build date, and effective configuration:
 
 ```
-time=2026-02-24T14:00:00Z level=INFO msg="starting preview server" version=v0.2.0 commit=abc1234 built=2026-02-24T13:00:00Z file=/path/to/file.md port=0 browser=true
+time=2026-02-24T14:00:00Z level=INFO msg="starting preview server" version=v0.2.0 commit=abc1234 built=2026-02-24T13:00:00Z file=/path/to/file.md port=0 browser=true theme=github-dark
 time=2026-02-24T14:00:00Z level=INFO msg=serving addr=http://127.0.0.1:52691 file=/path/to/file.md
 ```
 

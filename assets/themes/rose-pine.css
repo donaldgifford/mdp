@@ -1,0 +1,59 @@
+/* Rosé Pine — main (dark) variant
+ * Source: https://rosepinetheme.com/palette/
+ */
+
+[data-theme="rose-pine"] {
+  /* Prose custom properties */
+  --color-fg-default:     #e0def4;
+  --color-fg-muted:       #908caa;
+  --color-canvas-default: #191724;
+  --color-canvas-subtle:  #1f1d2e;
+  --color-border-default: #403d52;
+  --color-border-muted:   #26233a;
+  --color-accent-fg:      #c4a7e7;
+  --color-danger-fg:      #eb6f92;
+  --color-success-fg:     #31748f;
+
+  /* Mermaid theme variables (theme: 'base') */
+  --mermaid-primaryColor:        #c4a7e7;
+  --mermaid-primaryTextColor:    #e0def4;
+  --mermaid-primaryBorderColor:  #403d52;
+  --mermaid-lineColor:           #6e6a86;
+  --mermaid-secondaryColor:      #1f1d2e;
+  --mermaid-tertiaryColor:       #26233a;
+  --mermaid-background:          #191724;
+  --mermaid-noteBkgColor:        #1f1d2e;
+  --mermaid-noteTextColor:       #908caa;
+  --mermaid-edgeLabelBackground: #191724;
+  --mermaid-actorBkg:            #1f1d2e;
+  --mermaid-actorTextColor:      #e0def4;
+}
+
+/* Direct scoped hljs token rules */
+[data-theme="rose-pine"] .hljs                        { background: #191724; color: #e0def4; }
+[data-theme="rose-pine"] .hljs-keyword,
+[data-theme="rose-pine"] .hljs-operator               { color: #c4a7e7; }
+[data-theme="rose-pine"] .hljs-string,
+[data-theme="rose-pine"] .hljs-attr,
+[data-theme="rose-pine"] .hljs-addition               { color: #9ccfd8; }
+[data-theme="rose-pine"] .hljs-comment,
+[data-theme="rose-pine"] .hljs-quote                  { color: #6e6a86; font-style: italic; }
+[data-theme="rose-pine"] .hljs-number,
+[data-theme="rose-pine"] .hljs-literal                { color: #f6c177; }
+[data-theme="rose-pine"] .hljs-function,
+[data-theme="rose-pine"] .hljs-selector-pseudo,
+[data-theme="rose-pine"] .hljs-selector-tag           { color: #ebbcba; }
+[data-theme="rose-pine"] .hljs-type,
+[data-theme="rose-pine"] .hljs-class,
+[data-theme="rose-pine"] .hljs-built_in               { color: #31748f; }
+[data-theme="rose-pine"] .hljs-variable,
+[data-theme="rose-pine"] .hljs-template-variable      { color: #e0def4; }
+[data-theme="rose-pine"] .hljs-name,
+[data-theme="rose-pine"] .hljs-title,
+[data-theme="rose-pine"] .hljs-section                { color: #ebbcba; }
+[data-theme="rose-pine"] .hljs-meta,
+[data-theme="rose-pine"] .hljs-params                 { color: #908caa; }
+[data-theme="rose-pine"] .hljs-tag                    { color: #eb6f92; }
+[data-theme="rose-pine"] .hljs-deletion               { color: #eb6f92; background: #3d1a29; }
+[data-theme="rose-pine"] .hljs-emphasis               { font-style: italic; }
+[data-theme="rose-pine"] .hljs-strong                 { font-weight: bold; }
