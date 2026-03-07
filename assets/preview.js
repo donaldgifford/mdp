@@ -11,12 +11,30 @@
   // Initialize Mermaid with theme detection.
   if (typeof mermaid !== "undefined") {
     var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    var theme = document.body.getAttribute("data-theme");
-    var mermaidTheme = "default";
-    if (theme === "dark" || (theme === "auto" && prefersDark)) {
-      mermaidTheme = "dark";
+    var mermaidTheme = document.body.dataset.mermaidTheme;
+    if (mermaidTheme === "base") {
+      // Named built-in theme: read --mermaid-* CSS custom properties that the
+      // theme stylesheet defines on [data-theme] / body.
+      var bodyStyle = getComputedStyle(document.body);
+      var themeVariables = {
+        primaryColor:        bodyStyle.getPropertyValue("--mermaid-primaryColor").trim(),
+        primaryTextColor:    bodyStyle.getPropertyValue("--mermaid-primaryTextColor").trim(),
+        primaryBorderColor:  bodyStyle.getPropertyValue("--mermaid-primaryBorderColor").trim(),
+        lineColor:           bodyStyle.getPropertyValue("--mermaid-lineColor").trim(),
+        secondaryColor:      bodyStyle.getPropertyValue("--mermaid-secondaryColor").trim(),
+        tertiaryColor:       bodyStyle.getPropertyValue("--mermaid-tertiaryColor").trim(),
+        background:          bodyStyle.getPropertyValue("--mermaid-background").trim(),
+        noteBkgColor:        bodyStyle.getPropertyValue("--mermaid-noteBkgColor").trim(),
+        noteTextColor:       bodyStyle.getPropertyValue("--mermaid-noteTextColor").trim(),
+        edgeLabelBackground: bodyStyle.getPropertyValue("--mermaid-edgeLabelBackground").trim(),
+        actorBkg:            bodyStyle.getPropertyValue("--mermaid-actorBkg").trim(),
+        actorTextColor:      bodyStyle.getPropertyValue("--mermaid-actorTextColor").trim(),
+      };
+      mermaid.initialize({ startOnLoad: false, theme: "base", themeVariables: themeVariables });
+    } else {
+      // auto: fall back to prefers-color-scheme for Mermaid theme selection.
+      mermaid.initialize({ startOnLoad: false, theme: prefersDark ? "dark" : "default" });
     }
-    mermaid.initialize({ startOnLoad: false, theme: mermaidTheme });
   }
 
   // Run all client-side rendering after content update.

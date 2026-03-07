@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -22,6 +23,7 @@ import (
 
 	"github.com/donaldgifford/mdp/assets"
 	"github.com/donaldgifford/mdp/internal/parser"
+	interntheme "github.com/donaldgifford/mdp/internal/theme"
 )
 
 // Config holds the server configuration.
@@ -29,7 +31,8 @@ type Config struct {
 	File          string
 	Port          int
 	OpenBrowser   bool
-	Theme         string        // "auto", "light", or "dark".
+	Theme         string        // built-in theme name, file path, or "auto".
+	HljsTheme     string        // vendored hljs sheet for custom theme files (github, github-dark).
 	ScrollSync    bool          // Enable scroll sync via /cursor endpoint.
 	CustomCSS     string        // Path to custom CSS file to inject after default styles.
 	OpenToNetwork bool          // Listen on 0.0.0.0 instead of localhost.
@@ -48,6 +51,9 @@ type Server struct {
 	upgrader websocket.Upgrader
 	httpSrv  *http.Server
 	httpMu   sync.Mutex
+	theme    interntheme.Theme
+	baseCSS  template.CSS
+	js       template.JS
 }
 
 // New creates a new Server from the given config. The listen address is
@@ -62,6 +68,39 @@ func New(cfg Config) (*Server, error) { //nolint:gocritic // Config is intention
 	tmpl, err := template.New("preview").Parse(string(tmplData))
 	if err != nil {
 		return nil, fmt.Errorf("parsing template: %w", err)
+	}
+
+	// Resolve theme once at startup so invalid names surface immediately.
+	resolvedTheme, err := interntheme.Resolve(cfg.Theme)
+	if err != nil {
+		return nil, fmt.Errorf("resolving theme: %w", err)
+	}
+
+	// Apply --hljs-theme override for custom file-path themes only.
+	if cfg.HljsTheme != "" {
+		isFilePath := strings.HasPrefix(cfg.Theme, "/") || strings.HasPrefix(cfg.Theme, "./")
+		if !isFilePath {
+			return nil, fmt.Errorf("--hljs-theme is only valid with a custom theme file path, not with %q", cfg.Theme)
+		}
+		switch cfg.HljsTheme {
+		case "github":
+			resolvedTheme.HljsVendorCSS = "/vendor/hljs/github.min.css"
+		case "github-dark":
+			resolvedTheme.HljsVendorCSS = "/vendor/hljs/github-dark.min.css"
+		default:
+			return nil, fmt.Errorf("unknown --hljs-theme %q, valid options: github, github-dark", cfg.HljsTheme)
+		}
+	}
+
+	// Read static assets once at startup.
+	cssData, err := assets.FS.ReadFile("preview.css")
+	if err != nil {
+		return nil, fmt.Errorf("reading preview.css: %w", err)
+	}
+
+	jsData, err := assets.FS.ReadFile("preview.js")
+	if err != nil {
+		return nil, fmt.Errorf("reading preview.js: %w", err)
 	}
 
 	addr, err := resolveAddr(cfg.Port, cfg.OpenToNetwork)
@@ -89,6 +128,9 @@ func New(cfg Config) (*Server, error) { //nolint:gocritic // Config is intention
 			// Allow connections from any origin — this is a local dev tool.
 			CheckOrigin: func(_ *http.Request) bool { return true },
 		},
+		theme:   resolvedTheme,
+		baseCSS: template.CSS(cssData), //nolint:gosec // Embedded asset.
+		js:      template.JS(jsData),   //nolint:gosec // Embedded asset.
 	}, nil
 }
 
@@ -169,12 +211,16 @@ func (s *Server) Close() {
 
 // pageData is the template data for preview.html.
 type pageData struct {
-	Title     string
-	Theme     string
-	CSS       template.CSS
-	CustomCSS template.CSS
-	JS        template.JS
-	Body      template.HTML
+	Title         string
+	Theme         string
+	BaseCSS       template.CSS
+	ThemeCSS      template.CSS
+	HljsVendorCSS string
+	IsAuto        bool
+	MermaidTheme  string
+	CustomCSS     template.CSS
+	JS            template.JS
+	Body          template.HTML
 }
 
 // ListenAndServe starts the HTTP server and blocks until it exits.
@@ -232,13 +278,8 @@ func (s *Server) ListenAndServe() error {
 // idleWatcher shuts down the HTTP server after IdleTimeout elapses with no
 // active clients. The poll interval scales with the timeout so tests stay fast.
 func (s *Server) idleWatcher(httpSrv *http.Server) {
-	pollInterval := s.cfg.IdleTimeout / 6
-	if pollInterval < 50*time.Millisecond {
-		pollInterval = 50 * time.Millisecond
-	}
-	if pollInterval > 5*time.Second {
-		pollInterval = 5 * time.Second
-	}
+	pollInterval := max(s.cfg.IdleTimeout/6, 50*time.Millisecond)
+	pollInterval = min(pollInterval, 5*time.Second)
 
 	ticker := time.NewTicker(pollInterval)
 	defer ticker.Stop()
@@ -309,21 +350,10 @@ func (s *Server) handleIndex(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 
-	cssData, err := assets.FS.ReadFile("preview.css")
-	if err != nil {
-		http.Error(w, fmt.Sprintf("reading css: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	jsData, err := assets.FS.ReadFile("preview.js")
-	if err != nil {
-		http.Error(w, fmt.Sprintf("reading js: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	theme := s.cfg.Theme
-	if theme == "" {
-		theme = "auto"
+	// Determine the theme name shown in data-theme attribute.
+	themeName := s.cfg.Theme
+	if themeName == "" {
+		themeName = "auto"
 	}
 
 	var customCSS template.CSS
@@ -336,14 +366,18 @@ func (s *Server) handleIndex(w http.ResponseWriter, _ *http.Request) {
 		}
 	}
 
-	//nolint:gosec // All values are from our own embedded assets and renderer.
+	//nolint:gosec // ThemeCSS is from our embedded assets or a user-provided file validated at startup.
 	data := pageData{
-		Title:     s.cfg.File,
-		Theme:     theme,
-		CSS:       template.CSS(cssData),
-		CustomCSS: customCSS,
-		JS:        template.JS(jsData),
-		Body:      template.HTML(html),
+		Title:         s.cfg.File,
+		Theme:         themeName,
+		BaseCSS:       s.baseCSS,
+		ThemeCSS:      template.CSS(s.theme.CSS),
+		HljsVendorCSS: s.theme.HljsVendorCSS,
+		IsAuto:        s.theme.IsAuto,
+		MermaidTheme:  s.theme.MermaidTheme,
+		CustomCSS:     customCSS,
+		JS:            s.js,
+		Body:          template.HTML(html), //nolint:gosec // Output of our own markdown renderer.
 	}
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

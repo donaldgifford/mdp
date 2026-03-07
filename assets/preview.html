@@ -4,13 +4,18 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{{.Title}} — mdp</title>
-  <style>{{.CSS}}</style>
+  <style>{{.BaseCSS}}</style>
+  {{if .ThemeCSS}}<style>{{.ThemeCSS}}</style>{{end}}
   <link rel="stylesheet" href="/vendor/katex/katex.min.css">
+  {{if .HljsVendorCSS}}
+  <link rel="stylesheet" href="{{.HljsVendorCSS}}">
+  {{else if .IsAuto}}
   <link rel="stylesheet" href="/vendor/hljs/github.min.css" media="(prefers-color-scheme: light)">
   <link rel="stylesheet" href="/vendor/hljs/github-dark.min.css" media="(prefers-color-scheme: dark)">
+  {{end}}
   {{if .CustomCSS}}<style>{{.CustomCSS}}</style>{{end}}
 </head>
-<body data-theme="{{.Theme}}">
+<body data-theme="{{.Theme}}" data-mermaid-theme="{{.MermaidTheme}}">
   <div id="connection-status"></div>
   <div id="content">{{.Body}}</div>
   <script src="/vendor/mermaid.min.js"></script>

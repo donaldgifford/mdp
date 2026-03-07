@@ -120,116 +120,45 @@ visually (stub CSS) but the infrastructure is complete.
 
 **`internal/server/server.go`**
 
-- [ ] Add `theme theme.Theme` field to `Server` struct (resolved at startup,
+- [x] Add `theme theme.Theme` field to `Server` struct (resolved at startup,
       not per-request)
-- [ ] In `Server.New()`: call `theme.Resolve(cfg.Theme)` and store result;
+- [x] In `Server.New()`: call `theme.Resolve(cfg.Theme)` and store result;
       return error if resolution fails so invalid theme names surface immediately
       at startup
-- [ ] Rename `pageData.CSS` → `pageData.BaseCSS` (template field rename, purely
+- [x] Rename `pageData.CSS` → `pageData.BaseCSS` (template field rename, purely
       internal)
-- [ ] Add new fields to `pageData`:
-  ```go
-  ThemeCSS      template.CSS
-  HljsVendorCSS string       // e.g. "/vendor/hljs/github.min.css"
-  IsAuto        bool
-  MermaidTheme  string       // "default", "dark", or "base"
-  ```
-- [ ] Update `handleIndex` to populate new fields from `s.theme`:
-  - `ThemeCSS` ← `template.CSS(s.theme.CSS)` (nolint gosec — embedded asset)
-  - `HljsVendorCSS` ← `s.theme.HljsVendorCSS`
-  - `IsAuto` ← `s.theme.IsAuto`
-  - `MermaidTheme` ← `s.theme.MermaidTheme`
-  - Remove the per-request theme string fallback logic (now handled by
-    `theme.Resolve` in `New()`)
-- [ ] Remove `cssData` read-per-request in `handleIndex`; read once in `New()`
-      and store in `Server` struct (minor perf, avoids repeated embed FS reads)
+- [x] Add new fields to `pageData`:
+  - `ThemeCSS`, `HljsVendorCSS`, `IsAuto`, `MermaidTheme`
+- [x] Update `handleIndex` to populate new fields from `s.theme`
+- [x] Remove `cssData` / `jsData` read-per-request; read once in `New()` and
+      store in `Server` struct (`baseCSS`, `js` fields)
+- [x] `--hljs-theme` validation: hard error if used with non-file-path theme
 
 **`assets/preview.html`**
 
-- [ ] Replace `<style>{{.CSS}}</style>` with `<style>{{.BaseCSS}}</style>`
-- [ ] Add conditional theme CSS injection after base CSS:
-  ```html
-  {{if .ThemeCSS}}<style>{{.ThemeCSS}}</style>{{end}}
-  ```
-- [ ] Replace hardcoded hljs `<link>` tags with conditional blocks:
-  ```html
-  {{if .HljsVendorCSS}}
-  <link rel="stylesheet" href="{{.HljsVendorCSS}}">
-  {{end}}
-  {{if .IsAuto}}
-  <link rel="stylesheet" href="/vendor/hljs/github.min.css"
-        media="(prefers-color-scheme: light)">
-  <link rel="stylesheet" href="/vendor/hljs/github-dark.min.css"
-        media="(prefers-color-scheme: dark)">
-  {{end}}
-  ```
-- [ ] Add `data-mermaid-theme` to `<body>`:
-  ```html
-  <body data-theme="{{.Theme}}" data-mermaid-theme="{{.MermaidTheme}}">
-  ```
+- [x] Replace `<style>{{.CSS}}</style>` with `<style>{{.BaseCSS}}</style>`
+- [x] Add conditional theme CSS injection after base CSS
+- [x] Replace hardcoded hljs `<link>` tags with conditional blocks
+      (HljsVendorCSS for named themes, IsAuto for media-query links)
+- [x] Add `data-mermaid-theme="{{.MermaidTheme}}"` to `<body>`
 
 **`assets/preview.js`**
 
-- [ ] Replace the existing Mermaid init block with the full `theme: 'base'` +
-      CSS variable approach:
-  ```js
-  // Before:
-  var theme = document.body.getAttribute("data-theme");
-  var mermaidTheme = "default";
-  if (theme === "dark" || (theme === "auto" && prefersDark)) {
-    mermaidTheme = "dark";
-  }
-  mermaid.initialize({ startOnLoad: false, theme: mermaidTheme });
-
-  // After:
-  var mermaidTheme = document.body.dataset.mermaidTheme;
-  if (mermaidTheme === "base") {
-    // Named built-in theme: read --mermaid-* CSS custom properties that the
-    // theme stylesheet defines on [data-theme] / body.
-    var bodyStyle = getComputedStyle(document.body);
-    var themeVariables = {
-      primaryColor:        bodyStyle.getPropertyValue("--mermaid-primaryColor").trim(),
-      primaryTextColor:    bodyStyle.getPropertyValue("--mermaid-primaryTextColor").trim(),
-      primaryBorderColor:  bodyStyle.getPropertyValue("--mermaid-primaryBorderColor").trim(),
-      lineColor:           bodyStyle.getPropertyValue("--mermaid-lineColor").trim(),
-      secondaryColor:      bodyStyle.getPropertyValue("--mermaid-secondaryColor").trim(),
-      tertiaryColor:       bodyStyle.getPropertyValue("--mermaid-tertiaryColor").trim(),
-      background:          bodyStyle.getPropertyValue("--mermaid-background").trim(),
-      noteBkgColor:        bodyStyle.getPropertyValue("--mermaid-noteBkgColor").trim(),
-      noteTextColor:       bodyStyle.getPropertyValue("--mermaid-noteTextColor").trim(),
-      edgeLabelBackground: bodyStyle.getPropertyValue("--mermaid-edgeLabelBackground").trim(),
-      actorBkg:            bodyStyle.getPropertyValue("--mermaid-actorBkg").trim(),
-      actorTextColor:      bodyStyle.getPropertyValue("--mermaid-actorTextColor").trim(),
-    };
-    mermaid.initialize({ startOnLoad: false, theme: "base", themeVariables: themeVariables });
-  } else {
-    // auto: fall back to prefers-color-scheme
-    mermaid.initialize({ startOnLoad: false, theme: prefersDark ? "dark" : "default" });
-  }
-  ```
-- [ ] Keep `prefersDark` — still needed for the `auto` Mermaid fallback
+- [x] Replace the existing Mermaid init block with the full `theme: 'base'` +
+      CSS variable approach (reads `--mermaid-*` via `getComputedStyle`)
+- [x] Keep `prefersDark` — still needed for the `auto` Mermaid fallback
 
 **`internal/server` tests**
 
-- [ ] Update existing tests: `server.Config{}` now resolves `""` as auto — verify
-      no test breakage from early theme resolution in `New()`
-- [ ] Add `TestServer_ThemeAttribute` in `server_test.go`:
-  - For each of: `""`, `"auto"`, `"github-dark"`, `"tokyo-night"` — start server,
-    GET `/`, assert `data-theme` attribute value matches expectation
-- [ ] Add `TestServer_MermaidThemeAttribute`:
-  - All named built-in themes → `data-mermaid-theme="base"`
-  - Auto → `data-mermaid-theme=""` (JS handles via `prefersDark` at runtime)
-- [ ] Add `TestServer_ThemeCSS_Injection`:
-  - Named theme → response body contains a `<style>` block (ThemeCSS)
-  - Auto theme → no ThemeCSS `<style>` block injected
-- [ ] Add `TestServer_HljsVendorCSS_Injection`:
-  - `github-dark` / `github-light` → response contains `<link>` to vendor path
-  - `github-dimmed` / `tokyo-night` → no vendor hljs `<link>`
-  - `auto` → both media-query `<link>` tags present
-- [ ] Add `TestServer_CustomCSS_AfterTheme`:
-  - Confirm `custom_css` style block appears after theme CSS block in HTML
-- [ ] Add `TestServer_InvalidTheme`:
-  - `server.New(Config{Theme: "nonexistent"})` returns an error
+- [x] Update existing tests: `server.Config{}` now resolves `""` as auto — no
+      test breakage
+- [x] Add `TestServer_ThemeAttribute`
+- [x] Add `TestServer_MermaidThemeAttribute`
+- [x] Add `TestServer_ThemeCSS_Injection`
+- [x] Add `TestServer_HljsVendorCSS_Injection`
+- [x] Add `TestServer_CustomCSS_AfterTheme`
+- [x] Add `TestServer_InvalidTheme`
+- [x] Add `TestServer_HljsTheme_WithBuiltinTheme_Errors`
 
 ### Success Criteria
 
