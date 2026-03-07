@@ -32,5 +32,5 @@ docz create impl "Your Implementation Title"
 
 | ID | Title | Status | Date | Author | Link |
 |----|-------|--------|------|--------|------|
-| IMPL-0001 | Themes | Draft | 2026-03-06 | Donald Gifford | [0001-themes.md](0001-themes.md) |
+| IMPL-0001 | Themes | In Progress | 2026-03-06 | Donald Gifford | [0001-themes.md](0001-themes.md) |
 <!-- END DOCZ AUTO-GENERATED -->

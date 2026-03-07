@@ -1,7 +1,7 @@
 ---
 id: DESIGN-0001
 title: "Themes"
-status: In Review
+status: Approved
 author: Donald Gifford
 created: 2026-03-05
 updated: 2026-03-06
@@ -9,7 +9,7 @@ updated: 2026-03-06
 
 # DESIGN 0001: Themes
 
-**Status:** In Review
+**Status:** Approved
 **Author:** Donald Gifford
 **Created:** 2026-03-05
 **Updated:** 2026-03-06
@@ -68,9 +68,9 @@ Answers to the open questions raised in the initial draft:
 | 1 | `vim.o.background` as default? | **Yes** — plugin reads background at startup and maps to the appropriate named theme before passing to the binary |
 | 2 | Which built-in themes? | **Tokyo Night** (night/moon/storm/day), **Rosé Pine** (pine/moon/dawn), **GitHub** (dark/light/dimmed), **Catppuccin** (latte/frappé/macchiato/mocha) |
 | 3 | User-defined theme files? | **Yes** — `--theme=/abs/path/to/theme.css`; file is treated as a complete theme CSS |
-| 4 | hljs pairing for custom file themes? | **Yes** — custom theme files should include hljs token CSS; an optional `--hljs-theme=<vendored-name>` flag lets users opt into a vendored hljs sheet instead |
-| 5 | Vendor more hljs sheets? | **No** — first-class built-in themes write their own hljs token CSS; no new vendored sheets added |
-| 6 | Mermaid granularity? | Each built-in theme defines its own Mermaid CSS variables using `theme: 'base'` |
+| 4 | hljs pairing for custom file themes? | **Yes** — custom theme files should include hljs token CSS; an optional `--hljs-theme=<vendored-name>` flag lets users opt into a vendored hljs sheet instead. `--hljs-theme` with a built-in theme name returns a **hard error** |
+| 5 | Vendor more hljs sheets? | **No** — first-class built-in themes write their own hljs token CSS using direct scoped rules (`[data-theme="X"] .hljs-keyword { color: ...; }`); no new vendored sheets added |
+| 6 | Mermaid granularity? | **Full `theme: 'base'` + CSS variables**: each built-in theme defines `--mermaid-*` CSS custom properties; JS reads them via `getComputedStyle` and passes as `themeVariables`. `auto` falls back to `prefers-color-scheme` |
 
 **Core philosophy:** Built-in themes are first class. They own their full visual
 surface — prose, syntax highlighting, and diagrams — in a single embedded CSS
@@ -140,8 +140,11 @@ The `[data-theme]` scope ensures themes don't bleed if the attribute is missing.
 | `catppuccin-macchiato`| Catppuccin  | dark  |
 | `catppuccin-mocha`   | Catppuccin   | dark  |
 
-`github-light` and `github-dark` re-use the vendored hljs sheets (no new
-tokens to write). All others write their own token colours.
+`github-light` and `github-dark` re-use the vendored hljs sheets (no custom
+token rules needed). `github-dimmed` writes its own token rules (no matching
+vendored sheet). All three GitHub variants share one `assets/themes/github.css`
+file with separate `[data-theme]` selector blocks. All other themes write their
+own hljs token colours using direct scoped rules.
 
 ### `auto` theme resolution
 
@@ -171,9 +174,10 @@ assets/
     rose-pine.css
     rose-pine-moon.css
     rose-pine-dawn.css
-    github-dark.css          # prose vars only — hljs handled by vendored sheet
-    github-light.css         # prose vars only — hljs handled by vendored sheet
-    github-dimmed.css        # prose vars + hljs tokens (no matching vendored sheet)
+    github.css               # all three GitHub variants in one DRY file:
+                             #   [data-theme="github-light"] — prose vars; hljs via vendored sheet
+                             #   [data-theme="github-dark"]  — prose vars; hljs via vendored sheet
+                             #   [data-theme="github-dimmed"] — prose vars + own hljs token rules
     catppuccin-latte.css
     catppuccin-frappe.css
     catppuccin-macchiato.css

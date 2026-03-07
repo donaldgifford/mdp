@@ -1,14 +1,15 @@
 ---
 id: IMPL-0001
 title: "Themes"
-status: Draft
+status: In Progress
 author: Donald Gifford
 created: 2026-03-06
+updated: 2026-03-06
 ---
 
 # IMPL 0001: Themes
 
-**Status:** Draft
+**Status:** In Progress
 **Author:** Donald Gifford
 **Date:** 2026-03-06
 
@@ -53,11 +54,9 @@ visual changes yet — this is the foundation everything else builds on.
 ### Tasks
 
 - [ ] Create `assets/themes/` directory
-- [ ] Add stub CSS files for all 14 themes (empty files are fine; content comes
-      in later phases):
-  - [ ] `github-light.css`
-  - [ ] `github-dark.css`
-  - [ ] `github-dimmed.css`
+- [ ] Add stub CSS files for all themes (empty files are fine; content comes
+      in later phases). The three GitHub variants share one file:
+  - [ ] `github.css` (contains stubs for all three `[data-theme="github-*"]` blocks)
   - [ ] `tokyo-night.css`
   - [ ] `tokyo-night-moon.css`
   - [ ] `tokyo-night-storm.css`
@@ -82,10 +81,11 @@ visual changes yet — this is the foundation everything else builds on.
     //go:embed ../../assets/themes/*.css
     var themesFS embed.FS
     ```
-  - [ ] Define `builtinThemes` registry mapping name → `Theme` struct. Mermaid
-        theme mapping: dark variants → `"dark"`, light variants → `"default"`,
-        `github-dark`/`github-light` → set `HljsVendorCSS` to vendor path.
-        `auto` → `IsAuto: true`
+  - [ ] Define `builtinThemes` registry mapping name → `Theme` struct. All 14
+        named built-in themes set `MermaidTheme: "base"` (JS reads CSS variables
+        at runtime). `github-dark` / `github-light` set `HljsVendorCSS` to the
+        corresponding vendor path. All three github variants load CSS from the
+        shared `github.css` file. `auto` → `IsAuto: true`, `MermaidTheme: ""`
   - [ ] Implement `Resolve(name string) (Theme, error)`:
     - If name is `""` or `"auto"` → return auto theme
     - If name is a known built-in → return from registry
@@ -174,7 +174,8 @@ visually (stub CSS) but the infrastructure is complete.
 
 **`assets/preview.js`**
 
-- [ ] Replace the existing Mermaid init block:
+- [ ] Replace the existing Mermaid init block with the full `theme: 'base'` +
+      CSS variable approach:
   ```js
   // Before:
   var theme = document.body.getAttribute("data-theme");
@@ -185,10 +186,32 @@ visually (stub CSS) but the infrastructure is complete.
   mermaid.initialize({ startOnLoad: false, theme: mermaidTheme });
 
   // After:
-  var mermaidTheme = document.body.dataset.mermaidTheme || "default";
-  mermaid.initialize({ startOnLoad: false, theme: mermaidTheme });
+  var mermaidTheme = document.body.dataset.mermaidTheme;
+  if (mermaidTheme === "base") {
+    // Named built-in theme: read --mermaid-* CSS custom properties that the
+    // theme stylesheet defines on [data-theme] / body.
+    var bodyStyle = getComputedStyle(document.body);
+    var themeVariables = {
+      primaryColor:        bodyStyle.getPropertyValue("--mermaid-primaryColor").trim(),
+      primaryTextColor:    bodyStyle.getPropertyValue("--mermaid-primaryTextColor").trim(),
+      primaryBorderColor:  bodyStyle.getPropertyValue("--mermaid-primaryBorderColor").trim(),
+      lineColor:           bodyStyle.getPropertyValue("--mermaid-lineColor").trim(),
+      secondaryColor:      bodyStyle.getPropertyValue("--mermaid-secondaryColor").trim(),
+      tertiaryColor:       bodyStyle.getPropertyValue("--mermaid-tertiaryColor").trim(),
+      background:          bodyStyle.getPropertyValue("--mermaid-background").trim(),
+      noteBkgColor:        bodyStyle.getPropertyValue("--mermaid-noteBkgColor").trim(),
+      noteTextColor:       bodyStyle.getPropertyValue("--mermaid-noteTextColor").trim(),
+      edgeLabelBackground: bodyStyle.getPropertyValue("--mermaid-edgeLabelBackground").trim(),
+      actorBkg:            bodyStyle.getPropertyValue("--mermaid-actorBkg").trim(),
+      actorTextColor:      bodyStyle.getPropertyValue("--mermaid-actorTextColor").trim(),
+    };
+    mermaid.initialize({ startOnLoad: false, theme: "base", themeVariables: themeVariables });
+  } else {
+    // auto: fall back to prefers-color-scheme
+    mermaid.initialize({ startOnLoad: false, theme: prefersDark ? "dark" : "default" });
+  }
   ```
-- [ ] Remove the now-unused `prefersDark` variable (was only used for Mermaid)
+- [ ] Keep `prefersDark` — still needed for the `auto` Mermaid fallback
 
 **`internal/server` tests**
 
@@ -198,9 +221,8 @@ visually (stub CSS) but the infrastructure is complete.
   - For each of: `""`, `"auto"`, `"github-dark"`, `"tokyo-night"` — start server,
     GET `/`, assert `data-theme` attribute value matches expectation
 - [ ] Add `TestServer_MermaidThemeAttribute`:
-  - Dark themes → `data-mermaid-theme="dark"`
-  - Light themes → `data-mermaid-theme="default"`
-  - Auto → `data-mermaid-theme` is `""` or handled by JS
+  - All named built-in themes → `data-mermaid-theme="base"`
+  - Auto → `data-mermaid-theme=""` (JS handles via `prefersDark` at runtime)
 - [ ] Add `TestServer_ThemeCSS_Injection`:
   - Named theme → response body contains a `<style>` block (ThemeCSS)
   - Auto theme → no ThemeCSS `<style>` block injected
@@ -245,11 +267,14 @@ and `resolve_theme()` to the Lua plugin. End-to-end flow works: running
   ```
 - [ ] Pass `HljsTheme: hljsTheme` to `server.Config` (requires adding
       `HljsTheme string` field to `server.Config`)
-- [ ] In `server.New()`, if `cfg.HljsTheme != ""` and theme is a file path,
-      override `HljsVendorCSS` with the mapped vendor path:
-  - `"github"` → `/vendor/hljs/github.min.css`
-  - `"github-dark"` → `/vendor/hljs/github-dark.min.css`
-  - Other value → return error with valid options
+- [ ] In `server.New()`, validate `HljsTheme` usage:
+  - If `cfg.HljsTheme != ""` and theme is **not** a file path → return hard
+    error: `"--hljs-theme is only valid with a custom theme file path"`
+  - If `cfg.HljsTheme != ""` and theme **is** a file path → override
+    `HljsVendorCSS` with the mapped vendor path:
+    - `"github"` → `/vendor/hljs/github.min.css`
+    - `"github-dark"` → `/vendor/hljs/github-dark.min.css`
+    - Other value → return error listing valid options
 - [ ] Add `TestNewServeCmd_Flags` if not already present: ensure `--theme` and
       `--hljs-theme` are registered
 
@@ -347,21 +372,33 @@ writes its own hljs token colours (no matching vendored sheet).
 
 ### Tasks
 
-- [ ] Write `assets/themes/github-light.css`:
-  - [ ] `[data-theme="github-light"]` block with prose variable overrides
-        (pins light vars — no media query needed)
-  - No hljs token rules — vendored `github.min.css` is used
-- [ ] Write `assets/themes/github-dark.css`:
-  - [ ] `[data-theme="github-dark"]` block with prose variable overrides
-        (pins dark vars)
-  - No hljs token rules — vendored `github-dark.min.css` is used
-- [ ] Write `assets/themes/github-dimmed.css`:
-  - [ ] `[data-theme="github-dimmed"]` block with prose variable overrides
-  - [ ] Scoped hljs token rules:
+All three GitHub variants live in a single file (`assets/themes/github.css`) with
+three separate `[data-theme]` selector blocks. The Go registry maps each of the
+three names to the same CSS string but with different `HljsVendorCSS` and
+`MermaidTheme` values.
+
+- [ ] Write `assets/themes/github.css` — single file, three selector blocks:
+  - [ ] `[data-theme="github-light"]` block — prose variable overrides (pins
+        light vars, no media query needed). No hljs token rules — vendored
+        `github.min.css` handles highlighting. Mermaid vars for light palette.
+  - [ ] `[data-theme="github-dark"]` block — prose variable overrides (pins
+        dark vars). No hljs token rules — vendored `github-dark.min.css`.
+        Mermaid vars for dark palette.
+  - [ ] `[data-theme="github-dimmed"]` block — prose variable overrides.
+        Direct scoped hljs token rules:
         `[data-theme="github-dimmed"] .hljs-keyword { color: ...; }` etc.
-  - Mermaid theme: `"dark"`
+        Mermaid vars for dimmed dark palette.
+  - [ ] All three blocks define `--mermaid-*` CSS custom properties so JS
+        `theme: 'base'` can read them via `getComputedStyle`
+- [ ] Verify Go registry `builtinThemes` maps all three names to the
+      `github.css` CSS string with correct per-name `HljsVendorCSS` values:
+  - `github-light` → `HljsVendorCSS: "/vendor/hljs/github.min.css"`,
+    `MermaidTheme: "base"`
+  - `github-dark` → `HljsVendorCSS: "/vendor/hljs/github-dark.min.css"`,
+    `MermaidTheme: "base"`
+  - `github-dimmed` → `HljsVendorCSS: ""`, `MermaidTheme: "base"`
 - [ ] Manual visual check: open a fixture markdown file with each of the three
-      themes and verify prose and code block appearance
+      themes and verify prose, code block, and Mermaid diagram appearance
 
 ### Note on CSS variable scope
 
@@ -410,18 +447,20 @@ Canonical source: [enkia/tokyo-night-vscode-theme](https://github.com/enkia/toky
 
 ### Tasks
 
+Each file contains a single `[data-theme="X"]` block with:
+1. Prose CSS custom property overrides
+2. Direct scoped hljs token rules: `[data-theme="X"] .hljs-keyword { color: ...; }`
+3. `--mermaid-*` CSS custom properties (read by JS `theme: 'base'` at runtime)
+
 - [ ] Write `assets/themes/tokyo-night.css` (Night variant)
-  - `[data-theme="tokyo-night"]` block — prose vars + hljs token rules
-  - Mermaid theme: `"dark"`
+  - `[data-theme="tokyo-night"]` block — prose vars + hljs token rules + mermaid vars
 - [ ] Write `assets/themes/tokyo-night-moon.css`
-  - `[data-theme="tokyo-night-moon"]` block
-  - Mermaid theme: `"dark"`
+  - `[data-theme="tokyo-night-moon"]` block — prose vars + hljs token rules + mermaid vars
 - [ ] Write `assets/themes/tokyo-night-storm.css`
   - `[data-theme="tokyo-night-storm"]` block (close to Night, slightly blue-tinted)
-  - Mermaid theme: `"dark"`
 - [ ] Write `assets/themes/tokyo-night-day.css`
-  - `[data-theme="tokyo-night-day"]` block — this is the light variant
-  - Mermaid theme: `"default"`
+  - `[data-theme="tokyo-night-day"]` block — light variant; mermaid vars use
+    lighter palette colours
 - [ ] Manual visual check of all four variants against a markdown file with
       code blocks, tables, and a Mermaid diagram
 
@@ -431,7 +470,8 @@ Canonical source: [enkia/tokyo-night-vscode-theme](https://github.com/enkia/toky
   link colours
 - Code blocks render with correct syntax token colours (at minimum: keywords,
   strings, comments, numbers)
-- Mermaid diagrams use `dark` theme for night/moon/storm, `default` for day
+- Mermaid diagrams use `theme: 'base'` with each variant's `--mermaid-*`
+  CSS variables — diagram colours coordinate with the prose theme
 - `make test` still passes (CSS content doesn't affect Go tests)
 
 ---
@@ -461,21 +501,23 @@ Canonical source: [rose-pine/palette](https://rosepinetheme.com/palette/)
 
 ### Tasks
 
+Each file contains a single `[data-theme="X"]` block with prose vars, direct
+scoped hljs token rules, and `--mermaid-*` CSS custom properties.
+
 - [ ] Write `assets/themes/rose-pine.css` (Pine/main variant)
-  - `[data-theme="rose-pine"]` block — prose vars + hljs token rules
-  - Mermaid theme: `"dark"`
+  - `[data-theme="rose-pine"]` block — prose vars + hljs token rules + mermaid vars
 - [ ] Write `assets/themes/rose-pine-moon.css`
-  - `[data-theme="rose-pine-moon"]` block
-  - Mermaid theme: `"dark"`
+  - `[data-theme="rose-pine-moon"]` block — prose vars + hljs token rules + mermaid vars
 - [ ] Write `assets/themes/rose-pine-dawn.css`
-  - `[data-theme="rose-pine-dawn"]` block — light variant
-  - Mermaid theme: `"default"`
+  - `[data-theme="rose-pine-dawn"]` block — light variant; mermaid vars use
+    dawn palette colours
 - [ ] Manual visual check of all three variants
 
 ### Success Criteria
 
 - All three variants render correct prose and code colours
-- Mermaid diagrams use `dark` for pine/moon, `default` for dawn
+- Mermaid diagrams use `theme: 'base'` with per-variant `--mermaid-*` CSS
+  variables — dark palette for pine/moon, lighter palette for dawn
 - `make test` passes
 
 ---
@@ -505,20 +547,21 @@ Canonical source: [catppuccin/catppuccin](https://github.com/catppuccin/catppucc
 
 ### Tasks
 
-- [ ] Write `assets/themes/catppuccin-latte.css` — light variant
-  - Mermaid theme: `"default"`
-- [ ] Write `assets/themes/catppuccin-frappe.css`
-  - Mermaid theme: `"dark"`
-- [ ] Write `assets/themes/catppuccin-macchiato.css`
-  - Mermaid theme: `"dark"`
-- [ ] Write `assets/themes/catppuccin-mocha.css`
-  - Mermaid theme: `"dark"`
+Each file contains a single `[data-theme="X"]` block with prose vars, direct
+scoped hljs token rules, and `--mermaid-*` CSS custom properties.
+
+- [ ] Write `assets/themes/catppuccin-latte.css` — light variant; mermaid vars
+      use latte palette colours
+- [ ] Write `assets/themes/catppuccin-frappe.css` — mermaid vars use frappé palette
+- [ ] Write `assets/themes/catppuccin-macchiato.css` — mermaid vars use macchiato palette
+- [ ] Write `assets/themes/catppuccin-mocha.css` — mermaid vars use mocha palette
 - [ ] Manual visual check of all four variants
 
 ### Success Criteria
 
 - All four variants render correct prose and code colours
-- `catppuccin-latte` Mermaid uses `default`; others use `dark`
+- Mermaid diagrams use `theme: 'base'` with per-variant `--mermaid-*` CSS
+  variables; latte uses a light mermaid palette, others use dark palettes
 - `make test` passes
 
 ---
@@ -581,7 +624,10 @@ Cross-cutting validation, test coverage check, and user-facing docs update.
 |------|--------|-------------|
 | `internal/theme/theme.go` | Create | Theme struct, registry, Resolve(), Names() |
 | `internal/theme/theme_test.go` | Create | Unit tests for theme resolution |
-| `assets/themes/*.css` | Create | 14 theme CSS files |
+| `assets/themes/github.css` | Create | All three GitHub variants (light/dark/dimmed) in one DRY file |
+| `assets/themes/tokyo-night*.css` | Create | 4 Tokyo Night variant CSS files |
+| `assets/themes/rose-pine*.css` | Create | 3 Rosé Pine variant CSS files |
+| `assets/themes/catppuccin-*.css` | Create | 4 Catppuccin variant CSS files |
 | `assets/assets.go` | Modify | Add `themes` to embed directive |
 | `internal/server/server.go` | Modify | `Server.theme` field, updated pageData, handleIndex |
 | `internal/server/server_test.go` | Modify | New theme-related test cases |
@@ -632,74 +678,17 @@ No database migrations, no persistent state — rollback is a straight code reve
 
 ---
 
-## Open Questions
+## Decisions
 
-1. **hljs token colour approach — CSS variables vs direct scoped rules**
+All open questions from the initial draft have been answered.
 
-   The design doc shows CSS variables (`--hljs-keyword: #...`) defined inside
-   `[data-theme]` blocks. This requires a "resolver" layer in `preview.css`
-   (e.g. `.hljs-keyword { color: var(--hljs-keyword); }`) to apply the
-   variables to actual hljs-generated HTML.
-
-   The alternative is direct scoped rules:
-   `[data-theme="X"] .hljs-keyword { color: #...; }`
-
-   Direct rules are more verbose but self-contained — no extra layer in
-   `preview.css`. CSS variables are cleaner per-theme (all colours in one
-   `:root` block) but require maintaining the resolver rules.
-
-   **Recommend deciding before Phase 4** to ensure consistency across all
-   theme CSS files. The implementation plan assumes direct scoped rules for
-   simplicity, but either approach works.
-
-2. **Mermaid `theme: 'base'` vs built-in theme names**
-
-   The design mentions defining `--mermaid-*` CSS variables per theme and
-   using `theme: 'base'` in `mermaid.initialize()`. `theme: 'base'` with CSS
-   variables gives precise per-theme Mermaid colour control but requires JS
-   to read the CSS variables from computed styles.
-
-   The simpler approach (used in this plan) is mapping each theme to a Mermaid
-   built-in (`"default"` or `"dark"`) via `data-mermaid-theme`. This gives
-   adequate visual coordination without JS/CSS variable plumbing.
-
-   **Decide before Phase 2 (JS update)**: use `"default"`/`"dark"` mapping, or
-   implement the full `theme: 'base'` + CSS variable approach.
-
-3. **`github-dark` / `github-light` prose variable files**
-
-   `preview.css` already defines the github light/dark colour variables. For
-   the named `github-dark` and `github-light` themes, the CSS files need to
-   pin those values in `[data-theme]` scope (bypassing the media query). This
-   means duplicating the same values that already exist in `preview.css`.
-
-   Should we DRY this by extracting the github colour palette into a shared
-   CSS file (e.g. `assets/github-palette.css`) included via `preview.css`?
-   Or just accept the duplication (two places with the same hex values)?
-
-   Leaning toward accepting duplication — the palette is small and having each
-   theme CSS file be fully self-documenting is worth more than DRYing 8 hex
-   values.
-
-4. **`--hljs-theme` flag scope**
-
-   The `--hljs-theme` flag is defined as only meaningful alongside
-   `--theme=<file>`. Should the binary warn or error if `--hljs-theme` is
-   provided with a built-in theme name? Silently ignoring it is surprising;
-   returning an error is strict but correct.
-
-   **Recommend**: return an error — `--hljs-theme is only valid with a custom
-   theme file path`.
-
-5. **`resolve_theme()` default dark theme**
-
-   When `vim.o.background == "dark"`, `resolve_theme()` maps to `"github-dark"`.
-   Should the default dark theme instead be something more visually distinct
-   (e.g. `"tokyo-night"`)? Or keep it as `github-dark` since it's the closest
-   to the current `auto` dark experience?
-
-   **Recommend**: keep `github-dark` as the `background=dark` default — zero
-   visual surprise for existing users who are upgrading.
+| # | Question | Decision |
+|---|----------|----------|
+| 1 | hljs token colour approach | **Direct scoped rules**: `[data-theme="X"] .hljs-keyword { color: #...; }`. No resolver layer in `preview.css`. |
+| 2 | Mermaid theming | **Full `theme: 'base'` + CSS variable approach**: all 14 themes define `--mermaid-*` CSS custom properties; JS reads them via `getComputedStyle` at runtime and passes as `themeVariables` to `mermaid.initialize()`. `auto` falls back to `prefersDark ? "dark" : "default"`. |
+| 3 | GitHub theme DRY | **Single `assets/themes/github.css`** file containing all three `[data-theme="github-*"]` selector blocks. Go registry maps each name to the same CSS string with different `HljsVendorCSS` values per entry. |
+| 4 | `--hljs-theme` with built-in | **Hard error**: binary returns an error if `--hljs-theme` is provided alongside a built-in theme name. |
+| 5 | Default dark theme | **Keep `github-dark`**: `vim.o.background=dark` maps to `github-dark` — zero visual surprise for existing users. |
 
 ---
 

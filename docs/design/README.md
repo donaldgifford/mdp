@@ -32,5 +32,5 @@ docz create design "Your Design Title"
 
 | ID | Title | Status | Date | Author | Link |
 |----|-------|--------|------|--------|------|
-| DESIGN-0001 | Themes | In Review | 2026-03-05 | Donald Gifford | [0001-themes.md](0001-themes.md) |
+| DESIGN-0001 | Themes | Approved | 2026-03-05 | Donald Gifford | [0001-themes.md](0001-themes.md) |
 <!-- END DOCZ AUTO-GENERATED -->
