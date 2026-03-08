@@ -1,13 +1,18 @@
-/* donald — dark theme based on donald.dev
- * Source: https://donald.dev/
- * Palette: bg #16161e, bg-alt #13131a, fg #c0c0c0, fg-dim #6b6b6b,
- *          purple #9d7cd8, blue #7aa2f7, cyan #7dcfff, teal #73daca,
- *          green #9ece6a, yellow #e0af68, orange #ff9e64, red #f7768e
+/* donald — dark theme derived from donald.dev (textfiles Hugo theme)
+ * Source: https://donald.dev
+ *
+ * Authoritative palette from style.css + syntax.css + theme.json:
+ *   bg         #16161e    bg-alt      #13131a    fg-code    #c0caf5
+ *   fg         #b4b4b4    fg-dim      #6b6b6b    fg-bright  #e8e8e8
+ *   purple     #9d7cd8    blue        #7aa2f7    cyan       #7dcfff
+ *   teal       #2ac3de    green       #9ece6a    yellow     #e0af68
+ *   orange     #ff9e64    red         #f7768e    sky        #89ddff
+ *   comment    #565f89    border      #222222    border+    #333333
  */
 
 [data-theme="donald"] {
   /* Prose custom properties */
-  --color-fg-default:     #c0c0c0;
+  --color-fg-default:     #b4b4b4;
   --color-fg-muted:       #6b6b6b;
   --color-canvas-default: #16161e;
   --color-canvas-subtle:  #13131a;
@@ -29,36 +34,39 @@
   --mermaid-noteTextColor:       #6b6b6b;
   --mermaid-edgeLabelBackground: #16161e;
   --mermaid-actorBkg:            #13131a;
-  --mermaid-actorTextColor:      #c0c0c0;
+  --mermaid-actorTextColor:      #b4b4b4;
 }
 
-/* Direct scoped hljs token rules */
-[data-theme="donald"] .hljs                        { background: #16161e; color: #c0c0c0; }
-[data-theme="donald"] .hljs-keyword               { color: #9d7cd8; }    /* purple  */
-[data-theme="donald"] .hljs-operator              { color: #7dcfff; }    /* cyan    */
+/* Direct scoped hljs token rules
+ * Mapped from syntax.css (.chroma) and theme.json tokenColors.
+ */
+[data-theme="donald"] .hljs                        { background: #16161e; color: #c0caf5; }
+[data-theme="donald"] .hljs-keyword               { color: #9d7cd8; }    /* kd/kn/kp/kr  → purple        */
+[data-theme="donald"] .hljs-operator              { color: #89ddff; }    /* .o            → sky           */
 [data-theme="donald"] .hljs-string,
 [data-theme="donald"] .hljs-attr,
-[data-theme="donald"] .hljs-addition              { color: #9ece6a; }    /* green   */
+[data-theme="donald"] .hljs-addition              { color: #9ece6a; }    /* .s*           → green         */
+[data-theme="donald"] .hljs-regexp                { color: #e0af68; }    /* string.regexp → yellow        */
 [data-theme="donald"] .hljs-comment,
-[data-theme="donald"] .hljs-quote                 { color: #6b6b6b; font-style: italic; } /* fg-dim  */
+[data-theme="donald"] .hljs-quote                 { color: #565f89; font-style: italic; } /* .c*  → comment blue */
 [data-theme="donald"] .hljs-number,
-[data-theme="donald"] .hljs-literal               { color: #ff9e64; }    /* orange  */
+[data-theme="donald"] .hljs-literal               { color: #ff9e64; }    /* .m* / .kc     → orange        */
 [data-theme="donald"] .hljs-function,
 [data-theme="donald"] .hljs-selector-pseudo,
-[data-theme="donald"] .hljs-selector-tag          { color: #7aa2f7; }    /* blue    */
+[data-theme="donald"] .hljs-selector-tag          { color: #7aa2f7; }    /* .nf/.fm       → blue          */
 [data-theme="donald"] .hljs-type,
 [data-theme="donald"] .hljs-class,
-[data-theme="donald"] .hljs-built_in              { color: #73daca; }    /* teal    */
-[data-theme="donald"] .hljs-variable,
-[data-theme="donald"] .hljs-template-variable     { color: #c0c0c0; }    /* fg      */
+[data-theme="donald"] .hljs-built_in              { color: #2ac3de; }    /* .nc/.kt/.nb   → teal          */
+[data-theme="donald"] .hljs-variable              { color: #c0caf5; }    /* .nv*          → fg            */
+[data-theme="donald"] .hljs-template-variable     { color: #e0af68; }    /* .si/.se       → yellow        */
 [data-theme="donald"] .hljs-name,
 [data-theme="donald"] .hljs-title,
-[data-theme="donald"] .hljs-section               { color: #7aa2f7; }    /* blue    */
+[data-theme="donald"] .hljs-section               { color: #7aa2f7; }    /* .gh           → blue          */
 [data-theme="donald"] .hljs-meta,
-[data-theme="donald"] .hljs-params                { color: #6b6b6b; }    /* fg-dim  */
-[data-theme="donald"] .hljs-symbol,
-[data-theme="donald"] .hljs-link                  { color: #7dcfff; }    /* cyan    */
-[data-theme="donald"] .hljs-tag                   { color: #f7768e; }    /* red     */
-[data-theme="donald"] .hljs-deletion              { color: #f7768e; background: #2d1a1e; }
+[data-theme="donald"] .hljs-params                { color: #6b6b6b; }    /* .gp/.go       → fg-dim        */
+[data-theme="donald"] .hljs-symbol                { color: #e0af68; }    /* decorator     → yellow        */
+[data-theme="donald"] .hljs-link                  { color: #7dcfff; }    /* escape chars  → cyan          */
+[data-theme="donald"] .hljs-tag                   { color: #f7768e; }    /* .nt           → red           */
+[data-theme="donald"] .hljs-deletion              { color: #f7768e; background: #2a1515; }
 [data-theme="donald"] .hljs-emphasis              { font-style: italic; }
 [data-theme="donald"] .hljs-strong                { font-weight: bold; }
