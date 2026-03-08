@@ -88,7 +88,7 @@ release:
 
   footer: |
     ---
-    **Full Changelog**: https://github.com/donaldgifford/mdp/compare/{{ .PreviousTag }}...{{ .Tag }}
+    **Full Changelog**: https://github.com/donaldgifford/mdp/blob/main/CHANGELOG.md
 
 snapshot:
   version_template: "{{ .Tag }}-dev"

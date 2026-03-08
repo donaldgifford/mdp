@@ -33,8 +33,11 @@ internal/
   cli/             -> Root and serve commands with flag handling
   parser/          -> Goldmark pipeline: GFM, highlighting, mermaid, math, line annotations
   server/          -> HTTP server, WebSocket/SSE hubs, stdin reader, auth token
+  theme/           -> Built-in theme registry; Resolve() maps name/path/auto -> Theme struct
   watcher/         -> fsnotify file watcher with 50ms debounce
-assets/            -> Embedded: preview.html/css/js + vendored Mermaid, KaTeX, highlight.js
+assets/
+  themes/          -> One CSS file per built-in theme (embedded via go:embed)
+  (other)          -> preview.html/css/js + vendored Mermaid, KaTeX, highlight.js
 lua/mdp/init.lua   -> Neovim plugin: setup(), commands, buffer/cursor sync
 lazy.lua           -> Default lazy.nvim plugin spec (main, ft, cmd, opts)
 build.lua          -> Auto-run by lazy.nvim on install/update (binary download/build)
@@ -60,6 +63,48 @@ scripts/install.sh -> CLI alternative to build.lua (same logic in bash)
 - To test a dev branch: add `branch = "feat/your-branch"` to the lazy.nvim spec, then `:Lazy update mdp`
 - `:MdpInstall` re-downloads the release binary; `:MdpInstall!` forces a source build
 
+## Theme CSS Format
+
+Each built-in theme lives in `assets/themes/<name>.css` and must follow this structure:
+
+```css
+/* Theme comment block with palette reference */
+
+[data-theme="<name>"] {
+  /* Prose custom properties — required */
+  --color-fg-default:     #hex;
+  --color-fg-muted:       #hex;
+  --color-canvas-default: #hex;
+  --color-canvas-subtle:  #hex;
+  --color-border-default: #hex;
+  --color-border-muted:   #hex;
+  --color-accent-fg:      #hex;
+  --color-danger-fg:      #hex;
+  --color-success-fg:     #hex;
+
+  /* Mermaid theme variables (theme: 'base') — required */
+  --mermaid-primaryColor:        #hex;
+  --mermaid-primaryTextColor:    #hex;
+  --mermaid-primaryBorderColor:  #hex;
+  --mermaid-lineColor:           #hex;
+  --mermaid-secondaryColor:      #hex;
+  --mermaid-tertiaryColor:       #hex;
+  --mermaid-background:          #hex;
+  /* ... other mermaid vars */
+}
+
+/* Direct scoped hljs token rules — NO CSS variable indirection */
+[data-theme="<name>"] .hljs                { background: #hex; color: #hex; }
+[data-theme="<name>"] .hljs-keyword        { color: #hex; }
+[data-theme="<name>"] .hljs-operator       { color: #hex; } /* MUST differ from keyword */
+/* ... other tokens ... */
+```
+
+- Use **direct hex values** in hljs rules, not `var(--some-var)`
+- `.hljs-keyword` and `.hljs-operator` MUST use different colors — sharing them collapses syntax to a single hue
+- Register the theme in `internal/theme/theme.go` `builtinThemes` map via `mustReadThemeCSS()`
+- Update theme count assertions in `internal/theme/theme_test.go`
+
 ## Code Style
 
 - **Uber Go Style Guide** enforced via `.golangci.yml` with 30+ linters
@@ -68,6 +113,12 @@ scripts/install.sh -> CLI alternative to build.lua (same logic in bash)
 - `nolint` directives require explanation and specific linter name
 - Test files have relaxed linting (errcheck, funlen, gocyclo, gosec excluded)
 - Coverage target: 60% (minimum 40%)
+
+### Linting Gotchas
+
+- **gocritic `sprintfQuotedString`**: Use `fmt.Sprintf("data-theme=%q", name)` not `fmt.Sprintf(\`data-theme="%s"\`, name)`
+- **gocritic `hugeParam`**: Pass large structs by pointer in test helpers (e.g., `*server.Config` not `server.Config`)
+- **gci import formatting**: Run `make fmt` after any import changes — gci enforces import group order and will fail lint if out of sync
 
 ## Key Dependencies
 
