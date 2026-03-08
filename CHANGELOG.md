@@ -2,16 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
-
-### Documentation
-
-- **claude**: Add theme/ to architecture, theme CSS format, linting gotchas
+## [0.1.6] - 2026-03-08
 
 ### Miscellaneous
 
-- **changelog**: Add git-cliff and automated CHANGELOG.md generation
-- **changelog**: Run git-cliff before goreleaser, retag with CHANGELOG.md included
+- **changelog**: Add git-cliff and automated CHANGELOG.md generation (#14)
 
 ## [0.1.5] - 2026-03-08
 
@@ -105,7 +100,7 @@ All notable changes to this project will be documented in this file.
 - Add feature tests and update-vendor Makefile target
 - **server**: Add scroll sync tests
 
-[Unreleased]: https://github.com/donaldgifford/mdp/compare/v0.1.5...HEAD
+[0.1.6]: https://github.com/donaldgifford/mdp/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/donaldgifford/mdp/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/donaldgifford/mdp/compare/v0.1.3...v0.1.4
 [0.1.3]: https://github.com/donaldgifford/mdp/compare/v0.1.2...v0.1.3
