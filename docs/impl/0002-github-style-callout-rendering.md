@@ -101,7 +101,7 @@ them. The default (light/dark) values come from GitHub's own color scheme.
 - [ ] 1. Add default callout CSS custom properties to `:root` in `assets/preview.css` (light mode values)
 - [ ] 2. Add dark mode overrides in the existing `@media (prefers-color-scheme: dark)` block
 - [ ] 3. Add base callout layout rules targeting the extension's CSS classes:
-  - `.callout` — container: `border-left: 3px solid`, `padding`, `margin-bottom: 16px`, `border-radius: 6px`, `background` with subtle tint
+  - `.callout` — container: `border-left: 3px solid var(--callout-color)`, `padding`, `margin-bottom: 16px`, `border-radius: 6px`, `background: var(--callout-bg)`
   - `.callout-title` — flex row, `align-items: center`, `gap: 8px`, `font-weight: 600`, `margin-bottom: 8px`
   - `.callout-icon` — `display: flex`, size constraints for SVG icons, `fill: currentColor`
   - `.callout-icon svg` — width/height `16px`
@@ -109,11 +109,11 @@ them. The default (light/dark) values come from GitHub's own color scheme.
   - `.callout-content` — paragraph spacing, nested list/code styling
   - `.callout-content > :last-child` — `margin-bottom: 0` to remove trailing space
 - [ ] 4. Add per-type color rules using CSS custom properties:
-  - `.callout-note` — `--callout-color: var(--callout-note-color)` (blue)
-  - `.callout-tip` — `--callout-color: var(--callout-tip-color)` (green)
-  - `.callout-important` — `--callout-color: var(--callout-important-color)` (purple)
-  - `.callout-warning` — `--callout-color: var(--callout-warning-color)` (yellow)
-  - `.callout-caution` — `--callout-color: var(--callout-caution-color)` (red)
+  - `.callout-note` — `--callout-color: var(--callout-note-color); --callout-bg: var(--callout-note-bg)` (blue)
+  - `.callout-tip` — `--callout-color: var(--callout-tip-color); --callout-bg: var(--callout-tip-bg)` (green)
+  - `.callout-important` — `--callout-color: var(--callout-important-color); --callout-bg: var(--callout-important-bg)` (purple)
+  - `.callout-warning` — `--callout-color: var(--callout-warning-color); --callout-bg: var(--callout-warning-bg)` (yellow)
+  - `.callout-caution` — `--callout-color: var(--callout-caution-color); --callout-bg: var(--callout-caution-bg)` (red)
 - [ ] 5. Run `make build` and visually verify callouts render correctly with the default theme
 
 #### Success Criteria
@@ -134,8 +134,8 @@ visual harmony.
 
 #### Tasks
 
-- [ ] 1. Add callout color variables to `assets/themes/github.css` (light+dark auto theme):
-  - `--callout-note-color`, `--callout-tip-color`, `--callout-important-color`, `--callout-warning-color`, `--callout-caution-color`
+- [ ] 1. Add callout color and background variables to `assets/themes/github.css` (light+dark auto theme):
+  - `--callout-note-color`, `--callout-note-bg`, `--callout-tip-color`, `--callout-tip-bg`, `--callout-important-color`, `--callout-important-bg`, `--callout-warning-color`, `--callout-warning-bg`, `--callout-caution-color`, `--callout-caution-bg`
 - [ ] 2. Add callout color variables to Tokyo Night family (4 files):
   - `tokyo-night.css` — night palette: blue `#7aa2f7`, green `#9ece6a`, purple `#bb9af7`, yellow `#e0af68`, red `#f7768e`
   - `tokyo-night-storm.css` — same palette, different canvas
@@ -156,7 +156,7 @@ visual harmony.
 
 #### Success Criteria
 
-- All 13 theme CSS files contain the 5 `--callout-*-color` custom properties
+- All 13 theme CSS files contain the 10 callout custom properties (5 `--callout-*-color` + 5 `--callout-*-bg`)
 - Each callout type has a visually distinct color per theme
 - Light themes (tokyo-night-day, rose-pine-dawn, catppuccin-latte) use appropriately saturated colors that contrast well on light backgrounds
 - Dark themes use appropriately bright colors that contrast well on dark backgrounds
@@ -240,15 +240,15 @@ callout output, and update documentation.
 - INV-0001 concluded (recommended `gm-alert-callouts`)
 - All 13 theme CSS files exist with the current variable structure (completed in IMPL-0001)
 
-## Open Questions
+## Resolved Questions
 
-1. **Icon rendering in SSE/offline mode:** The extension embeds inline SVG icons in the HTML output. Are there any Content-Security-Policy or rendering issues with inline SVGs in our preview page? The preview currently uses `html.WithUnsafe()` in goldmark which should allow this, but needs verification.
+1. **Icon rendering:** Try inline SVGs first (extension default). We use `html.WithUnsafe()` so it should work. If issues arise, address them then.
 
-2. **Background tint opacity:** Should callout backgrounds use a fixed semi-transparent tint (e.g., `color-mix()` or `rgba`) derived from the callout color, or should each theme define a separate `--callout-{type}-bg` variable? Using `color-mix(in srgb, var(--callout-color) 10%, transparent)` keeps it to 5 variables per theme, but `color-mix()` requires modern browsers. An alternative is `background: var(--callout-color); opacity: 0.1` on a pseudo-element.
+2. **Background tint:** Use per-theme `--callout-{type}-bg` variables (10 vars per theme: 5 color + 5 bg) so backgrounds match each theme's palette precisely rather than relying on computed opacity. This follows the same direct-value pattern established for hljs token rules in IMPL-0001.
 
-3. **License check CI:** The `go-licenses` check in CI may need `gm-alert-callouts` added to an exclusion or allowlist if it has any transitive dependencies with unusual license declarations. Needs verification after adding the dependency.
+3. **License check CI:** Add to allowlist only if the license check fails after adding the dependency.
 
-4. **Extension version pinning:** `gm-alert-callouts` is at v0.8.0 (pre-1.0). Should we pin to the exact version in `go.mod` or allow minor updates? The extension is small and MIT-licensed — forking is an option if the API changes before 1.0.
+4. **Extension version pinning:** Pin to exact version (v0.8.0) in `go.mod`. Pre-1.0 API — fork if it breaks.
 
 ## References
 
