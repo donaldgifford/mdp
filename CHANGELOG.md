@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.7] - 2026-04-03
+
+### Added
+
+- **parser**: Add GitHub-style callout/alert rendering (#25)
+
+### Fixed
+
+- Deps (#17)
+
+### Miscellaneous
+
+- Disable dependabot (#18)
+
 ## [0.1.6] - 2026-03-08
 
 ### Miscellaneous
@@ -100,6 +114,7 @@ All notable changes to this project will be documented in this file.
 - Add feature tests and update-vendor Makefile target
 - **server**: Add scroll sync tests
 
+[0.1.7]: https://github.com/donaldgifford/mdp/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/donaldgifford/mdp/compare/v0.1.5...v0.1.6
 [0.1.5]: https://github.com/donaldgifford/mdp/compare/v0.1.4...v0.1.5
 [0.1.4]: https://github.com/donaldgifford/mdp/compare/v0.1.3...v0.1.4
