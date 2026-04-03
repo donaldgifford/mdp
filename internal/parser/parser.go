@@ -12,6 +12,7 @@ import (
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
 	"github.com/yuin/goldmark/util"
+	alertcallouts "github.com/zmtcreative/gm-alert-callouts"
 	"go.abhg.dev/goldmark/mermaid"
 )
 
@@ -28,6 +29,7 @@ type config struct {
 	syntaxHighlighting bool
 	mermaid            bool
 	math               bool
+	callouts           bool
 }
 
 func defaultConfig() config {
@@ -36,6 +38,7 @@ func defaultConfig() config {
 		syntaxHighlighting: true,
 		mermaid:            true,
 		math:               true,
+		callouts:           true,
 	}
 }
 
@@ -59,6 +62,12 @@ func WithMermaid(enabled bool) Option {
 // WithMath enables or disables math expression support ($...$ and $$...$$).
 func WithMath(enabled bool) Option {
 	return func(c *config) { c.math = enabled }
+}
+
+// WithCallouts enables or disables GitHub-style callout/alert rendering
+// (> [!NOTE], > [!TIP], > [!IMPORTANT], > [!WARNING], > [!CAUTION]).
+func WithCallouts(enabled bool) Option {
+	return func(c *config) { c.callouts = enabled }
 }
 
 // New creates a Parser with the given options. By default, GFM extensions,
@@ -90,6 +99,11 @@ func New(opts ...Option) *Parser {
 	}
 	if cfg.math {
 		extensions = append(extensions, mathjax.MathJax)
+	}
+	if cfg.callouts {
+		extensions = append(extensions, alertcallouts.NewAlertCallouts(
+			alertcallouts.UseGFMStrictIcons(),
+		))
 	}
 
 	md := goldmark.New(

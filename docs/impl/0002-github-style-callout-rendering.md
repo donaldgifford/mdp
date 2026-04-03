@@ -74,12 +74,12 @@ instead of raw `[!NOTE]` text in blockquotes.
 
 #### Tasks
 
-- [ ] 1. Run `go get github.com/zmtcreative/gm-alert-callouts` to add the dependency
-- [ ] 2. Run `make update-vendor` or `go mod tidy` to update go.sum
-- [ ] 3. Add `WithCallouts` option to `internal/parser/parser.go` config struct (default: `true`)
-- [ ] 4. Wire `alertcallouts.NewAlertCallouts(alertcallouts.UseGFMStrictIcons())` into the goldmark extension slice when callouts are enabled
-- [ ] 5. Verify with `go build ./...` that the extension compiles and integrates
-- [ ] 6. Run `make lint && make fmt` to verify code style
+- [x] 1. Run `go get github.com/zmtcreative/gm-alert-callouts` to add the dependency
+- [x] 2. Run `make update-vendor` or `go mod tidy` to update go.sum
+- [x] 3. Add `WithCallouts` option to `internal/parser/parser.go` config struct (default: `true`)
+- [x] 4. Wire `alertcallouts.NewAlertCallouts(alertcallouts.UseGFMStrictIcons())` into the goldmark extension slice when callouts are enabled
+- [x] 5. Verify with `go build ./...` that the extension compiles and integrates
+- [x] 6. Run `make lint && make fmt` to verify code style
 
 #### Success Criteria
 
@@ -106,8 +106,8 @@ them. The default (light/dark) values come from GitHub's own color scheme.
   - `.callout-icon` — `display: flex`, size constraints for SVG icons, `fill: currentColor`
   - `.callout-icon svg` — width/height `16px`
   - `.callout-title-text` — inherits color from callout type
-  - `.callout-content` — paragraph spacing, nested list/code styling
-  - `.callout-content > :last-child` — `margin-bottom: 0` to remove trailing space
+  - `.callout-body` — paragraph spacing, nested list/code styling (note: extension uses `callout-body`, not `callout-content`)
+  - `.callout-body > :last-child` — `margin-bottom: 0` to remove trailing space
 - [ ] 4. Add per-type color rules using CSS custom properties:
   - `.callout-note` — `--callout-color: var(--callout-note-color); --callout-bg: var(--callout-note-bg)` (blue)
   - `.callout-tip` — `--callout-color: var(--callout-tip-color); --callout-bg: var(--callout-tip-bg)` (green)
