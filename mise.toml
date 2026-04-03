@@ -1,6 +1,6 @@
 [tools]
 # Docs
-"github:donaldgifford/docz" = "0.0.1"
+"github:donaldgifford/docz" = "0.0.12"
 
 # Go Packages
 "go:github.com/spf13/cobra-cli" = "latest"
@@ -8,12 +8,12 @@
 "go:github.com/vektra/mockery/v2" = "latest"
 "go:github.com/google/go-licenses" = "latest"
 
-go = "1.25.7"
-markdownlint-cli2 = "0.18.1"
+go = "1.26.1"
+markdownlint-cli2 = "0.22.0"
 yamlfmt = "0.20.0"
 yamllint = "1.37.1"
 yq = "4.48.1"
 prettier = "3.7.4"
 golines = "latest"
-golangci-lint = "2.8.0"
+golangci-lint = "2.11.4"
 git-cliff = "latest"

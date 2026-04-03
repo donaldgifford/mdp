@@ -14,7 +14,7 @@ import (
 // Theme holds everything the server needs to render a page with the correct styling.
 type Theme struct {
 	// CSS is the complete theme stylesheet (prose + hljs tokens + mermaid vars).
-	// Empty for "auto" — the base preview.css handles auto via media query.
+	// Empty for themeAuto — the base preview.css handles auto via media query.
 	CSS string
 
 	// HljsVendorCSS is the path to a vendored hljs sheet to inject via <link>.
@@ -30,13 +30,16 @@ type Theme struct {
 	IsAuto bool
 }
 
+// themeAuto is the sentinel name for the browser-driven auto theme.
+const themeAuto = "auto"
+
 // NOTE: Theme files are embedded via the assets.FS from the assets package.
 
 // builtinThemes maps theme names to their Theme configurations.
 // The GitHub themes share a single CSS file with multiple [data-theme] blocks.
 var builtinThemes = map[string]Theme{
 	// Auto theme - uses CSS media queries
-	"auto": {
+	themeAuto: {
 		CSS:           "",
 		HljsVendorCSS: "",
 		MermaidTheme:  "",
@@ -156,12 +159,12 @@ func mustReadThemeCSS(filename string) string {
 }
 
 // Resolve returns the Theme for the given name.
-// name may be a built-in theme name, "auto", an empty string (treated as auto),
+// name may be a built-in theme name, themeAuto, an empty string (treated as auto),
 // or an absolute/relative path to a CSS file.
 func Resolve(name string) (Theme, error) {
-	// Empty string or explicit "auto" both resolve to auto theme
-	if name == "" || name == "auto" {
-		return builtinThemes["auto"], nil
+	// Empty string or explicit themeAuto both resolve to auto theme
+	if name == "" || name == themeAuto {
+		return builtinThemes[themeAuto], nil
 	}
 
 	// Check if it's a built-in theme name
@@ -211,11 +214,11 @@ func readThemeFile(path string) (string, error) {
 }
 
 // Names returns all valid built-in theme names in sorted order.
-// The "auto" theme is not included since it's a special value.
+// The themeAuto theme is not included since it's a special value.
 func Names() []string {
-	names := make([]string, 0, len(builtinThemes)-1) // -1 to exclude "auto"
+	names := make([]string, 0, len(builtinThemes)-1) // -1 to exclude themeAuto
 	for name := range builtinThemes {
-		if name != "auto" {
+		if name != themeAuto {
 			names = append(names, name)
 		}
 	}
