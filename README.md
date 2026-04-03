@@ -1,7 +1,8 @@
 # mdp
 
 A fast markdown preview server for Neovim with live reload, scroll sync, and
-client-side rendering of Mermaid diagrams, KaTeX math, and syntax highlighting.
+client-side rendering of Mermaid diagrams, KaTeX math, syntax highlighting,
+and GitHub-style callouts.
 All assets are embedded in the binary -- no CDN requests at runtime.
 
 ## Quick Start
@@ -125,6 +126,8 @@ mdp serve [flags] <file>
   light/dark themes
 - **Mermaid diagrams**: flowcharts, sequence diagrams, gantt charts, etc.
 - **KaTeX math**: inline `$...$` and block `$$...$$` expressions
+- **GitHub-style callouts**: `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`,
+  `> [!WARNING]`, `> [!CAUTION]` with themed icons and colors
 - **Relative images**: images referenced with relative paths are resolved from
   the markdown file's directory
 

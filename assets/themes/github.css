@@ -35,6 +35,18 @@
   --mermaid-edgeLabelBackground: #f6f8fa;
   --mermaid-actorBkg:            #f6f8fa;
   --mermaid-actorTextColor:      #1f2328;
+
+  /* Callout colors */
+  --callout-note-color:      #0969da;
+  --callout-note-bg:         #ddf4ff;
+  --callout-tip-color:       #1a7f37;
+  --callout-tip-bg:          #dafbe1;
+  --callout-important-color: #8250df;
+  --callout-important-bg:    #fbefff;
+  --callout-warning-color:   #9a6700;
+  --callout-warning-bg:      #fff8c5;
+  --callout-caution-color:   #d1242f;
+  --callout-caution-bg:      #ffebe9;
 }
 
 /* ── github-dark ──────────────────────────────────────────────────────────── */
@@ -64,6 +76,18 @@
   --mermaid-edgeLabelBackground: #0d1117;
   --mermaid-actorBkg:            #161b22;
   --mermaid-actorTextColor:      #e6edf3;
+
+  /* Callout colors */
+  --callout-note-color:      #58a6ff;
+  --callout-note-bg:         #12283e;
+  --callout-tip-color:       #3fb950;
+  --callout-tip-bg:          #12321e;
+  --callout-important-color: #a371f7;
+  --callout-important-bg:    #23163e;
+  --callout-warning-color:   #d29922;
+  --callout-warning-bg:      #342614;
+  --callout-caution-color:   #f85149;
+  --callout-caution-bg:      #351616;
 }
 
 /* ── github-dimmed ────────────────────────────────────────────────────────── */
@@ -93,6 +117,18 @@
   --mermaid-edgeLabelBackground: #22272e;
   --mermaid-actorBkg:            #2d333b;
   --mermaid-actorTextColor:      #adbac7;
+
+  /* Callout colors */
+  --callout-note-color:      #539bf5;
+  --callout-note-bg:         #222f42;
+  --callout-tip-color:       #57ab5a;
+  --callout-tip-bg:          #1e3628;
+  --callout-important-color: #986ee2;
+  --callout-important-bg:    #2a2342;
+  --callout-warning-color:   #c69026;
+  --callout-warning-bg:      #362c18;
+  --callout-caution-color:   #f47067;
+  --callout-caution-bg:      #3a2322;
 }
 
 /* Direct scoped hljs token rules for github-dimmed (no vendored sheet) */

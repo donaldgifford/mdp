@@ -27,6 +27,18 @@
   --mermaid-edgeLabelBackground: #eff1f5;
   --mermaid-actorBkg:            #e6e9ef;
   --mermaid-actorTextColor:      #4c4f69;
+
+  /* Callout colors */
+  --callout-note-color:      #1e66f5;
+  --callout-note-bg:         #dde5f8;
+  --callout-tip-color:       #40a02b;
+  --callout-tip-bg:          #ddefd8;
+  --callout-important-color: #8839ef;
+  --callout-important-bg:    #e8def8;
+  --callout-warning-color:   #df8e1d;
+  --callout-warning-bg:      #f0e6d5;
+  --callout-caution-color:   #d20f39;
+  --callout-caution-bg:      #f5dbe0;
 }
 
 /* Direct scoped hljs token rules */

@@ -33,4 +33,5 @@ docz create impl "Your Implementation Title"
 | ID | Title | Status | Date | Author | Link |
 |----|-------|--------|------|--------|------|
 | IMPL-0001 | Themes | In Progress | 2026-03-06 | Donald Gifford | [0001-themes.md](0001-themes.md) |
+| IMPL-0002 | GitHub-style callout rendering | Draft | 2026-04-03 | Donald Gifford | [0002-github-style-callout-rendering.md](0002-github-style-callout-rendering.md) |
 <!-- END DOCZ AUTO-GENERATED -->
