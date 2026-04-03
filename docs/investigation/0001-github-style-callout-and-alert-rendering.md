@@ -1,7 +1,7 @@
 ---
 id: INV-0001
 title: "GitHub-style callout and alert rendering"
-status: In Progress
+status: Concluded
 author: Donald Gifford
 created: 2026-04-03
 ---

@@ -1,7 +1,7 @@
 ---
 id: IMPL-0002
 title: "GitHub-style callout rendering"
-status: Draft
+status: Completed
 author: Donald Gifford
 created: 2026-04-03
 ---
@@ -169,19 +169,19 @@ callout output, and update documentation.
 
 #### Tasks
 
-- [ ] 1. Add `TestRender_GitHubCallout` to `internal/parser/parser_test.go`:
+- [x] 1. Add `TestRender_GitHubCallout` to `internal/parser/parser_test.go`:
   - Table-driven test covering all 5 types (NOTE, TIP, IMPORTANT, WARNING, CAUTION)
   - Each case: verify `class="callout callout-{type}"` in output
   - Each case: verify `callout-title-text` contains the type name
-  - Each case: verify `callout-content` contains the body text
-- [ ] 2. Add `TestRender_CalloutPreservesBlockquote` to verify plain `> quote` is unaffected
-- [ ] 3. Add `TestRender_CalloutWithNestedContent` to verify code blocks and lists inside callouts render correctly
-- [ ] 4. Add `TestRender_CalloutDisabled` to verify `WithCallouts(false)` produces raw blockquote output
-- [ ] 5. Verify `data-source-line` annotations work on elements inside callouts (scroll sync compatibility)
-- [ ] 6. Run `make test` — all tests pass
-- [ ] 7. Run `make lint` — passes with zero warnings
-- [ ] 8. Update `CLAUDE.md` if any new patterns or conventions are established
-- [ ] 9. Update `README.md` features list to mention GitHub-style callout support
+  - Each case: verify `callout-body` contains the body text
+- [x] 2. Add `TestRender_CalloutPreservesBlockquote` to verify plain `> quote` is unaffected
+- [x] 3. Add `TestRender_CalloutWithNestedContent` to verify code blocks and lists inside callouts render correctly
+- [x] 4. Add `TestRender_CalloutDisabled` to verify `WithCallouts(false)` produces raw blockquote output
+- [x] 5. Verify `data-source-line` annotations work on elements inside callouts (scroll sync compatibility)
+- [x] 6. Run `make test` — all tests pass
+- [x] 7. Run `make lint` — passes with zero warnings
+- [x] 8. Update `CLAUDE.md` if any new patterns or conventions are established — no new patterns needed
+- [x] 9. Update `README.md` features list to mention GitHub-style callout support
 
 #### Success Criteria
 
