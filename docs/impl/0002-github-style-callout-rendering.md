@@ -98,23 +98,22 @@ them. The default (light/dark) values come from GitHub's own color scheme.
 
 #### Tasks
 
-- [ ] 1. Add default callout CSS custom properties to `:root` in `assets/preview.css` (light mode values)
-- [ ] 2. Add dark mode overrides in the existing `@media (prefers-color-scheme: dark)` block
-- [ ] 3. Add base callout layout rules targeting the extension's CSS classes:
+- [x] 1. Add default callout CSS custom properties to `:root` in `assets/preview.css` (light mode values)
+- [x] 2. Add dark mode overrides in the existing `@media (prefers-color-scheme: dark)` block
+- [x] 3. Add base callout layout rules targeting the extension's CSS classes:
   - `.callout` — container: `border-left: 3px solid var(--callout-color)`, `padding`, `margin-bottom: 16px`, `border-radius: 6px`, `background: var(--callout-bg)`
   - `.callout-title` — flex row, `align-items: center`, `gap: 8px`, `font-weight: 600`, `margin-bottom: 8px`
-  - `.callout-icon` — `display: flex`, size constraints for SVG icons, `fill: currentColor`
-  - `.callout-icon svg` — width/height `16px`
+  - `.callout-title svg` — width/height `16px`, flex-shrink
   - `.callout-title-text` — inherits color from callout type
-  - `.callout-body` — paragraph spacing, nested list/code styling (note: extension uses `callout-body`, not `callout-content`)
+  - `.callout-body` — paragraph spacing, inherits `--color-fg-default`
   - `.callout-body > :last-child` — `margin-bottom: 0` to remove trailing space
-- [ ] 4. Add per-type color rules using CSS custom properties:
+- [x] 4. Add per-type color rules using CSS custom properties:
   - `.callout-note` — `--callout-color: var(--callout-note-color); --callout-bg: var(--callout-note-bg)` (blue)
   - `.callout-tip` — `--callout-color: var(--callout-tip-color); --callout-bg: var(--callout-tip-bg)` (green)
   - `.callout-important` — `--callout-color: var(--callout-important-color); --callout-bg: var(--callout-important-bg)` (purple)
   - `.callout-warning` — `--callout-color: var(--callout-warning-color); --callout-bg: var(--callout-warning-bg)` (yellow)
   - `.callout-caution` — `--callout-color: var(--callout-caution-color); --callout-bg: var(--callout-caution-bg)` (red)
-- [ ] 5. Run `make build` and visually verify callouts render correctly with the default theme
+- [x] 5. Run `make build` and visually verify callouts render correctly with the default theme
 
 #### Success Criteria
 
