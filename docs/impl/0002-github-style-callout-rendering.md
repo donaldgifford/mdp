@@ -133,25 +133,25 @@ visual harmony.
 
 #### Tasks
 
-- [ ] 1. Add callout color and background variables to `assets/themes/github.css` (light+dark auto theme):
+- [x] 1. Add callout color and background variables to `assets/themes/github.css` (light+dark auto theme):
   - `--callout-note-color`, `--callout-note-bg`, `--callout-tip-color`, `--callout-tip-bg`, `--callout-important-color`, `--callout-important-bg`, `--callout-warning-color`, `--callout-warning-bg`, `--callout-caution-color`, `--callout-caution-bg`
-- [ ] 2. Add callout color variables to Tokyo Night family (4 files):
+- [x] 2. Add callout color variables to Tokyo Night family (4 files):
   - `tokyo-night.css` — night palette: blue `#7aa2f7`, green `#9ece6a`, purple `#bb9af7`, yellow `#e0af68`, red `#f7768e`
   - `tokyo-night-storm.css` — same palette, different canvas
   - `tokyo-night-moon.css` — moon palette: blue `#82aaff`, green `#c3e88d`, purple `#c099ff`, yellow `#ffc777`, red `#ff757f`
   - `tokyo-night-day.css` — day palette: blue `#2e7de9`, green `#587539`, purple `#9854f1`, yellow `#8c6c3e`, red `#f52a65`
-- [ ] 3. Add callout color variables to Rose Pine family (3 files):
+- [x] 3. Add callout color variables to Rose Pine family (3 files):
   - `rose-pine.css` — blue foam `#9ccfd8`, green pine `#31748f`, purple iris `#c4a7e7`, yellow gold `#f6c177`, red love `#eb6f92`
   - `rose-pine-moon.css` — moon variants of same roles
   - `rose-pine-dawn.css` — dawn (light) variants
-- [ ] 4. Add callout color variables to Catppuccin family (4 files):
+- [x] 4. Add callout color variables to Catppuccin family (4 files):
   - `catppuccin-mocha.css` — blue `#89b4fa`, green `#a6e3a1`, purple `#cba6f7`, yellow `#f9e2af`, red `#f38ba8`
   - `catppuccin-macchiato.css` — macchiato palette
   - `catppuccin-frappe.css` — frappe palette
   - `catppuccin-latte.css` — latte (light) palette
-- [ ] 5. Add callout color variables to `assets/themes/donald.css`:
+- [x] 5. Add callout color variables to `assets/themes/donald.css`:
   - blue `#7aa2f7`, green `#9ece6a`, purple `#9d7cd8`, yellow `#e0af68`, red `#f7768e`
-- [ ] 6. Visually verify at least one theme from each family renders callouts with correct colors
+- [x] 6. Visually verify at least one theme from each family renders callouts with correct colors
 
 #### Success Criteria
 
