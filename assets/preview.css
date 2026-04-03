@@ -37,15 +37,15 @@
 
     /* Callout colors (GitHub dark defaults) */
     --callout-note-color:      #58a6ff;
-    --callout-note-bg:         #0d1d30;
+    --callout-note-bg:         #12283e;
     --callout-tip-color:       #3fb950;
-    --callout-tip-bg:          #0d2818;
+    --callout-tip-bg:          #12321e;
     --callout-important-color: #a371f7;
-    --callout-important-bg:    #1c0f30;
+    --callout-important-bg:    #23163e;
     --callout-warning-color:   #d29922;
-    --callout-warning-bg:      #2b1d0e;
+    --callout-warning-bg:      #342614;
     --callout-caution-color:   #f85149;
-    --callout-caution-bg:      #2c0f0f;
+    --callout-caution-bg:      #351616;
   }
 }
 

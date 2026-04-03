@@ -79,15 +79,15 @@
 
   /* Callout colors */
   --callout-note-color:      #58a6ff;
-  --callout-note-bg:         #0d1d30;
+  --callout-note-bg:         #12283e;
   --callout-tip-color:       #3fb950;
-  --callout-tip-bg:          #0d2818;
+  --callout-tip-bg:          #12321e;
   --callout-important-color: #a371f7;
-  --callout-important-bg:    #1c0f30;
+  --callout-important-bg:    #23163e;
   --callout-warning-color:   #d29922;
-  --callout-warning-bg:      #2b1d0e;
+  --callout-warning-bg:      #342614;
   --callout-caution-color:   #f85149;
-  --callout-caution-bg:      #2c0f0f;
+  --callout-caution-bg:      #351616;
 }
 
 /* ── github-dimmed ────────────────────────────────────────────────────────── */
@@ -120,15 +120,15 @@
 
   /* Callout colors */
   --callout-note-color:      #539bf5;
-  --callout-note-bg:         #1b2736;
+  --callout-note-bg:         #222f42;
   --callout-tip-color:       #57ab5a;
-  --callout-tip-bg:          #162b1e;
+  --callout-tip-bg:          #1e3628;
   --callout-important-color: #986ee2;
-  --callout-important-bg:    #211b34;
+  --callout-important-bg:    #2a2342;
   --callout-warning-color:   #c69026;
-  --callout-warning-bg:      #2d2311;
+  --callout-warning-bg:      #362c18;
   --callout-caution-color:   #f47067;
-  --callout-caution-bg:      #311b1a;
+  --callout-caution-bg:      #3a2322;
 }
 
 /* Direct scoped hljs token rules for github-dimmed (no vendored sheet) */

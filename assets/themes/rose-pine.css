@@ -34,15 +34,15 @@
 
   /* Callout colors */
   --callout-note-color:      #9ccfd8;
-  --callout-note-bg:         #1a2128;
+  --callout-note-bg:         #1b2a33;
   --callout-tip-color:       #31748f;
-  --callout-tip-bg:          #171e23;
+  --callout-tip-bg:          #19252e;
   --callout-important-color: #c4a7e7;
-  --callout-important-bg:    #211d2e;
+  --callout-important-bg:    #28213a;
   --callout-warning-color:   #f6c177;
-  --callout-warning-bg:      #25201a;
+  --callout-warning-bg:      #2e2618;
   --callout-caution-color:   #eb6f92;
-  --callout-caution-bg:      #261a21;
+  --callout-caution-bg:      #301c28;
 }
 
 /* Direct scoped hljs token rules */
