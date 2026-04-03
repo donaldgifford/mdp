@@ -30,6 +30,7 @@ func openBrowser(url string) {
 
 func run(name string, args ...string) {
 	// Use a detached context — the browser outlives the server process.
+	//nolint:gosec // G204: intentional — opens user's default browser via known commands (open/xdg-open/$BROWSER)
 	cmd := exec.CommandContext(context.Background(), name, args...)
 	cmd.Stderr = os.Stderr
 	if err := cmd.Start(); err != nil {
