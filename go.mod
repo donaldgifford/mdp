@@ -3,7 +3,7 @@ module github.com/donaldgifford/mdp
 go 1.26.1
 
 require (
-	github.com/alecthomas/chroma/v2 v2.2.0
+	github.com/alecthomas/chroma/v2 v2.23.1
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/litao91/goldmark-mathjax v0.0.0-20210217064022-a43cf739a50f
@@ -15,7 +15,7 @@ require (
 )
 
 require (
-	github.com/dlclark/regexp2 v1.7.0 // indirect
+	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jeandeaual/go-locale v0.0.0-20250612000132-0ef82f21eade // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
