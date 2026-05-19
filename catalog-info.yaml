@@ -1,0 +1,21 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: mdp
+  title: mdp
+  description: "Markdown Preview"
+  annotations:
+    backstage.io/code-coverage: enabled
+    backstage.io/source-location: url:https://github.com/donaldgifford/mdp
+    backstage.io/techdocs-ref: "dir:."
+    github.com/project-slug: "donaldgifford/mdp"
+  tags:
+    - go
+    - github
+  namespace: default
+spec:
+  owner: homelab
+  type: tool
+  system: dev-tools
+  lifecycle: production
