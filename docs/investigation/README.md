@@ -14,7 +14,7 @@ Design docs, plans, and implementation docs can reference investigations by ID
 | ID | Title | Status | Date | Author | Link |
 |----|-------|--------|------|--------|------|
 | INV-0001 | GitHub-style callout and alert rendering | Concluded | 2026-04-03 | Donald Gifford | [0001-github-style-callout-and-alert-rendering.md](0001-github-style-callout-and-alert-rendering.md) |
-| INV-0002 | Package mdp for distribution | Open | 2026-05-23 | Donald Gifford | [0002-package-mdp-for-distribution.md](0002-package-mdp-for-distribution.md) |
+| INV-0002 | Expose mdp as a Go library for other apps | Open | 2026-05-23 | Donald Gifford | [0002-expose-mdp-as-go-library.md](0002-expose-mdp-as-go-library.md) |
 <!-- END DOCZ AUTO-GENERATED -->
 <!-- BEGIN DOCZ AUTO-GENERATED -->
 ## All INVESTIGATIONs
