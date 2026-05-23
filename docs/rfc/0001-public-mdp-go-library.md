@@ -168,16 +168,20 @@ package livereload
 type Hub struct { /* ... */ }
 func NewHub() *Hub
 func (h *Hub) Broadcast(msg []byte)
+func (h *Hub) Count() int
 func (h *Hub) Close() error
+func (h *Hub) HandleWebSocket(w http.ResponseWriter, r *http.Request)
+func (h *Hub) HandleSSE(w http.ResponseWriter, r *http.Request)
 
-// Handler wraps an http.Handler, injecting the auto-reload <script>
-// into HTML responses and serving WS/SSE endpoints for the hub.
-type Handler struct { /* ... */ }
-type HandlerOption func(*Handler)
+// WrapHandler wraps next, injecting the reload <script> into
+// HTML responses and serving WS/SSE endpoints for the hub.
+type HandlerOption func(*handlerConfig)
 
-func WrapHandler(next http.Handler, hub *Hub, opts ...HandlerOption) *Handler
-func WithWSPath(path string) HandlerOption   // default: /ws
-func WithSSEPath(path string) HandlerOption  // default: /sse
+func WrapHandler(next http.Handler, hub *Hub, opts ...HandlerOption) http.Handler
+func WithWSPath(path string) HandlerOption    // default: /ws
+func WithSSEPath(path string) HandlerOption   // default: /events
+func WithInjectionPoint(marker string) HandlerOption // default: </body>
+func WithClientJS(script string) HandlerOption       // override when paths change
 
 // ClientJS is the small client-side reload script, exported for
 // consumers who want to inject it themselves rather than use
@@ -189,10 +193,15 @@ Boundary types are stdlib (`net/http`, `[]byte`, `string`). No
 dependency on `pkg/parser`, `pkg/theme`, or `assets`. External
 dependency: `github.com/gorilla/websocket` only.
 
-The wire protocol (`{"type":"content","html":"..."}` /
-`{"type":"cursor","line":N}`) becomes part of the public contract.
-Consumers can also opt out of injection by using `Hub.Broadcast`
-directly and serving their own routes.
+**Wire format ownership.** `pkg/livereload.Hub.Broadcast` takes raw
+`[]byte` and ships them over WS or SSE. The bytes are opaque to the
+package — *consumers* define the message shape. mdp's existing
+JSON shape (`{"type":"content","html":"..."}`, `{"type":"cursor","line":N}`)
+remains mdp's contract with `assets/preview.js`, not
+`pkg/livereload`'s contract with library consumers. docz or any
+other consumer can broadcast any bytes they want; the bundled
+`ClientJS` just calls `location.reload()` on any incoming message
+and treats the payload as opaque.
 
 ### What stays internal
 
@@ -289,8 +298,10 @@ After this phase, library consumers can already use `pkg/parser` and
 ### Phase 2: Extract pkg/livereload from internal/server
 
 - Create `pkg/livereload` with `Hub`, `WrapHandler`, `ClientJS`.
-- Move `internal/server/hub.go` → `pkg/livereload/hub.go`.
-- Move `internal/server/sse.go` → `pkg/livereload/sse.go`.
+- Extract WS hub (`internal/server/hub.go`) and SSE hub
+  (`internal/server/sse.go`) into `pkg/livereload`, unified behind a
+  single `Hub` type (DESIGN-0002 specifies the file layout and
+  concurrency model).
 - Refactor `internal/server` so it constructs a `livereload.Hub`,
   wraps its HTTP handler with `livereload.WrapHandler`, and pushes
   reload broadcasts through `Hub.Broadcast` when the watcher fires.
@@ -340,8 +351,10 @@ external consumer.
   - Audit `theme.Theme` exported fields (`IsAuto`, `HljsVendorCSS`,
     `MermaidTheme`) — decide whether they belong in the public surface
     or behind accessors (e.g., `Theme.IsAuto()`).
-  - Document the `pkg/livereload` wire protocol explicitly in the
-    package doc — it's now a public contract.
+  - Document the `pkg/livereload` transport contract explicitly in
+    the package doc — the WS frame and SSE event framing are part of
+    the public contract; the *payload bytes* are opaque to the
+    package and defined by consumers.
 
 ### Phase 4: Tag v0.2.0
 
@@ -358,7 +371,7 @@ external consumer.
 | Wire-protocol drift between `pkg/livereload` and the existing `preview.js` | Phase 2 breaks the browser preview silently | Medium | Acceptance criterion: byte-for-byte unchanged wire; `livereload_test.go` and `scrollsync_test.go` exercise the integration |
 | docz's needs reveal that the API surface is wrong (e.g., needs a higher-level "serve a directory" helper) | API churn post-v0.2.0 | Medium | Phase 2.5 validates docz against the un-tagged packages; revise before tagging |
 | `theme.Theme` exported fields become a contract we regret (renaming `HljsVendorCSS` would be breaking) | Long-term API debt | Medium | Phase 3 audit; consider replacing fields with accessor methods before v1 |
-| Consumers couple to mdp's specific WS/SSE message shape, then we can't evolve it | Frozen protocol | Low-Medium | Document the wire as a stable contract in `pkg/livereload`; bump major if it ever needs to change |
+| Consumers couple to mdp's specific JSON message shape, expecting it from `pkg/livereload` | Frozen protocol the package doesn't own | Low | DESIGN-0002 makes the payload opaque to `pkg/livereload`; consumers define their own message shape. Document this clearly in the package doc. |
 | Phase 1 import-path rewrite breaks the Neovim plugin's `build.lua` source-build fallback | Plugin install fails on non-release branches | Low | `build.lua` runs `go build` against whatever's in the tree — passes or fails with the Go build, which phase 1's acceptance covers |
 | Asset weight: consumers importing `pkg/theme` pull in `assets`' embedded vendor JS/CSS | Larger consumer binaries | Low | Document in `pkg/theme` doc.go; consumers who don't want the bloat can use `pkg/parser` alone |
 

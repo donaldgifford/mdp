@@ -86,9 +86,20 @@ design:
 1. **Two parallel hubs today.** `internal/server/hub.go` (WebSocket)
    and `internal/server/sse.go` (SSE) are separate types
    (`hub`, `sseHub`) with parallel `add`/`remove`/`broadcast`/`count`/
-   `closeAll` methods. `Server.Broadcast` likely fans out to both.
-   The new `pkg/livereload.Hub` will unify them behind a single
-   `Broadcast([]byte)` that delivers to both transports.
+   `closeAll` methods. `server.go:169-170` calls `s.hub.broadcast(msg)`
+   and `s.sse.broadcast(msg)` back-to-back — the fan-out is hardcoded
+   at the call site, not in the hub. The new `pkg/livereload.Hub`
+   unifies them behind a single `Broadcast([]byte)` that delivers to
+   both transports internally.
+
+   **Latent concurrency bug in the current code:** `hub.broadcast`
+   (`internal/server/hub.go:37-46`) holds an `RLock` while calling
+   `conn.WriteMessage`. gorilla/websocket documents that concurrent
+   writes to the same connection are unsafe. Today's code is safe
+   only because mdp serializes broadcasts (single watcher goroutine →
+   single `BroadcastFile` call). Once `Hub` is public, library
+   consumers can call `Broadcast` from any goroutine — the new
+   implementation must close this gap. See [Hub concurrency](#hub-concurrency).
 2. **No `<script>` injection today.** Reload works because
    `assets/preview.html:25` renders `{{.JS}}` (the bundled
    `preview.js`) into a single page that connects WS+SSE. This is
@@ -109,6 +120,9 @@ design:
 
 ### Target package layout
 
+End-state after phase 2 (entries marked `[phase 3]` are listed for
+reference but are not created in this design's scope):
+
 ```text
 cmd/mdp/                                -- unchanged
 pkg/
@@ -118,13 +132,13 @@ pkg/
     parser_test.go
     lineannotator_test.go
     bench_test.go
-    doc.go                              -- NEW (phase 3)
-    example_test.go                     -- NEW (phase 3)
+    doc.go                              -- [phase 3]
+    example_test.go                     -- [phase 3]
   theme/                                -- moved from internal/theme
     theme.go
     theme_test.go
-    doc.go                              -- NEW (phase 3)
-    example_test.go                     -- NEW (phase 3)
+    doc.go                              -- [phase 3]
+    example_test.go                     -- [phase 3]
   livereload/                           -- NEW
     hub.go                              -- unified WS+SSE broadcast
     handler.go                          -- WrapHandler + injection
@@ -132,8 +146,8 @@ pkg/
     client.js                           -- source for ClientJS (//go:embed)
     hub_test.go
     handler_test.go
-    doc.go                              -- NEW (phase 3)
-    example_test.go                     -- NEW (phase 3)
+    doc.go                              -- [phase 3]
+    example_test.go                     -- [phase 3]
 internal/server/                        -- slimmed
   server.go                             -- orchestrator: builds Hub, owns mdp flow
   browser.go                            -- unchanged
@@ -163,6 +177,10 @@ Import-path updates needed in:
 - any test files that import parser
 
 Run `goimports -w ./...` after the move.
+
+Benchmark baselines (`bench_test.go`) are not part of phase 1
+acceptance — the lift is mechanical and goldmark performance is
+unaffected. Re-baselining is a phase 3 hygiene task if desired.
 
 ### pkg/theme (phase 1)
 
@@ -229,6 +247,34 @@ Internally, `Hub` keeps two collections (WS conns, SSE channels) but
 the public API is one method per concern. Consumers don't need to
 care which transport a given client uses.
 
+#### Hub concurrency
+
+Closes the gorilla/websocket concurrent-write gap called out in
+[Background](#background). The new design uses **per-connection
+sender goroutines with a buffered channel**, which is the upstream
+gorilla pattern:
+
+- On `HandleWebSocket`, after the upgrade, `Hub` starts a goroutine
+  per connection that reads from a per-client `chan []byte` (buffer
+  size 8) and calls `conn.WriteMessage`. All writes to a given
+  connection therefore happen from a single goroutine.
+- `Broadcast` takes `RLock`, ranges over clients, and does a
+  non-blocking send (`select` with `default`) onto each client's
+  channel. If the channel is full (slow client), the message for
+  *that client* is dropped and the connection is scheduled for
+  removal — fast clients aren't blocked by slow ones.
+- `remove` closes the per-client channel; the sender goroutine
+  exits when the channel is drained and closed.
+- SSE clients already use `chan []byte` today (`sse.go:11-15`), so
+  the SSE path is structurally similar; the unification is mostly
+  about presenting a single `Hub` API.
+
+This must be implemented as part of phase 2 — lifting the existing
+`hub.go` verbatim would carry the race forward. The new test
+`pkg/livereload/hub_test.go` should include a `t.Parallel()` test
+firing `Broadcast` from N goroutines concurrently with
+`Connect`/`remove` to assert no race under `-race`.
+
 #### WrapHandler (injection middleware)
 
 For consumers that render arbitrary HTML responses (docz's per-doc
@@ -240,7 +286,7 @@ pages):
 // configurable paths. Useful for consumers that don't render HTML
 // through a single template (mdp does, docz doesn't).
 //
-// Default paths: /ws and /sse.
+// Default paths: /ws and /events.
 func WrapHandler(next http.Handler, hub *Hub, opts ...HandlerOption) http.Handler
 
 type HandlerOption func(*handlerConfig)
@@ -251,11 +297,22 @@ func WithSSEPath(path string) HandlerOption
 // WithInjectionPoint sets the marker before which ClientJS is
 // inserted in HTML responses. Default: "</body>".
 func WithInjectionPoint(marker string) HandlerOption
+
+// WithClientJS overrides the script that gets injected. Required
+// when WithWSPath or WithSSEPath are used, since the bundled
+// ClientJS hardcodes the default paths. If unset, the default
+// ClientJS is injected.
+func WithClientJS(script string) HandlerOption
 ```
 
 Returning `http.Handler` (interface) instead of a concrete `*Handler`
 type keeps the surface small and composes naturally with stdlib
-middleware patterns.
+middleware patterns. **This supersedes RFC-0001's `*Handler`
+sketch** — the RFC has been updated to match. Adding methods later
+is not currently planned; if future needs require methods, a
+concrete return type can be introduced as additive API
+(`*Handler` already implements `http.Handler`, so existing call
+sites would continue compiling).
 
 #### ClientJS
 
@@ -273,7 +330,7 @@ var ClientJS string
 
 The script:
 1. Opens a WebSocket to `/ws` (or the configured path).
-2. Falls back to EventSource at `/sse` if WS fails.
+2. Falls back to EventSource at `/events` if WS fails.
 3. On any incoming message, reloads the page (or, if the consumer's
    message shape includes `type: "content"` with `html`, swaps the
    body — the script can be dumb and just `location.reload()` for
@@ -289,8 +346,14 @@ in `assets/preview.js` and remains mdp-specific. This keeps
 `internal/server/server.go` shrinks substantially. Responsibilities
 that stay:
 
-- HTTP routing (`/`, `/cursor`, `/ws`, `/sse`, `/assets/*`,
-  `/vendor/*`)
+- HTTP routing — current routes per `server.go:230-244`:
+  - `GET /` → `handleIndex`
+  - `GET /ws` → was `handleWebSocket`, becomes `hub.HandleWebSocket`
+  - `GET /events` → was `handleSSE`, becomes `hub.HandleSSE`
+  - `POST /cursor` → `handleCursor`
+  - `GET /vendor/` → `http.FileServer` over embedded vendor assets
+  - `GET /local/` → `http.FileServer` over the markdown file's
+    directory (relative asset loading)
 - Token-based auth middleware
 - Idle-watcher (close when no clients for N seconds)
 - `pageData` rendering of `assets/preview.html`
@@ -309,7 +372,7 @@ Responsibilities that move:
 
 Concretely: `server.go` constructs a `*livereload.Hub`, wires
 `mux.HandleFunc("GET /ws", hub.HandleWebSocket)` and
-`mux.HandleFunc("GET /sse", hub.HandleSSE)`, and replaces internal
+`mux.HandleFunc("GET /events", hub.HandleSSE)`, and replaces internal
 calls to `s.hub.broadcast(...)` with `s.hub.Broadcast(...)` (capital B —
 the public method on the new package).
 
@@ -357,16 +420,21 @@ The minimal v1 ClientJS (~30 lines, illustrative):
     } catch (e) { connectSSE(); }
   }
   function connectSSE() {
-    sse = new EventSource("/sse");
+    sse = new EventSource("/events");
     sse.onmessage = reload;
   }
   connectWS();
 })();
 ```
 
-Paths (`/ws`, `/sse`) match `WrapHandler`'s defaults. If a consumer
-overrides the paths via `WithWSPath`/`WithSSEPath`, they also have to
-serve their own `ClientJS` substitute — out of scope for v1.
+The snippet above is **illustrative**, not a literal copy — the
+actual `client.js` will use whatever exact JS the implementer
+chooses, as long as it connects to `/ws` and `/events` and reloads
+on any incoming message. The default paths are hardcoded; consumers
+who override paths via `WithWSPath` / `WithSSEPath` must pass a
+matching `WithClientJS(script)` so the injected script targets the
+right endpoints. `WrapHandler` will log a warning at construction if
+custom paths are set without a custom `ClientJS`.
 
 ## API / Interface Changes
 
@@ -395,7 +463,7 @@ No CLI changes. No config changes. No `go.mod` module-path change.
 | Test | Asserts |
 |------|---------|
 | `pkg/livereload/hub_test.go` | `Broadcast` delivers to WS and SSE clients; `Count` is accurate; `Close` shuts both transports; concurrent broadcast/connect safety |
-| `pkg/livereload/handler_test.go` | `WrapHandler` injects `ClientJS` before `</body>` in `text/html` responses; doesn't touch non-HTML; serves `/ws` and `/sse` at default and custom paths |
+| `pkg/livereload/handler_test.go` | `WrapHandler` injects `ClientJS` before `</body>` in `text/html` responses; doesn't touch non-HTML; serves `/ws` and `/events` at default and custom paths |
 | `pkg/livereload/wire_test.go` | **Regression test**: server in `internal/server` configuration broadcasts a `wsMessage`; assert the bytes on the WS frame match the existing protocol byte-for-byte. Backstops phase 2's acceptance criterion. |
 
 **Deferred to phase 3:** `example_test.go` per public package
@@ -443,7 +511,8 @@ can already see `pkg/parser` exists but it's pre-release).
   into `pkg/livereload/hub.go` (unified)
 - Delete `internal/server/hub.go` and `internal/server/sse.go`
 - Refactor `internal/server/server.go`:
-  - Replace `s.hub = newHub()` and `s.sseHub = newSSEHub()` with
+  - Replace `s.hub = newHub()` and `s.sse = newSSEHub()` (per
+    `server.go:125-126`, field is `s.sse`) with
     `s.hub = livereload.NewHub()`
   - Replace `mux.HandleFunc("GET /ws", s.handleWebSocket)` with
     `mux.HandleFunc("GET /ws", s.hub.HandleWebSocket)`
@@ -465,36 +534,40 @@ can already see `pkg/parser` exists but it's pre-release).
    with stdlib middleware. Current design picks methods; reconsider
    if it bites in phase 2.5.
 
-2. **Should `WrapHandler` return `http.Handler` or a concrete
-   `*Handler` type?** Concrete type allows future methods (e.g.,
-   `Handler.Stop()`) without changing the signature; interface keeps
-   the surface minimal. Current design picks `http.Handler` —
-   simpler to compose, can switch later if needed without breaking
-   consumers (`*Handler` would still satisfy `http.Handler`).
-
-3. **Should the SSE channel be a `chan []byte` or `chan string`?**
+2. **Should the SSE channel be a `chan []byte` or `chan string`?**
    Today's `sseHub` uses `chan []byte`. The SSE spec requires
    string-encoded `data:` lines, so we'll end up converting either
    way. Sticking with `[]byte` for parity with the WS path.
 
-4. **What happens if a consumer's response is `Content-Type:
+3. **What happens if a consumer's response is `Content-Type:
    text/html; charset=utf-8` but doesn't contain `</body>`?**
    Inject before `</html>`, before EOF, or skip? Current design:
    skip (don't inject) and document the requirement in `WrapHandler`'s
    GoDoc. The "no `</body>` in HTML" case is rare and silently
    failing is better than corrupting markup.
 
-5. **Should mdp's `internal/server` switch to using
+4. **Should mdp's `internal/server` switch to using
    `livereload.WrapHandler` for consistency, or keep its template-
    based injection?** Current design: keep the template approach
    (less churn, mdp's HTML is template-rendered anyway). Worth
    revisiting later for code-path consolidation.
 
-6. **Mermaid render mode default — does promoting `parser` to public
+5. **Mermaid render mode default — does promoting `parser` to public
    force a decision now?** No — current behavior
    (`mermaid.RenderModeClient` hardcoded) is preserved in phase 1.
    `WithMermaidRenderMode` is added in phase 3 as additive API; the
    default stays client-side. Pre-v0.2.0 hardening can revisit.
+
+### Resolved during review
+
+- **`WrapHandler` return type.** Was open; resolved to `http.Handler`
+  in the [WrapHandler section](#wraphandler-injection-middleware).
+  RFC-0001 has been updated to match.
+- **Custom-path `ClientJS` gap.** Was punted; resolved by adding
+  `WithClientJS(script)` to the handler options.
+- **`hub.broadcast` concurrent-write race.** Was unaddressed in the
+  first draft; resolved by the [Hub concurrency](#hub-concurrency)
+  design (per-connection sender goroutine + buffered channel).
 
 ## References
 
