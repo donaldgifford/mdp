@@ -1,7 +1,7 @@
 ---
 id: INV-0002
 title: "Expose mdp as a Go library for other apps"
-status: Open
+status: Concluded
 author: Donald Gifford
 created: 2026-05-23
 ---
@@ -9,9 +9,11 @@ created: 2026-05-23
 
 # INV 0002: Expose mdp as a Go library for other apps
 
-**Status:** Open
+**Status:** Concluded
 **Author:** Donald Gifford
 **Date:** 2026-05-23
+**Concluded by:** [RFC-0001 — Public mdp Go library](../rfc/0001-public-mdp-go-library.md)
+(picked **Option A**, `pkg/`, over this doc's preference for Option B)
 
 <!--toc:start-->
 - [Question](#question)
@@ -25,7 +27,6 @@ created: 2026-05-23
   - [Why internal/ blocks import today](#why-internal-blocks-import-today)
   - [Reorganization options](#reorganization-options)
   - [Per-package "should it be public?" scorecard](#per-package-should-it-be-public-scorecard)
-  - [Composition rule of thumb](#composition-rule-of-thumb)
   - [Stability and asset-bloat considerations](#stability-and-asset-bloat-considerations)
 - [Conclusion](#conclusion)
 - [Recommendation](#recommendation)
@@ -354,3 +355,5 @@ the rationale survives future "why isn't X exported?" questions.
 - Go spec on `internal/` packages — https://go.dev/doc/go1.4#internalpackages
 - Common debate on `pkg/` vs root packages — Go community
   discussions; both are valid choices
+- [RFC-0001 — Public mdp Go library](../rfc/0001-public-mdp-go-library.md)
+  — the decision document that concludes this investigation
