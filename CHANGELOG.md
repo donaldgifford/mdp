@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.9] - 2026-05-23
+
+### Add
+
+- Deps update (#40)
+
 ## [0.1.8] - 2026-04-03
 
 ### Miscellaneous
@@ -120,6 +126,7 @@ All notable changes to this project will be documented in this file.
 - Add feature tests and update-vendor Makefile target
 - **server**: Add scroll sync tests
 
+[0.1.9]: https://github.com/donaldgifford/mdp/compare/v0.1.8...v0.1.9
 [0.1.8]: https://github.com/donaldgifford/mdp/compare/v0.1.7...v0.1.8
 [0.1.7]: https://github.com/donaldgifford/mdp/compare/v0.1.6...v0.1.7
 [0.1.6]: https://github.com/donaldgifford/mdp/compare/v0.1.5...v0.1.6
