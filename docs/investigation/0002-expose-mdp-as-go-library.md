@@ -29,6 +29,8 @@ created: 2026-05-23
   - [Stability and asset-bloat considerations](#stability-and-asset-bloat-considerations)
 - [Conclusion](#conclusion)
 - [Recommendation](#recommendation)
+  - [Proposed phasing](#proposed-phasing)
+  - [Deferred](#deferred)
 - [References](#references)
 <!--toc:end-->
 
@@ -252,35 +254,83 @@ Concretely:
 ## Recommendation
 
 Promote this investigation into an **RFC** (`RFC-XXXX: Public mdp Go
-library`) covering:
+library`). Up-front decision: pick **Option B** (root-level packages)
+unless there's a strong reason for `pkg/`. The work then splits into
+the following phases — each phase is independently shippable and has a
+concrete acceptance test.
 
-1. Pick **Option B** (root-level packages) unless there's a strong
-   reason for `pkg/`.
-2. Lift `internal/parser` -> `parser`; `internal/theme` -> `theme`.
-   Mechanical refactor (~15 files).
-3. Extract `livereload` from `internal/server`:
-   - `livereload.Hub` — broadcast hub (currently `internal/server/hub.go`)
-   - `livereload.Handler` — `http.Handler` middleware: serves WS at
-     `/ws`, SSE at `/sse` (configurable paths), injects the auto-reload
-     `<script>` into HTML responses
-   - `livereload.ClientJS` — the JS snippet (as `string` or `[]byte`)
-     for consumers who want to inject it themselves
-   - Keep mdp's existing `internal/server` as the *consumer* of
-     `livereload` — demonstrates the package on real code
-4. Before tagging v0.2.0:
-   - Add `WithMermaidRenderMode(mode)` option to `parser` so library
-     consumers aren't locked to client-side rendering.
-   - Audit `theme.Theme` exported fields — consider whether `IsAuto`,
-     `HljsVendorCSS`, `MermaidTheme` belong in the public surface or
-     should be hidden behind accessors.
-   - Write a doc.go for each public package with a usage example.
-5. Add a `Library` section to `README.md` showing two examples:
-   - parser-only (10 lines, markdown -> HTML)
-   - parser + theme + livereload (the docz `serve` shape)
-6. **Defer** exposing the full `server`, `watcher`, and a higher-level
-   "serve a directory" helper until a second consumer asks for them.
-   docz will be the forcing function for what the v1 API actually
-   needs to look like.
+### Proposed phasing
+
+**Phase 1 — Lift `parser` and `theme`.**
+- `git mv internal/parser parser`; `git mv internal/theme theme`.
+- Update internal imports in `cli`, `server`, etc. (~15 files).
+- **Acceptance:** `make build && make test && make lint` clean; manual
+  smoke: `mdp --file <doc>` renders identically to before; Neovim
+  plugin still works.
+- This phase ships independently — even without `livereload`,
+  consumers can now use the parser/theme directly.
+
+**Phase 2 — Extract `livereload` from `internal/server`.**
+- New public package: `livereload.Hub`, `livereload.Handler` (wraps an
+  `http.Handler`, injects auto-reload `<script>`, serves WS+SSE),
+  `livereload.ClientJS`.
+- Refactor `internal/server` to be a *consumer* of `livereload`. Server
+  keeps its single-file/stdin/cursor specifics but delegates the
+  reload machinery.
+- **Acceptance:** WS/SSE wire protocol is byte-for-byte unchanged
+  (the existing `assets/preview.js` and Neovim plugin must not need
+  any changes); `make test` passes including the
+  `livereload_test.go`/`scrollsync_test.go` integration tests.
+- After this phase, mdp's `internal/server` is the in-tree proof that
+  `livereload` works on real code.
+
+**Phase 2.5 — Validate against docz before tagging.**
+- In a docz branch, write `docz serve` against the un-tagged packages
+  using a `replace` directive in docz's `go.mod`.
+- **Acceptance:** docz `serve` compiles using only `parser` + `theme`
+  + `assets` + `livereload` (no reach-arounds into `internal/`), the
+  nav-and-render UX works end-to-end, and any API friction discovered
+  is fed back into the mdp packages *before* v0.2.0 is tagged. This is
+  the cheapest moment to break the API.
+
+**Phase 3 — Harden for v1 (isolation, examples, docs).**
+Most of the isolation property comes from *not coupling* the packages
+in phases 1–2, not from a separate phase of work. The explicit work
+here is the audit + proof:
+- **Audit:** grep each public package to confirm no exported function
+  takes or returns a type from another mdp package. Boundary types
+  should be standard library (`io.Reader`, `http.Handler`, `[]byte`,
+  `string`, `embed.FS`).
+- **`example_test.go` per package**, each importing *only* that
+  package. Go's compile step enforces "no hidden cross-deps" for free.
+- **`doc.go` per package** with a usage example.
+- Pre-v1 API changes:
+  - `parser.WithMermaidRenderMode(mode)` — unlock server-side
+    rendering for non-browser consumers.
+  - Audit `theme.Theme` exported fields (`IsAuto`, `HljsVendorCSS`,
+    `MermaidTheme`) — decide whether they belong in the public
+    surface or behind accessors.
+- **Trap to avoid:** do **not** create a shared-types package
+  (`mdptypes`, `mdpcore`, ...) to hold common types. Shared-types
+  packages turn into dumping grounds and recreate the coupling phase 3
+  is supposed to eliminate. If two packages "need the same type,"
+  prefer giving each its own (slightly different) version, or push the
+  contract out to a standard interface.
+
+**Phase 4 — Tag v0.2.0.**
+- Add a `Library` section to `README.md` with two worked examples:
+  parser-only (10 lines, markdown -> HTML), and parser + theme +
+  livereload (the docz `serve` shape).
+- Tag and release.
+
+### Deferred
+
+- Full `server` package as public API — wait for a second consumer
+  (beyond docz) that demonstrates a need.
+- `watcher` as public — 30-line job for any consumer; not mdp's
+  problem.
+- "Serve a directory" higher-level helper — let docz's implementation
+  bake first, then consider promoting the useful bits.
 
 A follow-up **ADR** should record the decisions to (a) keep `server`
 internal in favor of `livereload`, and (b) keep `watcher` internal, so
