@@ -383,6 +383,9 @@ The RFC is successful if:
 - INV-0002 — Expose mdp as a Go library for other apps
   (`docs/investigation/0002-expose-mdp-as-go-library.md`) — the
   analytical basis for this RFC
+- DESIGN-0002 — Refactor mdp internals into public pkg packages
+  (`docs/design/0002-refactor-mdp-internals-into-public-pkg-packages.md`)
+  — detailed design for phases 1 and 2
 - `internal/parser/parser.go` — package to be lifted in phase 1
 - `internal/theme/theme.go` — package to be lifted in phase 1
 - `internal/server/hub.go` and `internal/server/sse.go` — code to be
