@@ -9,7 +9,7 @@
 "go:github.com/google/go-licenses" = "1.6.0"
 
 # renovate: datasource=github-tags depName=golang/go
-go = "1.26.1"
+go = "1.26.2"
 # renovate: datasource=github-releases depName=DavidAnson/markdownlint-cli2
 markdownlint-cli2 = "0.22.1"
 # renovate: datasource=github-releases depName=google/yamlfmt
