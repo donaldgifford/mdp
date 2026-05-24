@@ -19,14 +19,18 @@ created: 2026-05-24
   - [In Scope](#in-scope)
   - [Out of Scope](#out-of-scope)
 - [Implementation Phases](#implementation-phases)
-  - [Phase 1: Lift parser and theme to pkg/](#phase-1-lift-parser-and-theme-to-pkg)
+  - [Phase 0: Add -race to CI test step (precursor)](#phase-0-add--race-to-ci-test-step-precursor)
     - [Tasks](#tasks)
     - [Success Criteria](#success-criteria)
-  - [Phase 2: Extract pkg/livereload from internal/server](#phase-2-extract-pkglivereload-from-internalserver)
+  - [Phase 1: Lift parser and theme to pkg/](#phase-1-lift-parser-and-theme-to-pkg)
     - [Tasks](#tasks-1)
     - [Success Criteria](#success-criteria-1)
+  - [Phase 2: Extract pkg/livereload from internal/server](#phase-2-extract-pkglivereload-from-internalserver)
+    - [Tasks](#tasks-2)
+    - [Success Criteria](#success-criteria-2)
 - [Cross-Phase Concerns](#cross-phase-concerns)
 - [Open Questions](#open-questions)
+  - [Resolved](#resolved)
 - [References](#references)
 <!--toc:end-->
 
@@ -79,6 +83,37 @@ tasks are checked off and all success criteria are met**.
 
 ---
 
+### Phase 0: Add -race to CI test step (precursor)
+
+**Branch:** `chore/add-race-to-ci`
+**Estimated diff:** 2-3 files (Makefile target, CI workflow).
+**Why first:** Phase 2's `Hub` concurrency redesign is specifically
+defended by a race-detector test. Landing this precursor means the
+race guarantee actually fires in CI from the moment Phase 2 lands —
+not just locally.
+
+#### Tasks
+
+- [ ] Add a `test-race` target to `Makefile` that runs
+      `go test -race ./...`
+- [ ] Wire `test-race` into `.github/workflows/ci.yml` as a step
+      after `make test` (or replace `test` with `test-race` if the
+      runtime budget allows — `-race` typically adds 2–10×)
+- [ ] Confirm the existing test suite passes cleanly under `-race`
+      on `main` before this PR merges. If there are existing races,
+      file them as separate issues — don't try to fix them in this
+      precursor PR
+- [ ] PR title: `chore: add -race to CI test step`
+- [ ] PR label: `patch`
+
+#### Success Criteria
+
+- `make test-race` is a defined target and runs cleanly on `main`
+- CI workflow includes the race step on push/PR
+- No unhandled race detector reports in the existing suite
+
+---
+
 ### Phase 1: Lift parser and theme to pkg/
 
 **Branch:** `feat/lift-parser-theme-to-pkg`
@@ -112,10 +147,10 @@ This is a mechanical refactor — no behavior change.
 - [ ] Update `internal/server/server.go` imports:
       `github.com/donaldgifford/mdp/internal/theme` →
       `github.com/donaldgifford/mdp/pkg/theme`
-- [ ] Check `internal/cli/serve.go` and `internal/cli/root.go` for
-      parser/theme imports; update if present
-- [ ] Check `cmd/mdp/main.go` for parser/theme imports; update if
-      present
+- [ ] Run `grep -rn "internal/parser\|internal/theme" internal/cli/ cmd/`
+      to identify call sites. Update any imports found
+      (`internal/cli/serve.go`, `internal/cli/root.go`,
+      `cmd/mdp/main.go` are the candidates)
 - [ ] Sweep with `goimports -w ./...` (or `make fmt`) to reorganize
       import blocks (gci enforces group order)
 - [ ] Verify with `grep -r "internal/parser\|internal/theme" .` that
@@ -134,9 +169,9 @@ This is a mechanical refactor — no behavior change.
 
 **PR**
 
-- [ ] Open PR with `minor` label (per `.github/workflows/release.yml`'s
-      `jefflinse/pr-semver-bump` — see Q1 in Open Questions for
-      whether this is the right label)
+- [ ] Open PR with `patch` label (phase 1 is a mechanical refactor
+      with no user-visible change; the actual v0.2.0 minor tag is
+      reserved for the release IMPL)
 - [ ] PR title: `feat: lift parser and theme into pkg/`
 - [ ] PR body references DESIGN-0002 § "pkg/parser (phase 1)" and
       "pkg/theme (phase 1)"
@@ -185,7 +220,9 @@ requirement means tests are the critical artifact.
 **Implement Hub (with concurrency fix)**
 
 - [ ] Define internal `wsClient` struct holding `*websocket.Conn` and
-      a `send chan []byte` (buffer size 8 — see Q5 in Open Questions)
+      a `send chan []byte` (buffer size 8 — matches the existing SSE
+      buffer in `sse.go:79`; revisit with `WithSendBuffer(n)` if
+      profiling later shows drops)
 - [ ] `Hub` stores `wsClients map[*wsClient]struct{}` and
       `sseClients map[chan []byte]struct{}` under a single `sync.RWMutex`
 - [ ] `HandleWebSocket`: upgrade, register a `*wsClient`, spawn one
@@ -202,12 +239,17 @@ requirement means tests are the critical artifact.
       for WS; same shape for SSE. Drain `removeQueue` after `RUnlock`
 - [ ] `Count`: return `len(wsClients) + len(sseClients)` under `RLock`
 - [ ] `Close`: lock, close all `send` channels (WS) and SSE channels,
-      clear both maps. Return `error` — currently always nil, but see
-      Q3 in Open Questions
+      clear both maps. Return `error`. Real error paths to surface:
+      `websocket.Conn.Close()` failures (rare but real on already-
+      half-closed sockets). If any per-connection close returns an
+      error, capture the first one and return it; continue closing
+      the rest (don't short-circuit on first error)
 - [ ] Move the `websocket.Upgrader{}` definition from
-      `internal/server/server.go:128-131` into `Hub` as a private field
-      (or expose `Hub.SetCheckOrigin(func(*http.Request) bool)` if
-      consumers need to override — see Q4 in Open Questions)
+      `internal/server/server.go:128-131` into `Hub` as a private
+      field with hardcoded permissive `CheckOrigin` (`func(_ *http.Request) bool { return true }`).
+      Document in `Hub`'s GoDoc that `livereload` is intended for
+      local-only use; a future `WithCheckOrigin(func)` option can be
+      added if a non-local consumer materializes
 
 **Implement WrapHandler**
 
@@ -287,12 +329,16 @@ requirement means tests are the critical artifact.
   - [ ] `TestWrapHandler_HonorsCustomPaths`: with
         `WithWSPath("/socket")` + `WithSSEPath("/stream")` +
         `WithClientJS("...")`, assert the routes work
-- [ ] `pkg/livereload/wire_test.go` (regression test — see Q2 in
-      Open Questions for whether this lives here or in `internal/server`):
+- [ ] `internal/server/wire_test.go` (regression test — lives in
+      `internal/server` because it tests the integration of mdp's
+      `wsMessage` JSON marshaling with `pkg/livereload`'s transport;
+      `pkg/livereload` itself has no opinion on the bytes):
   - [ ] `TestWireFormat_WSFrameMatchesPriorBaseline`: golden-file
         test that captures the exact bytes broadcast for a
         canonical `wsMessage{Type:"content",HTML:"<p>hi</p>"}` and
         asserts equality with a checked-in `testdata/ws_content.bin`
+  - [ ] Same for the `wsMessage{Type:"cursor",Line:42}` shape →
+        `testdata/ws_cursor.bin`
 
 **Verify and tidy**
 
@@ -300,9 +346,7 @@ requirement means tests are the critical artifact.
       (livereload_test.go, scrollsync_test.go, idletimeout_test.go,
       features_test.go, server_test.go, stdin_test.go)
 - [ ] All existing tests in `pkg/parser/`, `pkg/theme/` pass unchanged
-- [ ] `go test -race ./...` clean (this is **new** — currently `make
-      test` doesn't include `-race`. See Q6 in Open Questions for CI
-      wiring)
+- [ ] `make test-race` clean (target landed in Phase 0)
 - [ ] `make fmt`, `make lint`, `make build` all clean
 - [ ] Manual smoke: `./bin/mdp --file README.md` — open in browser,
       edit, confirm live reload still works
@@ -313,7 +357,7 @@ requirement means tests are the critical artifact.
 
 **PR**
 
-- [ ] Open PR with `minor` label
+- [ ] Open PR with `patch` label (see Phase 1 PR notes)
 - [ ] PR title: `feat: extract pkg/livereload from internal/server`
 - [ ] PR body references DESIGN-0002 § "pkg/livereload (phase 2)" and
       explicitly notes the gorilla concurrent-write race fix as a
@@ -343,11 +387,11 @@ requirement means tests are the critical artifact.
 - **No CHANGELOG hand-edits.** `git-cliff` regenerates `CHANGELOG.md`
   in the release workflow; per-PR changelog entries are not required.
   The `feat:` commit prefix triggers a Features section automatically.
-- **No release tags between phases.** Phase 1 and phase 2 land on
-  `main` but v0.2.0 is not tagged until phase 4 (handled by a
-  separate IMPL). Use the `dont-release` label on the phase 1/2 PRs
-  *only if* the `jefflinse/pr-semver-bump` action would otherwise tag
-  v0.2.0 early — see Q1.
+- **Phase PRs use `patch` labels** (resolved per Open Question 1).
+  Each phase bumps the patch version; the actual v0.2.0 minor tag
+  happens in IMPL-0004 phase 4 when the library is announced. If
+  the running patch count gets uncomfortable mid-rollout, switch
+  later PRs to `dont-release`.
 - **Pre-existing `internal/server` test files (server_test.go,
   features_test.go) use `package server_test`** and import
   `github.com/donaldgifford/mdp/internal/server`. These remain
@@ -358,81 +402,33 @@ requirement means tests are the critical artifact.
 
 ## Open Questions
 
-Implementation-specific questions to resolve before phase 1 starts.
-Design-level questions are settled in DESIGN-0002 § Resolved.
+None remaining. All eight questions raised during drafting are
+captured below under [Resolved](#resolved).
 
-1. **`minor` vs `dont-release` label for phase 1/2 PRs.** Per
-   `.github/workflows/release.yml`, every push to `main` with a
-   `minor` label bumps the version. Do we want phase 1 (mechanical
-   lift, no user-facing change) to bump from `v0.1.x` to `v0.2.0`,
-   or should both phase 1 and phase 2 carry `dont-release` and the
-   actual `v0.2.0` tag happen in phase 4 alongside the README
-   Library section? My read of RFC-0001 phase 4 is that v0.2.0
-   tagging is reserved for then — so both PRs probably want
-   `dont-release`. Confirm?
+### Resolved
 
-2. **Wire-regression test location.** DESIGN-0002 § Testing Strategy
-   places `wire_test.go` in `pkg/livereload/`. But it specifically
-   tests the integration of `internal/server`'s `wsMessage` JSON
-   marshaling with `pkg/livereload`'s transport — that's an
-   internal/server concern, not a pkg/livereload concern. Should it
-   live in `internal/server/wire_test.go` instead? My recommendation:
-   yes, move it to `internal/server/`, since `pkg/livereload` itself
-   has no opinion on the bytes.
-
-3. **`Hub.Close() error` return type.** Today's `closeAll()` returns
-   no error. If `Hub.Close()` will always return `nil`, returning
-   `error` is API-design noise that future evolution can't easily
-   walk back (removing the return value is a breaking change). My
-   recommendation: change DESIGN to `Close()` (no return). Wanted to
-   flag because DESIGN currently specifies `error`.
-
-4. **`websocket.Upgrader.CheckOrigin` configurability.** Today's
-   server hardcodes `CheckOrigin: func(_ *http.Request) bool { return true }`
-   (server.go:130) because it's a local dev tool. After moving the
-   upgrader into `Hub`, consumers writing a non-localhost server
-   (production preview, perhaps?) might need to restrict origins. Two
-   options: (a) hardcode permissive origin in `Hub` and document that
-   `livereload` is for local-only use; (b) add `WithCheckOrigin(func)`
-   as a hub option. My recommendation: (a) for v1 — keeps API
-   minimal; add (b) later if a real use case appears. Confirm.
-
-5. **SSE / WS channel buffer size.** Today: `chan []byte` with
-   buffer 8 (sse.go:79, `ch := make(chan []byte, 8)`). DESIGN-0002
-   prescribes the same buffer 8 for the new WS sender. Is 8 still
-   right after consolidation? It's been sufficient for mdp because
-   broadcasts are infrequent (file save → one broadcast). Library
-   consumers might broadcast more often. Reasonable defaults to
-   consider: 8 (current), 32, 128. My recommendation: keep 8, add a
-   future `WithSendBuffer(n int)` option if profiling shows drops.
-   Confirm.
-
-6. **Add `make test-race` target and CI step before phase 2 lands.**
-   The new `Hub` concurrency design is specifically defended by a
-   race-detector test (`TestHub_ConcurrentBroadcastNoRace`). The
-   current `make test` target doesn't pass `-race`. Should we add a
-   `test-race` make target and a CI step for it in a tiny precursor
-   PR (`chore: add -race to CI test step`) so phase 2's regression
-   guarantee actually fires in CI, not just locally? My
-   recommendation: yes, precursor PR.
-
-7. **Phase ordering of import-path rewrites in `internal/cli/`.**
-   `internal/cli/serve.go` likely imports neither parser nor theme
-   directly (it imports `internal/server`, which re-exports them
-   via constructor). Worth a `grep` before phase 1 to know whether
-   any cli changes are needed; the IMPL assumes they may not be.
-
-8. **Branch protection on `feat/extract-livereload-package`.** The
-   PR will be large (~10 files, ~500 LoC moved/added). Worth
-   considering whether to split the phase 2 PR further: (a) one PR
-   for the new `pkg/livereload` package + its tests (no
-   `internal/server` changes); (b) a follow-up PR refactoring
-   `internal/server` to use it. This would keep each PR smaller and
-   make the wire-compat test gate a separate review. Trade-off:
-   slower end-to-end, harder to verify in isolation that
-   `pkg/livereload` actually works in context until the second PR
-   lands. My recommendation: single PR; the wire-regression test
-   is the load-bearing guarantee, not PR size. Confirm.
+1. **PR label.** Use `patch` for Phase 0/1/2 PRs. v0.2.0 minor tag is
+   reserved for IMPL-0004 phase 4. If patch count gets uncomfortable
+   mid-rollout, fall back to `dont-release` on later PRs.
+2. **Wire-regression test location.** `internal/server/wire_test.go`
+   (not `pkg/livereload/`). Reflected in Phase 2 tasks above.
+3. **`Hub.Close() error` return type.** Keep `error`. Real error
+   paths exist (e.g., `websocket.Conn.Close()` on a half-closed
+   socket). Capture the first per-connection error, continue closing
+   the rest, return the captured error.
+4. **`CheckOrigin` configurability.** Hardcoded permissive
+   (`func(_ *http.Request) bool { return true }`) for v1. Document
+   in `Hub`'s GoDoc that `livereload` is intended for local-only
+   use. Add `WithCheckOrigin(func)` later if a real non-local
+   consumer materializes.
+5. **Channel buffer size.** Keep 8 (matches existing `sse.go:79`).
+   Add `WithSendBuffer(n int)` option later if profiling shows drops.
+6. **`-race` in CI.** Yes — precursor PR (Phase 0 above) lands first.
+7. **`internal/cli/` import sweep.** Made explicit as a `grep` task
+   in Phase 1 above.
+8. **Phase 2 PR splitting.** Keep Phase 2 as a single PR. The
+   wire-regression test (Phase 2 §Tests) is the load-bearing
+   guarantee, not PR size.
 
 ## References
 

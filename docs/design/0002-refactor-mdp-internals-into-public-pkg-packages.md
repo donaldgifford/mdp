@@ -25,6 +25,7 @@ created: 2026-05-23
   - [pkg/theme (phase 1)](#pkgtheme-phase-1)
   - [pkg/livereload (phase 2)](#pkglivereload-phase-2)
     - [Hub](#hub)
+    - [Hub concurrency](#hub-concurrency)
     - [WrapHandler (injection middleware)](#wraphandler-injection-middleware)
     - [ClientJS](#clientjs)
   - [internal/server after refactor](#internalserver-after-refactor)
