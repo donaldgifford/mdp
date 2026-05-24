@@ -36,6 +36,7 @@ created: 2026-05-23
   - [Phase 1 PR — lift parser and theme](#phase-1-pr--lift-parser-and-theme)
   - [Phase 2 PR — extract livereload](#phase-2-pr--extract-livereload)
 - [Open Questions](#open-questions)
+  - [Resolved](#resolved)
 - [References](#references)
 <!--toc:end-->
 
@@ -526,48 +527,45 @@ can already see `pkg/parser` exists but it's pre-release).
 
 ## Open Questions
 
-1. **Should `Hub` expose `HandleWebSocket` / `HandleSSE` as methods,
-   or as standalone functions taking a `*Hub`?**
-   Methods read more naturally at call sites
-   (`mux.HandleFunc("GET /ws", hub.HandleWebSocket)`), but standalone
-   funcs (`livereload.WebSocketHandler(hub)`) are easier to compose
-   with stdlib middleware. Current design picks methods; reconsider
-   if it bites in phase 2.5.
+None remaining. All questions raised during drafting have been
+resolved — see [Resolved](#resolved) below.
 
-2. **Should the SSE channel be a `chan []byte` or `chan string`?**
-   Today's `sseHub` uses `chan []byte`. The SSE spec requires
-   string-encoded `data:` lines, so we'll end up converting either
-   way. Sticking with `[]byte` for parity with the WS path.
+### Resolved
 
-3. **What happens if a consumer's response is `Content-Type:
-   text/html; charset=utf-8` but doesn't contain `</body>`?**
-   Inject before `</html>`, before EOF, or skip? Current design:
-   skip (don't inject) and document the requirement in `WrapHandler`'s
-   GoDoc. The "no `</body>` in HTML" case is rare and silently
-   failing is better than corrupting markup.
+Resolved during initial review:
 
-4. **Should mdp's `internal/server` switch to using
-   `livereload.WrapHandler` for consistency, or keep its template-
-   based injection?** Current design: keep the template approach
-   (less churn, mdp's HTML is template-rendered anyway). Worth
-   revisiting later for code-path consolidation.
-
-5. **Mermaid render mode default — does promoting `parser` to public
-   force a decision now?** No — current behavior
-   (`mermaid.RenderModeClient` hardcoded) is preserved in phase 1.
-   `WithMermaidRenderMode` is added in phase 3 as additive API; the
-   default stays client-side. Pre-v0.2.0 hardening can revisit.
-
-### Resolved during review
-
-- **`WrapHandler` return type.** Was open; resolved to `http.Handler`
+- **`WrapHandler` return type.** Resolved to `http.Handler`
   in the [WrapHandler section](#wraphandler-injection-middleware).
-  RFC-0001 has been updated to match.
-- **Custom-path `ClientJS` gap.** Was punted; resolved by adding
+  RFC-0001 updated to match.
+- **Custom-path `ClientJS` gap.** Resolved by adding
   `WithClientJS(script)` to the handler options.
-- **`hub.broadcast` concurrent-write race.** Was unaddressed in the
-  first draft; resolved by the [Hub concurrency](#hub-concurrency)
-  design (per-connection sender goroutine + buffered channel).
+- **`hub.broadcast` concurrent-write race.** Resolved by the
+  [Hub concurrency](#hub-concurrency) design (per-connection sender
+  goroutine + buffered channel).
+
+Resolved by author follow-up:
+
+- **`HandleWebSocket` / `HandleSSE` shape.** Keep as methods on
+  `*Hub`. Call sites read naturally
+  (`mux.HandleFunc("GET /ws", hub.HandleWebSocket)`); revisit if
+  stdlib-middleware composition friction shows up in phase 2.5.
+- **SSE channel element type.** Keep `chan []byte` for parity with
+  the WS path. SSE-spec string conversion happens at write time
+  inside `HandleSSE`.
+- **HTML response without `</body>`.** `WrapHandler` does not
+  inject; logs a warning at the `slog.Warn` level naming the
+  request path so the consumer can spot the misconfiguration.
+  Better to leave the response untouched than to corrupt markup
+  by guessing where the script should go.
+- **mdp's `internal/server` continues to use template-based
+  injection,** not `livereload.WrapHandler`. mdp's HTML is
+  template-rendered anyway and the template path is unchanged by
+  this refactor — switching would be churn for no functional
+  benefit. Code-path consolidation can be revisited later if
+  ever useful.
+- **Mermaid render mode default.** Phase 1 preserves the current
+  hardcoded `mermaid.RenderModeClient`. `WithMermaidRenderMode`
+  is added in phase 3 as additive API; default stays client-side.
 
 ## References
 
