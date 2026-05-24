@@ -22,8 +22,8 @@ import (
 	"github.com/gorilla/websocket"
 
 	"github.com/donaldgifford/mdp/assets"
-	"github.com/donaldgifford/mdp/internal/parser"
 	interntheme "github.com/donaldgifford/mdp/internal/theme"
+	"github.com/donaldgifford/mdp/pkg/parser"
 )
 
 // Config holds the server configuration.

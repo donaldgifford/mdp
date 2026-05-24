@@ -123,10 +123,10 @@ This is a mechanical refactor — no behavior change.
 
 **Move parser package**
 
-- [ ] `git mv internal/parser pkg/parser` (preserves history)
-- [ ] Verify `pkg/parser/parser.go` package declaration is still
+- [x] `git mv internal/parser pkg/parser` (preserves history)
+- [x] Verify `pkg/parser/parser.go` package declaration is still
       `package parser` (no edit needed — package name doesn't change)
-- [ ] Verify `pkg/parser/lineannotator.go`, `parser_test.go`,
+- [x] Verify `pkg/parser/lineannotator.go`, `parser_test.go`,
       `lineannotator_test.go`, `bench_test.go` all moved cleanly
 
 **Move theme package**

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/donaldgifford/mdp/internal/parser"
+	"github.com/donaldgifford/mdp/pkg/parser"
 )
 
 func BenchmarkRender(b *testing.B) {
