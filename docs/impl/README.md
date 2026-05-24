@@ -34,4 +34,5 @@ docz create impl "Your Implementation Title"
 |----|-------|--------|------|--------|------|
 | IMPL-0001 | Themes | In Progress | 2026-03-06 | Donald Gifford | [0001-themes.md](0001-themes.md) |
 | IMPL-0002 | GitHub-style callout rendering | Completed | 2026-04-03 | Donald Gifford | [0002-github-style-callout-rendering.md](0002-github-style-callout-rendering.md) |
+| IMPL-0003 | Phase 1-2 of RFC-0001 — lift parser/theme and extract livereload | Draft | 2026-05-24 | Donald Gifford | [0003-phase-1-2-of-rfc-0001-lift-parsertheme-and-extract-livereload.md](0003-phase-1-2-of-rfc-0001-lift-parsertheme-and-extract-livereload.md) |
 <!-- END DOCZ AUTO-GENERATED -->
