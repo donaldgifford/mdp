@@ -131,40 +131,44 @@ This is a mechanical refactor — no behavior change.
 
 **Move theme package**
 
-- [ ] `git mv internal/theme pkg/theme`
-- [ ] Verify `pkg/theme/theme.go` package declaration is still
+- [x] `git mv internal/theme pkg/theme`
+- [x] Verify `pkg/theme/theme.go` package declaration is still
       `package theme`
-- [ ] Confirm `pkg/theme/theme.go` still imports
+- [x] Confirm `pkg/theme/theme.go` still imports
       `github.com/donaldgifford/mdp/assets` (unchanged — `assets` is
       at module root)
 
 **Rewrite imports**
 
-- [ ] Update `internal/server/server.go` imports:
+- [x] Update `internal/server/server.go` imports:
       `github.com/donaldgifford/mdp/internal/parser` →
       `github.com/donaldgifford/mdp/pkg/parser`
-- [ ] Update `internal/server/server.go` imports:
+- [x] Update `internal/server/server.go` imports:
       `github.com/donaldgifford/mdp/internal/theme` →
-      `github.com/donaldgifford/mdp/pkg/theme`
-- [ ] Run `grep -rn "internal/parser\|internal/theme" internal/cli/ cmd/`
+      `github.com/donaldgifford/mdp/pkg/theme` (and dropped the
+      `interntheme` alias — bare `theme` package qualifier is
+      unambiguous against the `s.theme` field)
+- [x] Run `grep -rn "internal/parser\|internal/theme" internal/cli/ cmd/`
       to identify call sites. Update any imports found
-      (`internal/cli/serve.go`, `internal/cli/root.go`,
-      `cmd/mdp/main.go` are the candidates)
-- [ ] Sweep with `goimports -w ./...` (or `make fmt`) to reorganize
+      (no matches — `internal/cli` and `cmd/mdp` don't import
+      parser/theme directly; they go through `internal/server`)
+- [x] Sweep with `goimports -w ./...` (or `make fmt`) to reorganize
       import blocks (gci enforces group order)
-- [ ] Verify with `grep -r "internal/parser\|internal/theme" .` that
+- [x] Verify with `grep -r "internal/parser\|internal/theme" .` that
       no stale paths remain (outside docs/)
 
 **Verify and tidy**
 
-- [ ] `make fmt` clean
-- [ ] `make lint` clean (gci is the most likely failure surface)
-- [ ] `make test` green
-- [ ] `make build` produces a working binary
+- [x] `make fmt` clean
+- [x] `make lint` clean (gci is the most likely failure surface)
+- [x] `make test` green
+- [x] `make build` produces a working binary
 - [ ] Manual smoke: `./bin/mdp --file README.md` — open in browser,
-      edit README.md, confirm live reload still works
+      edit README.md, confirm live reload still works *(deferred —
+      requires browser; the test suite covers the HTTP/WS paths)*
 - [ ] Neovim smoke: `:MdpPreview` on a `.md` file, edit, confirm
-      reload + scroll sync still work
+      reload + scroll sync still work *(deferred — requires
+      Neovim; covered by the binary build + test suite)*
 
 **PR**
 
