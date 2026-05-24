@@ -444,7 +444,7 @@ custom paths are set without a custom `ClientJS`.
 |---------|--------------------|
 | `pkg/parser` | Same as `internal/parser` today: `Parser`, `Option`, `New`, `Render`, `WithGFM`, `WithSyntaxHighlighting`, `WithMermaid`, `WithMath`, `WithCallouts`. (`WithMermaidRenderMode` deferred to phase 3.) |
 | `pkg/theme` | Same as `internal/theme` today: `Theme` struct (`CSS`, `HljsVendorCSS`, `MermaidTheme`, `IsAuto`), `Resolve`, `Names`. |
-| `pkg/livereload` | `Hub`, `NewHub`, `(*Hub).Broadcast`, `(*Hub).Count`, `(*Hub).Close`, `(*Hub).HandleWebSocket`, `(*Hub).HandleSSE`, `WrapHandler`, `HandlerOption`, `WithWSPath`, `WithSSEPath`, `WithInjectionPoint`, `ClientJS`. |
+| `pkg/livereload` | `Hub`, `NewHub`, `(*Hub).Broadcast`, `(*Hub).Count`, `(*Hub).Close`, `(*Hub).HandleWebSocket`, `(*Hub).HandleSSE`, `WrapHandler`, `HandlerOption`, `WithWSPath`, `WithSSEPath`, `WithInjectionPoint`, `WithClientJS`, `ClientJS`. |
 
 No CLI changes. No config changes. No `go.mod` module-path change.
 
@@ -497,9 +497,9 @@ without affecting the other.
   `internal/server/*.go`, plus any test files
 - Run `make fmt` (gci will reorganize import blocks)
 
-**PR labels:** `minor` (RFC-0001 phase 1 is a v0.2.0 milestone but
-phase 1 alone doesn't ship anything new to library consumers — they
-can already see `pkg/parser` exists but it's pre-release).
+**PR labels:** `patch` (Phase 1 is a mechanical refactor; the v0.2.0
+minor tag is reserved for IMPL-0004 Phase 4 alongside the README
+Library section).
 
 **Acceptance:** as defined in RFC-0001 phase 1.
 

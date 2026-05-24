@@ -89,7 +89,8 @@ Phase 3 must not start until:
      covered by tests
    - `internal/server` consumes `pkg/livereload` (no `hub.go` /
      `sse.go` files left in `internal/server`)
-   - `make test-race` is green in CI
+   - `make test-coverage` (the CI-invoked race-detected path) is
+     green on `main`
 2. RFC-0001 phase 2.5 is complete: docz has a working `serve` command
    built against the un-tagged public packages via a `replace`
    directive. Any API friction surfaced in docz has been fed back into
@@ -197,7 +198,8 @@ small — the rich examples live in `doc.go`.
       mermaid block; assert the rendered HTML contains an `<svg>`
       (server-side render) rather than a `<pre class="mermaid">`
       placeholder (client-side render)
-- [ ] Add the new option to `ExampleNew_withOptions` from above
+- [ ] Mention `WithMermaidRenderMode` in `pkg/parser/doc.go`'s
+      "all-options" code block
 
 **pkg/theme: exported field audit**
 
@@ -243,9 +245,9 @@ auditable.
 - [ ] For each gap that won't be closed (defensive guards, etc.),
       add a `// coverage: <reason>` comment and document the
       exemption in the PR body
-- [ ] Update `.codecov.yml` (or wherever the threshold lives — see
-      Open Question 6 in IMPL-0003) if needed to assert per-pkg/
-      thresholds. Project-wide threshold stays at the current 60%
+- [ ] Update `.codecov.yml` if needed to assert per-`pkg/` thresholds
+      higher than the project-wide 60% (see `CLAUDE.md` § CI/CD).
+      Project-wide threshold stays at the current 60%
 
 **PR**
 
@@ -257,7 +259,8 @@ auditable.
 
 #### Success Criteria
 
-- `make build && make test && make lint && make test-race` all green
+- `make build && make test && make lint && make test-coverage` all
+  green (test-coverage is the race-detected CI path)
 - `go test ./pkg/...` runs and all `Example*` tests pass
 - Each `example_test.go` imports *only* its own package + stdlib
   (compile-time enforcement of isolation; the test file fails to
@@ -341,7 +344,8 @@ If a richer top-level explainer is needed later, revisit.
 - All four docs (RFC-0001, DESIGN-0002, IMPL-0003, IMPL-0004) have
   their statuses bumped to the terminal state and the docz indexes
   reflect it
-- `README.md` has a `## Library` section with both worked examples
+- `README.md` has a `## Library` section with the use-cases
+  pointer table and GoDoc links
 
 ---
 

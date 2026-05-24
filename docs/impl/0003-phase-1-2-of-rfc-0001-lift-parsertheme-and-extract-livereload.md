@@ -83,34 +83,33 @@ tasks are checked off and all success criteria are met**.
 
 ---
 
-### Phase 0: Add -race to CI test step (precursor)
+### Phase 0: Add `test-race` make target for local dev (optional precursor)
 
-**Branch:** `chore/add-race-to-ci`
-**Estimated diff:** 2-3 files (Makefile target, CI workflow).
-**Why first:** Phase 2's `Hub` concurrency redesign is specifically
-defended by a race-detector test. Landing this precursor means the
-race guarantee actually fires in CI from the moment Phase 2 lands —
-not just locally.
+**Branch:** `chore/add-race-make-target`
+**Estimated diff:** 1 file (Makefile).
+**Status:** *Optional.* CI already runs race detection — `make
+test-coverage` invokes `go test -race -coverprofile=...`
+(`Makefile:52-54`), and the GitHub Actions `Test Go` job runs
+`make test-coverage`. So phase 2's `Hub` concurrency test is already
+defended in CI without any precursor.
+
+This phase only adds a convenience target for local dev so contributors
+can run race detection without producing a coverage file. Skip the
+phase entirely if you prefer to keep using `make test-coverage`
+locally.
 
 #### Tasks
 
-- [ ] Add a `test-race` target to `Makefile` that runs
-      `go test -race ./...`
-- [ ] Wire `test-race` into `.github/workflows/ci.yml` as a step
-      after `make test` (or replace `test` with `test-race` if the
-      runtime budget allows — `-race` typically adds 2–10×)
-- [ ] Confirm the existing test suite passes cleanly under `-race`
-      on `main` before this PR merges. If there are existing races,
-      file them as separate issues — don't try to fix them in this
-      precursor PR
-- [ ] PR title: `chore: add -race to CI test step`
+- [ ] Add a `test-race` target to `Makefile`:
+      `$(GO) test -race ./...` (no coverage output)
+- [ ] PR title: `chore: add test-race convenience make target`
 - [ ] PR label: `patch`
 
 #### Success Criteria
 
 - `make test-race` is a defined target and runs cleanly on `main`
-- CI workflow includes the race step on push/PR
-- No unhandled race detector reports in the existing suite
+- No CI changes (race detection is already exercised by
+  `make test-coverage`)
 
 ---
 
@@ -348,7 +347,8 @@ requirement means tests are the critical artifact.
       (livereload_test.go, scrollsync_test.go, idletimeout_test.go,
       features_test.go, server_test.go, stdin_test.go)
 - [ ] All existing tests in `pkg/parser/`, `pkg/theme/` pass unchanged
-- [ ] `make test-race` clean (target landed in Phase 0)
+- [ ] `make test-coverage` clean (CI's existing race-detected path
+      covers the new `TestHub_ConcurrentBroadcastNoRace`)
 - [ ] `make fmt`, `make lint`, `make build` all clean
 - [ ] Manual smoke: `./bin/mdp --file README.md` — open in browser,
       edit, confirm live reload still works
@@ -371,8 +371,9 @@ requirement means tests are the critical artifact.
 - `go test -race ./...` clean (zero race-detector reports)
 - All existing `internal/server` tests pass *without modification*
   (proves wire compatibility from inside the server)
-- `pkg/livereload/wire_test.go` golden-file test passes (proves wire
-  compatibility from outside — locks the bytes for future refactors)
+- `internal/server/wire_test.go` golden-file test passes (proves wire
+  compatibility from outside `pkg/livereload`; locks the bytes for
+  future refactors)
 - `internal/server/hub.go` and `internal/server/sse.go` no longer
   exist
 - `internal/server/server.go` no longer imports
@@ -427,7 +428,12 @@ captured below under [Resolved](#resolved).
    consumer materializes.
 5. **Channel buffer size.** Keep 8 (matches existing `sse.go:79`).
    Add `WithSendBuffer(n int)` option later if profiling shows drops.
-6. **`-race` in CI.** Yes — precursor PR (Phase 0 above) lands first.
+6. **`-race` in CI.** Already covered — `make test-coverage`
+   (Makefile:52-54) runs with `-race` and is what CI invokes for
+   the `Test Go` job. The original Q6 answer assumed `-race` needed
+   wiring; on closer inspection it's already there. Phase 0 in this
+   IMPL is reduced to an optional `test-race` make target for local
+   dev convenience.
 7. **`internal/cli/` import sweep.** Made explicit as a `grep` task
    in Phase 1 above.
 8. **Phase 2 PR splitting.** Keep Phase 2 as a single PR. The
