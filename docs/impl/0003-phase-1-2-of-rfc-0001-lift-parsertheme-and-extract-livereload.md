@@ -186,7 +186,9 @@ This is a mechanical refactor — no behavior change.
 - Manual smoke: live reload and Neovim scroll sync behave identically
   to `main`
 - Code-coverage report (`make test-coverage`) within 1% of `main`
-  baseline (no test deletions, no untested new code)
+  baseline (no test deletions, no untested new code). Closing any
+  pre-existing coverage gaps on `pkg/parser` and `pkg/theme` to the
+  100%-on-exported standard is deferred to IMPL-0004 phase 3
 
 ---
 
@@ -376,9 +378,11 @@ requirement means tests are the critical artifact.
 - `internal/server/server.go` no longer imports
   `github.com/gorilla/websocket` directly (transitive only)
 - Manual smoke (mdp CLI + Neovim) behaves identically to `main`
-- Coverage (`make test-coverage`) for the new `pkg/livereload`
-  package ≥ 70% (the project's coverage target is 60% with 40%
-  minimum per CLAUDE.md; a load-bearing new package warrants more)
+- **100% line coverage on exported symbols** in `pkg/livereload`
+  (matches the standard for public packages set in IMPL-0004
+  phase 3). Defensive gaps annotated with `// coverage: <reason>`.
+  Project-wide coverage threshold (currently 60% per CLAUDE.md)
+  stays unchanged — the bar is raised only for the public packages
 
 ---
 

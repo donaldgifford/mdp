@@ -28,6 +28,7 @@ created: 2026-05-24
     - [Success Criteria](#success-criteria-1)
 - [Cross-Phase Concerns](#cross-phase-concerns)
 - [Open Questions](#open-questions)
+  - [Resolved](#resolved)
 - [References](#references)
 <!--toc:end-->
 
@@ -126,43 +127,60 @@ outcomes).
 - [ ] If audit surfaces unintended coupling, file as a follow-up PR
       rather than fixing inline (keeps this PR scoped to hardening)
 
-**Per-package doc.go**
+**Per-package doc.go (primary docs surface)**
 
-- [ ] `pkg/parser/doc.go`: package-level GoDoc with a 10-line
-      "render markdown to HTML" example in the comment block; covers
-      Mermaid + KaTeX + highlighting + callouts feature flags
-- [ ] `pkg/theme/doc.go`: package-level GoDoc explaining the theme
-      registry, `Resolve`/`Names`, and that consumers importing
-      `pkg/theme` will pull in `assets`' embedded JS/CSS (binary
-      bloat warning)
-- [ ] `pkg/livereload/doc.go`: package-level GoDoc with **transport
+Each package's `doc.go` is the canonical place for usage examples.
+The README's Library section (phase 4) defers to GoDoc rather than
+duplicating prose. Each `doc.go` holds the package-level GoDoc
+comment with usage examples rendered as fenced code blocks.
+
+- [ ] `pkg/parser/doc.go`: package overview; covers GFM, syntax
+      highlighting, Mermaid + Math + callouts feature flags. Include
+      two code-block examples:
+  - minimal `parser.New().Render([]byte("# Hi"))`
+  - parser with all `With*` options including the new
+    `WithMermaidRenderMode`
+- [ ] `pkg/theme/doc.go`: package overview; explain the theme
+      registry, `Resolve` / `Names`, and the binary-bloat note
+      (importing `pkg/theme` pulls in `assets`' embedded vendor
+      JS/CSS). Include a code-block example showing
+      `theme.Resolve("github-light")` + reading the resolved fields
+      (`CSS`, `HljsVendorCSS`, `MermaidTheme`, `IsAuto()`).
+- [ ] `pkg/livereload/doc.go`: package overview with the **transport
       contract** spelled out — WS frame format (TextMessage carrying
-      opaque `[]byte` payload), SSE event framing (`data: <payload>\n\n`),
-      and the explicit statement that `Broadcast` payloads are
-      consumer-defined. Include the standard `WrapHandler` + `Hub`
-      composition example
+      opaque `[]byte` payload), SSE event framing
+      (`data: <payload>\n\n`), and the explicit statement that
+      `Broadcast` payloads are consumer-defined. Include a single
+      composition example: build a `Hub`, wrap a stdlib
+      `http.HandlerFunc` with `WrapHandler`, broadcast opaque bytes,
+      browser reloads on receipt. **Do not** include a typed/JSON
+      message example — that's mdp's contract, not livereload's, and
+      muddles the "payload is opaque" point.
 
-**Per-package example_test.go**
+**Per-package example_test.go (compile-time isolation backstop)**
+
+Each public package has one `example_test.go` with a *minimal*
+runnable `Example*` function. The point is the compile-time
+guarantee: the file's import block must contain only that package
+plus stdlib; if anyone later adds a cross-`pkg/` import to the
+public surface, the example fails to build. Examples are intentionally
+small — the rich examples live in `doc.go`.
 
 - [ ] `pkg/parser/example_test.go`:
-  - [ ] `ExampleNew_basic`: minimal `parser.New().Render([]byte("# Hi"))`
-  - [ ] `ExampleNew_withOptions`: parser with all current `With*`
-        options + the new `WithMermaidRenderMode`
-  - [ ] Import block must contain only `parser` (and stdlib).
-        Compile-time fail if the audit was wrong
+  - [ ] `ExampleNew`: 5-line `parser.New().Render([]byte("# Hi"))`
+        with `// Output:` assertion
+  - [ ] Import block: only `parser` + stdlib (`fmt`)
 - [ ] `pkg/theme/example_test.go`:
-  - [ ] `ExampleResolve`: resolve `"github-light"` and use the
-        returned `Theme` fields
-  - [ ] `ExampleNames`: print all built-in theme names
-  - [ ] Import block: `theme` + stdlib (+ `assets` only if the
-        example serves CSS bytes)
+  - [ ] `ExampleResolve`: `theme.Resolve("github-light")` and print
+        the resolved `MermaidTheme` string
+  - [ ] Import block: only `theme` + stdlib (`fmt`)
 - [ ] `pkg/livereload/example_test.go`:
-  - [ ] `ExampleHub_broadcast`: minimal hub + WS connect from test
-        client + assert receive
-  - [ ] `ExampleWrapHandler`: wrap a stdlib `http.HandlerFunc`,
-        broadcast, demonstrate auto-reload `<script>` in response
-  - [ ] Import block: `livereload` + stdlib + `gorilla/websocket`
-        (transitively required) — no `pkg/parser`, no `pkg/theme`
+  - [ ] `ExampleHub`: `NewHub()`, `Count()`, `Close()` — no network
+        needed for the minimal example. The point is to prove
+        nothing else has to be imported to use the package
+  - [ ] Import block: only `livereload` + stdlib (`fmt`).
+        No `pkg/parser`, no `pkg/theme`, no `gorilla/websocket`
+        (the dependency is transitive only)
 
 **pkg/parser: WithMermaidRenderMode option**
 
@@ -183,28 +201,23 @@ outcomes).
 
 **pkg/theme: exported field audit**
 
-- [ ] Walk each exported field on `Theme`:
-  - [ ] `CSS string` — load-bearing; consumers will inject this into
-        their HTML. Keep as field
-  - [ ] `HljsVendorCSS string` — path to a vendored stylesheet.
-        Consumers serve this from `assets.FS`. Decide: keep as field
-        (path is simple to use) vs. accessor `Theme.HljsVendorCSSPath()`.
-        Default recommendation: keep field; rename is not a v2
-        regret because the field name is precise
-  - [ ] `MermaidTheme string` — string passed to `mermaid.initialize()`.
-        Consumers using `pkg/livereload` + their own mermaid integration
-        need this. Keep as field
-  - [ ] `IsAuto bool` — sentinel for the browser-driven auto theme.
-        Decide: keep as field vs. `Theme.IsAuto()` accessor.
-        Recommendation: accessor — `IsAuto bool` reads oddly when
-        someone is checking it in a non-mdp context; accessor makes
-        the intent clearer (`theme.Resolve("auto").IsAuto()`).
-        If renaming, do it here — last chance before semver
-- [ ] If any field changes from field to method, update
-      `internal/server/server.go` call sites and the affected
-      `pkg/theme` tests
-- [ ] Update `pkg/theme/example_test.go` to use whatever shape
-      survives the audit
+- [ ] `CSS string` — keep as field (load-bearing; consumers inject
+      directly into HTML).
+- [ ] `HljsVendorCSS string` — keep as field (precise name; path is
+      ergonomic to use as a string).
+- [ ] `MermaidTheme string` — keep as field (passed to
+      `mermaid.initialize()` by consumers).
+- [ ] **Convert `IsAuto bool` → `Theme.IsAuto() bool` method.** Make
+      the underlying field unexported (e.g., `isAuto bool`); add a
+      pointer-receiver method `func (t Theme) IsAuto() bool { return t.isAuto }`.
+      Rationale: accessor reads more clearly at call sites
+      (`theme.Resolve("auto").IsAuto()`) than a bool field, and this
+      is the last chance to make the change before v0.2.0 freezes
+      the API
+- [ ] Update `internal/server/server.go` call sites that read
+      `theme.IsAuto` to call `theme.IsAuto()`
+- [ ] Update `pkg/theme` tests for the new shape
+- [ ] Update the `pkg/theme` doc.go example to use `IsAuto()`
 
 **Documentation and isolation proofs**
 
@@ -214,6 +227,25 @@ outcomes).
       `go doc github.com/donaldgifford/mdp/pkg/parser`
       (and theme, livereload) that the package docs render as
       expected on the command line
+
+**Coverage hardening (100% target on exported symbols)**
+
+Public packages aim for 100% line coverage on exported
+functions/methods. Defensive checks that aren't realistically
+exercisable (e.g., a `panic` guard on a stdlib call that doesn't fail
+in practice) are acceptable exemptions — annotate inline with a
+`// coverage: <reason>` comment so the gap is intentional and
+auditable.
+
+- [ ] `go test -cover ./pkg/parser ./pkg/theme ./pkg/livereload`
+      and inspect per-package coverage. Add tests for any exported
+      function/method that isn't fully covered
+- [ ] For each gap that won't be closed (defensive guards, etc.),
+      add a `// coverage: <reason>` comment and document the
+      exemption in the PR body
+- [ ] Update `.codecov.yml` (or wherever the threshold lives — see
+      Open Question 6 in IMPL-0003) if needed to assert per-pkg/
+      thresholds. Project-wide threshold stays at the current 60%
 
 **PR**
 
@@ -232,8 +264,12 @@ outcomes).
   build if a cross-`pkg/` import is added later)
 - `go doc github.com/donaldgifford/mdp/pkg/parser` (and theme,
   livereload) shows readable package docs with at least one example
-- `theme.Theme` field audit is documented (which fields stayed,
-  which became accessors, and why — captured in the PR body)
+  in the doc comment
+- **100% line coverage on exported symbols** in `pkg/parser`,
+  `pkg/theme`, `pkg/livereload`. Any gaps annotated with
+  `// coverage: <reason>` and listed in the PR body
+- `theme.Theme.IsAuto` is a method (not a field); call sites in
+  `internal/server` updated accordingly
 - No regressions in `mdp --file` or Neovim plugin behavior
 
 ---
@@ -248,21 +284,22 @@ outcomes).
 
 **README.md Library section**
 
+Minimal — README points at GoDoc rather than duplicating examples.
+If a richer top-level explainer is needed later, revisit.
+
 - [ ] Add a `## Library` section (probably after `## Install`,
-      before `## Development`) describing the public packages
-- [ ] Worked example 1 — parser-only (10 lines):
-      `import "github.com/donaldgifford/mdp/pkg/parser"`,
-      `p := parser.New()`, `html, _ := p.Render([]byte("# Hi"))`,
-      print
-- [ ] Worked example 2 — parser + theme + livereload (docz `serve`
-      shape, ~25 lines): set up a `Hub`, wire a stdlib
-      `http.ServeMux` that renders some markdown via `parser` +
-      `theme`, wrap with `livereload.WrapHandler`, start server.
-      Mention this is the shape `docz serve` uses
-- [ ] Link the worked examples to the corresponding
-      `example_test.go` files so they stay in sync (Go's `go test
-      -run Example` will catch drift if the README examples are
-      updated to match the test files verbatim)
+      before `## Development`) with:
+  - One-paragraph description: "mdp's markdown parser, theme
+    registry, and live-reload primitive are also importable as Go
+    packages. See the package docs for usage."
+  - GoDoc links: `pkg.go.dev/github.com/donaldgifford/mdp/pkg/parser`,
+    `pkg/theme`, `pkg/livereload`
+  - A short "use cases" pointer table:
+    - markdown → HTML in your own app → `pkg/parser`
+    - same with mdp's look → add `pkg/theme`
+    - same with browser auto-reload → add `pkg/livereload`
+  - One concrete reference to a downstream consumer: docz `serve`
+    (link the docz repo)
 
 **Release mechanics**
 
@@ -327,46 +364,36 @@ outcomes).
 
 ## Open Questions
 
-Implementation-specific questions to resolve before phase 3 starts.
+None remaining. All six questions raised during drafting are
+captured below under [Resolved](#resolved).
 
-1. **`theme.Theme.IsAuto` → `Theme.IsAuto()` accessor rename.**
-   Recommendation in the task list is to rename to a method before
-   v0.2.0 freezes the API. Confirm — or keep as a field if you
-   prefer field syntax at call sites. The same question applies
-   (less urgently) to `HljsVendorCSS`. If kept as a field, the
-   audit task simply documents the decision rather than refactoring.
+### Resolved
 
-2. **Whether to include a `pkg/livereload` example that broadcasts a
-   typed message** vs. only the opaque-bytes example. A typed
-   example would show consumers what the docz wire shape looks like
-   in practice, but risks implying that `pkg/livereload` cares about
-   the bytes (it doesn't). Recommendation: opaque only; let docz's
-   own examples (in the docz repo) cover the typed case.
-
-3. **README "Library" section depth.** Two worked examples (per the
-   tasks above) is a reasonable starting point. Consider also
-   adding a one-line "use cases" table (static site, lambda,
-   docz-style preview) so prospective consumers can self-route to
-   the right composition. Optional — defer if it adds churn.
-
-4. **Whether the `cliff.toml` group regexps need updating** for the
-   new `pkg/` work. The current regexps in `.cliff.toml` (or similar)
-   probably already capture `feat:` prefixes; worth a dry-run
-   before phase 4 PR to confirm.
-
-5. **`replace` directive cleanup in docz.** After v0.2.0 tags,
-   docz's `replace github.com/donaldgifford/mdp => ../mdp` should be
-   removed and replaced with a real `require` on `v0.2.0`. This is
-   technically docz-repo work, but worth flagging as a follow-up so
-   it doesn't get forgotten and leak through to a docz release.
-
-6. **Coverage thresholds for the new packages.** CLAUDE.md cites a
-   60% target and 40% minimum overall. After phase 3 lands the
-   `example_test.go` files, coverage for `pkg/parser` and `pkg/theme`
-   should naturally cross 70%+. `pkg/livereload` was set to ≥70%
-   in IMPL-0003 — confirm this target survives the phase 3
-   additions and reconcile against the per-package `.golangci.yml`
-   or `.codecov.yml` configs if they exist.
+1. **`theme.Theme.IsAuto` rename.** Convert to a method
+   (`Theme.IsAuto() bool`) before v0.2.0 freezes. Reflected in the
+   field-audit tasks above. Other fields (`CSS`, `HljsVendorCSS`,
+   `MermaidTheme`) stay as fields.
+2. **Typed-message example in `pkg/livereload`.** Not included.
+   Examples are opaque-bytes only — typed messaging is mdp's
+   contract, not livereload's, and including it would muddle the
+   "payload is opaque" guarantee. Richer examples (if needed) go in
+   the package's `doc.go`.
+3. **README "Library" section depth.** Minimal. Section points at
+   GoDoc rather than duplicating examples. `doc.go` per package is
+   the canonical example surface; special-purpose docs pages can be
+   added later if `doc.go` proves insufficient.
+4. **`cliff.toml` updates.** Dry-run during phase 4 (already a task);
+   adjust only if categorization is off.
+5. **docz `replace` cleanup.** Tracked as a docz-repo follow-up in
+   the phase 4 post-merge task list (verify `go get @v0.2.0` works
+   from a throwaway dir; docz then drops the `replace` and pins
+   `v0.2.0`).
+6. **Coverage thresholds.** **100% line coverage on exported
+   symbols** in `pkg/parser`, `pkg/theme`, `pkg/livereload`.
+   Defensive gaps that aren't realistically exercisable get a
+   `// coverage: <reason>` annotation. Project-wide threshold stays
+   at the current 60% — the bar is raised only for public packages.
+   Back-ported to IMPL-0003 phase 2 success criteria.
 
 ## References
 
