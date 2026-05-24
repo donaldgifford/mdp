@@ -172,19 +172,19 @@ This is a mechanical refactor — no behavior change.
 
 **PR**
 
-- [ ] Open PR with `patch` label (phase 1 is a mechanical refactor
+- [x] Open PR with `patch` label (phase 1 is a mechanical refactor
       with no user-visible change; the actual v0.2.0 minor tag is
-      reserved for the release IMPL)
-- [ ] PR title: `feat: lift parser and theme into pkg/`
-- [ ] PR body references DESIGN-0002 § "pkg/parser (phase 1)" and
+      reserved for the release IMPL) — [PR #46](https://github.com/donaldgifford/mdp/pull/46)
+- [x] PR title: `feat: lift parser and theme into pkg/`
+- [x] PR body references DESIGN-0002 § "pkg/parser (phase 1)" and
       "pkg/theme (phase 1)"
 
 #### Success Criteria
 
-- `make build && make test && make lint` all green on the branch
-- `find . -path ./docs -prune -o -name '*.go' -print | xargs grep -l "internal/parser\|internal/theme"` returns nothing (all
+- [x] `make build && make test && make lint` all green on the branch
+- [x] `find . -path ./docs -prune -o -name '*.go' -print | xargs grep -l "internal/parser\|internal/theme"` returns nothing (all
   internal references rewritten)
-- `git log --follow pkg/parser/parser.go` shows pre-move history
+- [x] `git log --follow pkg/parser/parser.go` shows pre-move history
   (lift preserves provenance)
 - Manual smoke: live reload and Neovim scroll sync behave identically
   to `main`
