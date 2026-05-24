@@ -29,4 +29,9 @@ docz create rfc "Your RFC Title"
 - **Superseded**: Replaced by another RFC
 
 <!-- BEGIN DOCZ AUTO-GENERATED -->
+## All RFCs
+
+| ID | Title | Status | Date | Author | Link |
+|----|-------|--------|------|--------|------|
+| RFC-0001 | Public mdp Go library | Draft | 2026-05-23 | Donald Gifford | [0001-public-mdp-go-library.md](0001-public-mdp-go-library.md) |
 <!-- END DOCZ AUTO-GENERATED -->
