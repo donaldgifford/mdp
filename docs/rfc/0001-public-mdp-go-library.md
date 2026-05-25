@@ -1,7 +1,7 @@
 ---
 id: RFC-0001
 title: "Public mdp Go library"
-status: Draft
+status: Accepted
 author: Donald Gifford
 created: 2026-05-23
 ---
@@ -9,7 +9,7 @@ created: 2026-05-23
 
 # RFC 0001: Public mdp Go library
 
-**Status:** Draft
+**Status:** Accepted
 **Author:** Donald Gifford
 **Date:** 2026-05-23
 

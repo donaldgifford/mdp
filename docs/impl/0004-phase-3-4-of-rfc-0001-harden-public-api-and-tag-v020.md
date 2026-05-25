@@ -1,7 +1,7 @@
 ---
 id: IMPL-0004
 title: "Phase 3-4 of RFC-0001 — harden public API and tag v0.2.0"
-status: In Progress
+status: Completed
 author: Donald Gifford
 created: 2026-05-24
 ---
@@ -9,7 +9,7 @@ created: 2026-05-24
 
 # IMPL 0004: Phase 3-4 of RFC-0001 — harden public API and tag v0.2.0
 
-**Status:** In Progress
+**Status:** Completed
 **Author:** Donald Gifford
 **Date:** 2026-05-24
 
@@ -290,25 +290,25 @@ If a richer top-level explainer is needed later, revisit.
       every `patch` PR merge), so they don't repeat under v0.2.0 —
       they're already in CHANGELOG.md under their original tags
 - [x] cliff output reads cleanly; no `cliff.toml` tweaks needed
-- [ ] Open PR with `minor` label (this is the v0.2.0 trigger)
-- [ ] PR title: `chore: release v0.2.0 — public pkg/ API`
-- [ ] PR body: link RFC-0001, IMPL-0003, IMPL-0004; note that this
-      tag freezes the v1 public API surface and any future breaking
-      change requires a v0 → v1 bump or a `replace`-style migration
+- [x] Opened [PR #50](https://github.com/donaldgifford/mdp/pull/50)
+      with `minor` label
+- [x] PR title: `chore: release v0.2.0 — public pkg/ API`
+- [x] PR body linked RFC-0001, IMPL-0003, IMPL-0004 and noted the
+      v1 API-freeze semantics
 
 **Post-merge**
 
-- [ ] Confirm the release workflow runs cleanly and produces:
-      tagged `v0.2.0`, signed checksums, SBOM, CHANGELOG entry
-- [ ] Verify the published Go module resolves:
-      `go get github.com/donaldgifford/mdp@v0.2.0` from a
-      throwaway scratch dir, then
-      `import "github.com/donaldgifford/mdp/pkg/parser"`,
-      `go build` against a 5-line `main.go`
-- [ ] Update RFC-0001 status from `Draft` → `Accepted`; update
-      DESIGN-0002 status from `Draft` → `Implemented`; update
-      IMPL-0003 and IMPL-0004 from `Draft` → `Completed`. Run
-      `docz update` to refresh the indexes
+- [x] Release workflow ran cleanly. `v0.2.0` tagged with archives
+      (darwin/linux × amd64/arm64), per-archive SBOM
+      (spdx.json), and GPG-signed `checksums.txt`. CHANGELOG.md
+      updated with the v0.2.0 entry
+- [x] `go get github.com/donaldgifford/mdp@v0.2.0` from a
+      `mktemp -d` scratch dir succeeds; built and ran a 9-line
+      `main.go` that imports `pkg/parser` and renders
+      `# Hello v0.2.0` to `<h1 id="hello-v020" data-source-line="1">Hello v0.2.0</h1>`
+- [x] RFC-0001 → Accepted, DESIGN-0002 → Implemented, IMPL-0003 +
+      IMPL-0004 → Completed. `docz update` refreshes indexes
+      (this commit)
 
 #### Success Criteria
 

@@ -33,5 +33,5 @@ docz create rfc "Your RFC Title"
 
 | ID | Title | Status | Date | Author | Link |
 |----|-------|--------|------|--------|------|
-| RFC-0001 | Public mdp Go library | Draft | 2026-05-23 | Donald Gifford | [0001-public-mdp-go-library.md](0001-public-mdp-go-library.md) |
+| RFC-0001 | Public mdp Go library | Accepted | 2026-05-23 | Donald Gifford | [0001-public-mdp-go-library.md](0001-public-mdp-go-library.md) |
 <!-- END DOCZ AUTO-GENERATED -->
