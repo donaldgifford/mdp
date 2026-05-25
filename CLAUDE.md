@@ -19,21 +19,22 @@ make test-coverage  # Run tests with coverage output
 make update-vendor  # Update vendored JS libraries from CDN
 
 # Run a single test
-go test ./internal/parser/ -run TestSpecificName -v
+go test ./pkg/parser/ -run TestSpecificName -v
 
 # Run benchmarks
-go test -bench=. ./internal/parser/
+go test -bench=. ./pkg/parser/
 ```
 
 ## Architecture
 
 ```
 cmd/mdp/           -> CLI entrypoint (cobra with --version, --verbose)
+pkg/
+  parser/          -> Goldmark pipeline: GFM, highlighting, mermaid, math, line annotations (PUBLIC)
+  theme/           -> Built-in theme registry; Resolve() maps name/path/auto -> Theme struct (PUBLIC)
 internal/
   cli/             -> Root and serve commands with flag handling
-  parser/          -> Goldmark pipeline: GFM, highlighting, mermaid, math, line annotations
   server/          -> HTTP server, WebSocket/SSE hubs, stdin reader, auth token
-  theme/           -> Built-in theme registry; Resolve() maps name/path/auto -> Theme struct
   watcher/         -> fsnotify file watcher with 50ms debounce
 assets/
   themes/          -> One CSS file per built-in theme (embedded via go:embed)
@@ -43,6 +44,11 @@ lazy.lua           -> Default lazy.nvim plugin spec (main, ft, cmd, opts)
 build.lua          -> Auto-run by lazy.nvim on install/update (binary download/build)
 scripts/install.sh -> CLI alternative to build.lua (same logic in bash)
 ```
+
+`pkg/parser` and `pkg/theme` are part of the public Go library
+introduced by RFC-0001; external consumers can `import` them.
+`internal/server`, `internal/watcher`, and `internal/cli` stay
+internal — they're CLI-specific.
 
 **Data flow:** Neovim buffer -> Lua plugin -> stdin JSON -> Go binary -> goldmark parse -> WebSocket/SSE hub -> browser. Browser handles Mermaid, KaTeX, highlight.js client-side.
 
@@ -102,8 +108,8 @@ Each built-in theme lives in `assets/themes/<name>.css` and must follow this str
 
 - Use **direct hex values** in hljs rules, not `var(--some-var)`
 - `.hljs-keyword` and `.hljs-operator` MUST use different colors — sharing them collapses syntax to a single hue
-- Register the theme in `internal/theme/theme.go` `builtinThemes` map via `mustReadThemeCSS()`
-- Update theme count assertions in `internal/theme/theme_test.go`
+- Register the theme in `pkg/theme/theme.go` `builtinThemes` map via `mustReadThemeCSS()`
+- Update theme count assertions in `pkg/theme/theme_test.go`
 
 ## Code Style
 

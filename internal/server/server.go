@@ -22,8 +22,8 @@ import (
 	"github.com/gorilla/websocket"
 
 	"github.com/donaldgifford/mdp/assets"
-	"github.com/donaldgifford/mdp/internal/parser"
-	interntheme "github.com/donaldgifford/mdp/internal/theme"
+	"github.com/donaldgifford/mdp/pkg/parser"
+	"github.com/donaldgifford/mdp/pkg/theme"
 )
 
 // Config holds the server configuration.
@@ -51,7 +51,7 @@ type Server struct {
 	upgrader websocket.Upgrader
 	httpSrv  *http.Server
 	httpMu   sync.Mutex
-	theme    interntheme.Theme
+	theme    theme.Theme
 	baseCSS  template.CSS
 	js       template.JS
 }
@@ -71,7 +71,7 @@ func New(cfg Config) (*Server, error) { //nolint:gocritic // Config is intention
 	}
 
 	// Resolve theme once at startup so invalid names surface immediately.
-	resolvedTheme, err := interntheme.Resolve(cfg.Theme)
+	resolvedTheme, err := theme.Resolve(cfg.Theme)
 	if err != nil {
 		return nil, fmt.Errorf("resolving theme: %w", err)
 	}

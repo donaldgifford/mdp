@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/donaldgifford/mdp/internal/server"
-	"github.com/donaldgifford/mdp/internal/theme"
+	"github.com/donaldgifford/mdp/pkg/theme"
 )
 
 func TestServer_ServesRenderedMarkdown(t *testing.T) {

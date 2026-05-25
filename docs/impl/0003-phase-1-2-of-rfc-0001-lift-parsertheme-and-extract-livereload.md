@@ -123,64 +123,68 @@ This is a mechanical refactor — no behavior change.
 
 **Move parser package**
 
-- [ ] `git mv internal/parser pkg/parser` (preserves history)
-- [ ] Verify `pkg/parser/parser.go` package declaration is still
+- [x] `git mv internal/parser pkg/parser` (preserves history)
+- [x] Verify `pkg/parser/parser.go` package declaration is still
       `package parser` (no edit needed — package name doesn't change)
-- [ ] Verify `pkg/parser/lineannotator.go`, `parser_test.go`,
+- [x] Verify `pkg/parser/lineannotator.go`, `parser_test.go`,
       `lineannotator_test.go`, `bench_test.go` all moved cleanly
 
 **Move theme package**
 
-- [ ] `git mv internal/theme pkg/theme`
-- [ ] Verify `pkg/theme/theme.go` package declaration is still
+- [x] `git mv internal/theme pkg/theme`
+- [x] Verify `pkg/theme/theme.go` package declaration is still
       `package theme`
-- [ ] Confirm `pkg/theme/theme.go` still imports
+- [x] Confirm `pkg/theme/theme.go` still imports
       `github.com/donaldgifford/mdp/assets` (unchanged — `assets` is
       at module root)
 
 **Rewrite imports**
 
-- [ ] Update `internal/server/server.go` imports:
+- [x] Update `internal/server/server.go` imports:
       `github.com/donaldgifford/mdp/internal/parser` →
       `github.com/donaldgifford/mdp/pkg/parser`
-- [ ] Update `internal/server/server.go` imports:
+- [x] Update `internal/server/server.go` imports:
       `github.com/donaldgifford/mdp/internal/theme` →
-      `github.com/donaldgifford/mdp/pkg/theme`
-- [ ] Run `grep -rn "internal/parser\|internal/theme" internal/cli/ cmd/`
+      `github.com/donaldgifford/mdp/pkg/theme` (and dropped the
+      `interntheme` alias — bare `theme` package qualifier is
+      unambiguous against the `s.theme` field)
+- [x] Run `grep -rn "internal/parser\|internal/theme" internal/cli/ cmd/`
       to identify call sites. Update any imports found
-      (`internal/cli/serve.go`, `internal/cli/root.go`,
-      `cmd/mdp/main.go` are the candidates)
-- [ ] Sweep with `goimports -w ./...` (or `make fmt`) to reorganize
+      (no matches — `internal/cli` and `cmd/mdp` don't import
+      parser/theme directly; they go through `internal/server`)
+- [x] Sweep with `goimports -w ./...` (or `make fmt`) to reorganize
       import blocks (gci enforces group order)
-- [ ] Verify with `grep -r "internal/parser\|internal/theme" .` that
+- [x] Verify with `grep -r "internal/parser\|internal/theme" .` that
       no stale paths remain (outside docs/)
 
 **Verify and tidy**
 
-- [ ] `make fmt` clean
-- [ ] `make lint` clean (gci is the most likely failure surface)
-- [ ] `make test` green
-- [ ] `make build` produces a working binary
+- [x] `make fmt` clean
+- [x] `make lint` clean (gci is the most likely failure surface)
+- [x] `make test` green
+- [x] `make build` produces a working binary
 - [ ] Manual smoke: `./bin/mdp --file README.md` — open in browser,
-      edit README.md, confirm live reload still works
+      edit README.md, confirm live reload still works *(deferred —
+      requires browser; the test suite covers the HTTP/WS paths)*
 - [ ] Neovim smoke: `:MdpPreview` on a `.md` file, edit, confirm
-      reload + scroll sync still work
+      reload + scroll sync still work *(deferred — requires
+      Neovim; covered by the binary build + test suite)*
 
 **PR**
 
-- [ ] Open PR with `patch` label (phase 1 is a mechanical refactor
+- [x] Open PR with `patch` label (phase 1 is a mechanical refactor
       with no user-visible change; the actual v0.2.0 minor tag is
-      reserved for the release IMPL)
-- [ ] PR title: `feat: lift parser and theme into pkg/`
-- [ ] PR body references DESIGN-0002 § "pkg/parser (phase 1)" and
+      reserved for the release IMPL) — [PR #46](https://github.com/donaldgifford/mdp/pull/46)
+- [x] PR title: `feat: lift parser and theme into pkg/`
+- [x] PR body references DESIGN-0002 § "pkg/parser (phase 1)" and
       "pkg/theme (phase 1)"
 
 #### Success Criteria
 
-- `make build && make test && make lint` all green on the branch
-- `find . -path ./docs -prune -o -name '*.go' -print | xargs grep -l "internal/parser\|internal/theme"` returns nothing (all
+- [x] `make build && make test && make lint` all green on the branch
+- [x] `find . -path ./docs -prune -o -name '*.go' -print | xargs grep -l "internal/parser\|internal/theme"` returns nothing (all
   internal references rewritten)
-- `git log --follow pkg/parser/parser.go` shows pre-move history
+- [x] `git log --follow pkg/parser/parser.go` shows pre-move history
   (lift preserves provenance)
 - Manual smoke: live reload and Neovim scroll sync behave identically
   to `main`
