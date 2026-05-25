@@ -19,9 +19,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gorilla/websocket"
-
 	"github.com/donaldgifford/mdp/assets"
+	"github.com/donaldgifford/mdp/pkg/livereload"
 	"github.com/donaldgifford/mdp/pkg/parser"
 	"github.com/donaldgifford/mdp/pkg/theme"
 )
@@ -41,19 +40,17 @@ type Config struct {
 
 // Server is the HTTP preview server.
 type Server struct {
-	cfg      Config
-	addr     string
-	token    string // Auth token for network-exposed servers.
-	parser   *parser.Parser
-	tmpl     *template.Template
-	hub      *hub
-	sse      *sseHub
-	upgrader websocket.Upgrader
-	httpSrv  *http.Server
-	httpMu   sync.Mutex
-	theme    theme.Theme
-	baseCSS  template.CSS
-	js       template.JS
+	cfg     Config
+	addr    string
+	token   string // Auth token for network-exposed servers.
+	parser  *parser.Parser
+	tmpl    *template.Template
+	hub     *livereload.Hub
+	httpSrv *http.Server
+	httpMu  sync.Mutex
+	theme   theme.Theme
+	baseCSS template.CSS
+	js      template.JS
 }
 
 // New creates a new Server from the given config. The listen address is
@@ -117,17 +114,12 @@ func New(cfg Config) (*Server, error) { //nolint:gocritic // Config is intention
 	}
 
 	return &Server{
-		cfg:    cfg,
-		addr:   addr,
-		token:  token,
-		parser: parser.New(),
-		tmpl:   tmpl,
-		hub:    newHub(),
-		sse:    newSSEHub(),
-		upgrader: websocket.Upgrader{
-			// Allow connections from any origin — this is a local dev tool.
-			CheckOrigin: func(_ *http.Request) bool { return true },
-		},
+		cfg:     cfg,
+		addr:    addr,
+		token:   token,
+		parser:  parser.New(),
+		tmpl:    tmpl,
+		hub:     livereload.NewHub(),
 		theme:   resolvedTheme,
 		baseCSS: template.CSS(cssData), //nolint:gosec // Embedded asset.
 		js:      template.JS(jsData),   //nolint:gosec // Embedded asset.
@@ -166,8 +158,7 @@ func (s *Server) Broadcast(md []byte) error {
 	if err != nil {
 		return fmt.Errorf("marshalling message: %w", err)
 	}
-	s.hub.broadcast(msg)
-	s.sse.broadcast(msg)
+	s.hub.Broadcast(msg)
 	return nil
 }
 
@@ -177,8 +168,7 @@ func (s *Server) SendCursor(line int) error {
 	if err != nil {
 		return fmt.Errorf("marshalling cursor message: %w", err)
 	}
-	s.hub.broadcast(msg)
-	s.sse.broadcast(msg)
+	s.hub.Broadcast(msg)
 	return nil
 }
 
@@ -193,8 +183,9 @@ func (s *Server) BroadcastFile() error {
 
 // Close shuts down the server, closing all WebSocket and SSE connections.
 func (s *Server) Close() {
-	s.hub.closeAll()
-	s.sse.closeAll()
+	if err := s.hub.Close(); err != nil {
+		slog.Debug("closing livereload hub", "error", err)
+	}
 
 	s.httpMu.Lock()
 	srv := s.httpSrv
@@ -228,8 +219,8 @@ type pageData struct {
 func (s *Server) ListenAndServe() error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /", s.handleIndex)
-	mux.HandleFunc("GET /ws", s.handleWebSocket)
-	mux.HandleFunc("GET /events", s.handleSSE)
+	mux.HandleFunc("GET /ws", s.hub.HandleWebSocket)
+	mux.HandleFunc("GET /events", s.hub.HandleSSE)
 	mux.HandleFunc("POST /cursor", s.handleCursor)
 
 	// Serve embedded vendor assets (Mermaid, KaTeX, highlight.js).
@@ -287,7 +278,7 @@ func (s *Server) idleWatcher(httpSrv *http.Server) {
 	var idleSince time.Time
 
 	for range ticker.C {
-		if s.hub.count()+s.sse.count() > 0 {
+		if s.hub.Count() > 0 {
 			// Clients are connected — reset the idle clock.
 			idleSince = time.Time{}
 			continue
@@ -383,32 +374,6 @@ func (s *Server) handleIndex(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if err := s.tmpl.Execute(w, data); err != nil {
 		slog.Error("executing template", "error", err)
-	}
-}
-
-func (s *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
-	conn, err := s.upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		slog.Error("websocket upgrade failed", "error", err)
-		return
-	}
-	s.hub.add(conn)
-	slog.Debug("websocket client connected", "addr", conn.RemoteAddr())
-
-	// Keep the connection open; remove on close.
-	defer func() {
-		s.hub.remove(conn)
-		if closeErr := conn.Close(); closeErr != nil {
-			slog.Debug("closing websocket client", "error", closeErr)
-		}
-	}()
-
-	// Read loop — we don't expect messages from the client, but we need
-	// to drain reads so the connection stays alive and close is detected.
-	for {
-		if _, _, err := conn.ReadMessage(); err != nil {
-			break
-		}
 	}
 }
 
