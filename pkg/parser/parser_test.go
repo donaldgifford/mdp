@@ -3,8 +3,11 @@ package parser_test
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 	"testing"
+
+	"go.abhg.dev/goldmark/mermaid"
 
 	"github.com/donaldgifford/mdp/pkg/parser"
 )
@@ -242,5 +245,50 @@ func TestRender_MarkdownFixture(t *testing.T) {
 		if !strings.Contains(got, tc.want) {
 			t.Errorf("expected %s (%q) in output", tc.name, tc.want)
 		}
+	}
+}
+
+const mermaidFixture = "```mermaid\ngraph TD\nA-->B\n```\n"
+
+// TestParser_WithMermaidRenderMode_Client asserts the default client
+// render mode emits a <pre class="mermaid"> placeholder for the
+// browser to render with mermaid.js.
+func TestParser_WithMermaidRenderMode_Client(t *testing.T) {
+	t.Parallel()
+
+	p := parser.New(parser.WithMermaidRenderMode(mermaid.RenderModeClient))
+	html, err := p.Render([]byte(mermaidFixture))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	got := string(html)
+	if !strings.Contains(got, `<pre class="mermaid"`) {
+		t.Errorf("client mode should emit <pre class=\"mermaid\">, got: %s", got)
+	}
+}
+
+// TestParser_WithMermaidRenderMode_Server asserts the server render
+// mode compiles mermaid blocks to inline <svg>. Requires the mmdc CLI
+// to be installed; skipped otherwise so the suite stays green on
+// machines that don't have it.
+func TestParser_WithMermaidRenderMode_Server(t *testing.T) {
+	t.Parallel()
+	if _, err := exec.LookPath("mmdc"); err != nil {
+		t.Skip("mmdc CLI not on $PATH; skipping server-side mermaid render test")
+	}
+
+	p := parser.New(parser.WithMermaidRenderMode(mermaid.RenderModeServer))
+	html, err := p.Render([]byte(mermaidFixture))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	got := string(html)
+	if !strings.Contains(got, "<svg") {
+		t.Errorf("server mode should emit <svg>, got: %s", got)
+	}
+	if strings.Contains(got, `<pre class="mermaid"`) {
+		t.Errorf("server mode should not emit client-mode placeholder, got: %s", got)
 	}
 }
