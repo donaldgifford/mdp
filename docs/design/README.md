@@ -33,5 +33,5 @@ docz create design "Your Design Title"
 | ID | Title | Status | Date | Author | Link |
 |----|-------|--------|------|--------|------|
 | DESIGN-0001 | Themes | Approved | 2026-03-05 | Donald Gifford | [0001-themes.md](0001-themes.md) |
-| DESIGN-0002 | Refactor mdp internals into public pkg packages | Draft | 2026-05-23 | Donald Gifford | [0002-refactor-mdp-internals-into-public-pkg-packages.md](0002-refactor-mdp-internals-into-public-pkg-packages.md) |
+| DESIGN-0002 | Refactor mdp internals into public pkg packages | Implemented | 2026-05-23 | Donald Gifford | [0002-refactor-mdp-internals-into-public-pkg-packages.md](0002-refactor-mdp-internals-into-public-pkg-packages.md) |
 <!-- END DOCZ AUTO-GENERATED -->

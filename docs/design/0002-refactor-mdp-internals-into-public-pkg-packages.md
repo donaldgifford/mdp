@@ -1,7 +1,7 @@
 ---
 id: DESIGN-0002
 title: "Refactor mdp internals into public pkg packages"
-status: Draft
+status: Implemented
 author: Donald Gifford
 created: 2026-05-23
 ---
@@ -9,7 +9,7 @@ created: 2026-05-23
 
 # DESIGN 0002: Refactor mdp internals into public pkg packages
 
-**Status:** Draft
+**Status:** Implemented
 **Author:** Donald Gifford
 **Date:** 2026-05-23
 
