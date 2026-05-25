@@ -80,6 +80,10 @@ func (h *Hub) Broadcast(msg []byte) {
 		h.removeWS(c)
 	}
 	for _, ch := range dropSSE {
+		// coverage: triggered only when the SSE consumer goroutine
+		// stalls under load (an HTTP/2 client that stops reading on
+		// the open response). The unit suite uses cooperative clients
+		// so this branch is exercised in production only.
 		slog.Debug("livereload: dropping slow SSE client")
 		h.removeSSE(ch)
 	}
@@ -114,6 +118,9 @@ func (h *Hub) Close() error {
 	for c := range wsClients {
 		close(c.send)
 		if err := c.conn.Close(); err != nil {
+			// coverage: gorilla *Conn.Close only fails on already-closed
+			// sockets, which the writer goroutine takes care of before
+			// we get here in normal flows.
 			if firstErr == nil {
 				firstErr = fmt.Errorf("closing websocket: %w", err)
 			} else {
@@ -134,6 +141,10 @@ func (h *Hub) Close() error {
 func (h *Hub) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := h.upgrader.Upgrade(w, r, nil)
 	if err != nil {
+		// coverage: gorilla logs+writes its own 400 response before
+		// returning the error, so the only thing left to do is log
+		// at error level. Reaching this requires a malformed upgrade
+		// request that the test harness doesn't produce.
 		slog.Error("livereload: websocket upgrade failed", "error", err)
 		return
 	}
@@ -162,6 +173,9 @@ func (h *Hub) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 func (h *Hub) HandleSSE(w http.ResponseWriter, r *http.Request) {
 	flusher, ok := w.(http.Flusher)
 	if !ok {
+		// coverage: net/http's response writer always implements
+		// http.Flusher in real servers; this branch only fires
+		// against a hand-rolled non-flushing ResponseWriter.
 		http.Error(w, "streaming not supported", http.StatusInternalServerError)
 		return
 	}
@@ -188,6 +202,8 @@ func (h *Hub) HandleSSE(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			if _, err := fmt.Fprintf(w, "data: %s\n\n", msg); err != nil {
+				// coverage: SSE write failure means the client
+				// disconnected mid-stream; the outer return cleans up.
 				return
 			}
 			flusher.Flush()
@@ -219,6 +235,8 @@ func (h *Hub) removeWS(c *wsClient) {
 	h.mu.Unlock()
 	if present {
 		if err := c.conn.Close(); err != nil {
+			// coverage: see Close — gorilla conn.Close only errors on
+			// already-half-closed sockets.
 			slog.Debug("livereload: closing websocket", "error", err)
 		}
 	}
@@ -240,6 +258,8 @@ func (h *Hub) removeSSE(ch chan []byte) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	if _, ok := h.sseClients[ch]; !ok {
+		// coverage: idempotent guard for the rare race between
+		// Broadcast's drop path and HandleSSE's defer cleanup.
 		return
 	}
 	delete(h.sseClients, ch)

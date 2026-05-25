@@ -1,4 +1,3 @@
-// Package parser provides markdown-to-HTML conversion using goldmark.
 package parser
 
 import (
@@ -28,6 +27,7 @@ type config struct {
 	gfm                bool
 	syntaxHighlighting bool
 	mermaid            bool
+	mermaidMode        mermaid.RenderMode
 	math               bool
 	callouts           bool
 }
@@ -37,6 +37,7 @@ func defaultConfig() config {
 		gfm:                true,
 		syntaxHighlighting: true,
 		mermaid:            true,
+		mermaidMode:        mermaid.RenderModeClient,
 		math:               true,
 		callouts:           true,
 	}
@@ -57,6 +58,15 @@ func WithSyntaxHighlighting(enabled bool) Option {
 // WithMermaid enables or disables Mermaid diagram support.
 func WithMermaid(enabled bool) Option {
 	return func(c *config) { c.mermaid = enabled }
+}
+
+// WithMermaidRenderMode sets the Mermaid render mode. The default is
+// mermaid.RenderModeClient, which emits <pre class="mermaid"> blocks
+// for the browser to render with mermaid.js. mermaid.RenderModeServer
+// renders to inline <svg> at parse time (requires the mermaid CLI).
+// Has no effect when WithMermaid(false) is set.
+func WithMermaidRenderMode(mode mermaid.RenderMode) Option {
+	return func(c *config) { c.mermaidMode = mode }
 }
 
 // WithMath enables or disables math expression support ($...$ and $$...$$).
@@ -91,10 +101,8 @@ func New(opts ...Option) *Parser {
 		))
 	}
 	if cfg.mermaid {
-		// Client-side mode: emits <pre class="mermaid"> blocks for
-		// the browser to render with mermaid.js.
 		extensions = append(extensions, &mermaid.Extender{
-			RenderMode: mermaid.RenderModeClient,
+			RenderMode: cfg.mermaidMode,
 		})
 	}
 	if cfg.math {
@@ -126,6 +134,9 @@ func New(opts ...Option) *Parser {
 func (p *Parser) Render(src []byte) ([]byte, error) {
 	var buf bytes.Buffer
 	if err := p.md.Convert(src, &buf); err != nil {
+		// coverage: goldmark.Convert only errors on impossible
+		// conditions (nil writer, malformed AST from a broken
+		// extender). The default extender set never triggers this.
 		return nil, err
 	}
 	return buf.Bytes(), nil

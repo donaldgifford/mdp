@@ -1,4 +1,3 @@
-// Package theme provides theme resolution for the mdp preview server.
 package theme
 
 import (
@@ -25,9 +24,17 @@ type Theme struct {
 	// "base" for named themes (uses CSS vars), "" for auto.
 	MermaidTheme string
 
-	// IsAuto skips server-side CSS injection and lets the browser's
-	// prefers-color-scheme media query drive appearance.
-	IsAuto bool
+	// isAuto skips server-side CSS injection and lets the browser's
+	// prefers-color-scheme media query drive appearance. Exposed via
+	// IsAuto so the field can evolve without a breaking change.
+	isAuto bool
+}
+
+// IsAuto reports whether the theme is the auto theme — when true,
+// server-side CSS injection is skipped and the browser's
+// prefers-color-scheme media query drives appearance.
+func (t Theme) IsAuto() bool {
+	return t.isAuto
 }
 
 // themeAuto is the sentinel name for the browser-driven auto theme.
@@ -43,7 +50,7 @@ var builtinThemes = map[string]Theme{
 		CSS:           "",
 		HljsVendorCSS: "",
 		MermaidTheme:  "",
-		IsAuto:        true,
+		isAuto:        true,
 	},
 
 	// GitHub theme family - all use shared github.css file
@@ -51,19 +58,19 @@ var builtinThemes = map[string]Theme{
 		CSS:           mustReadThemeCSS("github.css"),
 		HljsVendorCSS: "/vendor/hljs/github.min.css",
 		MermaidTheme:  "base",
-		IsAuto:        false,
+		isAuto:        false,
 	},
 	"github-dark": {
 		CSS:           mustReadThemeCSS("github.css"),
 		HljsVendorCSS: "/vendor/hljs/github-dark.min.css",
 		MermaidTheme:  "base",
-		IsAuto:        false,
+		isAuto:        false,
 	},
 	"github-dimmed": {
 		CSS:           mustReadThemeCSS("github.css"),
 		HljsVendorCSS: "",
 		MermaidTheme:  "base",
-		IsAuto:        false,
+		isAuto:        false,
 	},
 
 	// Tokyo Night theme family
@@ -71,25 +78,25 @@ var builtinThemes = map[string]Theme{
 		CSS:           mustReadThemeCSS("tokyo-night.css"),
 		HljsVendorCSS: "",
 		MermaidTheme:  "base",
-		IsAuto:        false,
+		isAuto:        false,
 	},
 	"tokyo-night-moon": {
 		CSS:           mustReadThemeCSS("tokyo-night-moon.css"),
 		HljsVendorCSS: "",
 		MermaidTheme:  "base",
-		IsAuto:        false,
+		isAuto:        false,
 	},
 	"tokyo-night-storm": {
 		CSS:           mustReadThemeCSS("tokyo-night-storm.css"),
 		HljsVendorCSS: "",
 		MermaidTheme:  "base",
-		IsAuto:        false,
+		isAuto:        false,
 	},
 	"tokyo-night-day": {
 		CSS:           mustReadThemeCSS("tokyo-night-day.css"),
 		HljsVendorCSS: "",
 		MermaidTheme:  "base",
-		IsAuto:        false,
+		isAuto:        false,
 	},
 
 	// Rosé Pine theme family
@@ -97,19 +104,19 @@ var builtinThemes = map[string]Theme{
 		CSS:           mustReadThemeCSS("rose-pine.css"),
 		HljsVendorCSS: "",
 		MermaidTheme:  "base",
-		IsAuto:        false,
+		isAuto:        false,
 	},
 	"rose-pine-moon": {
 		CSS:           mustReadThemeCSS("rose-pine-moon.css"),
 		HljsVendorCSS: "",
 		MermaidTheme:  "base",
-		IsAuto:        false,
+		isAuto:        false,
 	},
 	"rose-pine-dawn": {
 		CSS:           mustReadThemeCSS("rose-pine-dawn.css"),
 		HljsVendorCSS: "",
 		MermaidTheme:  "base",
-		IsAuto:        false,
+		isAuto:        false,
 	},
 
 	// donald — personal dark theme based on donald.dev palette
@@ -117,7 +124,7 @@ var builtinThemes = map[string]Theme{
 		CSS:           mustReadThemeCSS("donald.css"),
 		HljsVendorCSS: "",
 		MermaidTheme:  "base",
-		IsAuto:        false,
+		isAuto:        false,
 	},
 
 	// Catppuccin theme family
@@ -125,25 +132,25 @@ var builtinThemes = map[string]Theme{
 		CSS:           mustReadThemeCSS("catppuccin-latte.css"),
 		HljsVendorCSS: "",
 		MermaidTheme:  "base",
-		IsAuto:        false,
+		isAuto:        false,
 	},
 	"catppuccin-frappe": {
 		CSS:           mustReadThemeCSS("catppuccin-frappe.css"),
 		HljsVendorCSS: "",
 		MermaidTheme:  "base",
-		IsAuto:        false,
+		isAuto:        false,
 	},
 	"catppuccin-macchiato": {
 		CSS:           mustReadThemeCSS("catppuccin-macchiato.css"),
 		HljsVendorCSS: "",
 		MermaidTheme:  "base",
-		IsAuto:        false,
+		isAuto:        false,
 	},
 	"catppuccin-mocha": {
 		CSS:           mustReadThemeCSS("catppuccin-mocha.css"),
 		HljsVendorCSS: "",
 		MermaidTheme:  "base",
-		IsAuto:        false,
+		isAuto:        false,
 	},
 }
 
@@ -153,6 +160,9 @@ var builtinThemes = map[string]Theme{
 func mustReadThemeCSS(filename string) string {
 	data, err := assets.FS.ReadFile("themes/" + filename)
 	if err != nil {
+		// coverage: embedded assets are baked into the binary; a read
+		// failure here means the package was built with a missing
+		// theme file, which a single test run would catch immediately.
 		panic(fmt.Sprintf("failed to read embedded theme file %q: %v", filename, err))
 	}
 	return string(data)
@@ -179,10 +189,8 @@ func Resolve(name string) (Theme, error) {
 			return Theme{}, err
 		}
 		return Theme{
-			CSS:           css,
-			HljsVendorCSS: "",
-			MermaidTheme:  "base",
-			IsAuto:        false,
+			CSS:          css,
+			MermaidTheme: "base",
 		}, nil
 	}
 
@@ -197,6 +205,9 @@ func readThemeFile(path string) (string, error) {
 	// Convert relative paths to absolute
 	absPath, err := filepath.Abs(path)
 	if err != nil {
+		// coverage: filepath.Abs returns an error only when os.Getwd
+		// fails, which requires the process's CWD to have been deleted
+		// — essentially unreachable in normal operation.
 		return "", fmt.Errorf("resolving theme file path %q: %w", path, err)
 	}
 

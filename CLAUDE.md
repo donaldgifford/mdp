@@ -60,6 +60,23 @@ format on top of the hub is owned by the caller — mdp marshals the
 `assets/preview.js`, not `pkg/livereload`'s contract with consumers
 (which is just `[]byte`).
 
+Each public package has a canonical `doc.go` holding the package-level
+GoDoc with usage examples, plus an `example_test.go` whose import
+block is restricted to that package + stdlib — a compile-time
+backstop that fails the build if anyone later adds a cross-`pkg/`
+dependency to the public surface. Sub-100% coverage is acceptable
+when the uncovered lines are annotated with `// coverage: <reason>`
+(defensive guards that aren't realistically exercisable).
+
+`pkg/theme.Theme.IsAuto` is a method, not a field — the underlying
+`isAuto bool` is unexported so the storage can evolve without a
+breaking change. Don't reintroduce the field.
+
+`pkg/parser.WithMermaidRenderMode(mode mermaid.RenderMode)` exposes
+the goldmark-mermaid render mode. Default stays `RenderModeClient`
+(emits `<pre class="mermaid">` placeholders); setting
+`RenderModeServer` switches to inline `<svg>` via the `mmdc` CLI.
+
 **Data flow:** Neovim buffer -> Lua plugin -> stdin JSON -> Go binary -> goldmark parse -> WebSocket/SSE hub -> browser. Browser handles Mermaid, KaTeX, highlight.js client-side.
 
 **Dual input modes:** Editor plugin pipes buffer via stdin (`--stdin` flag); standalone CLI watches file on disk via fsnotify.
