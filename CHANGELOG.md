@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.11] - 2026-05-25
+
+### Added
+
+- Extract pkg/livereload from internal/server (#48)
+
 ## [0.1.10] - 2026-05-25
 
 ### Added
@@ -136,6 +142,7 @@ All notable changes to this project will be documented in this file.
 - Add feature tests and update-vendor Makefile target
 - **server**: Add scroll sync tests
 
+[0.1.11]: https://github.com/donaldgifford/mdp/compare/v0.1.10...v0.1.11
 [0.1.10]: https://github.com/donaldgifford/mdp/compare/v0.1.9...v0.1.10
 [0.1.9]: https://github.com/donaldgifford/mdp/compare/v0.1.8...v0.1.9
 [0.1.8]: https://github.com/donaldgifford/mdp/compare/v0.1.7...v0.1.8
