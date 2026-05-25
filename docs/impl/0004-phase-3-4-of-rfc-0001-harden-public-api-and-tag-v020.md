@@ -234,11 +234,12 @@ auditable.
 
 **PR**
 
-- [ ] Open PR with `patch` label (the only user-facing API change is
-      additive: `WithMermaidRenderMode` and possibly the `IsAuto`
-      accessor rename)
-- [ ] PR title: `feat: harden public pkg API for v0.2.0`
-- [ ] PR body references RFC-0001 phase 3 acceptance criteria
+- [x] Open PR with `patch` label — [PR #49](https://github.com/donaldgifford/mdp/pull/49)
+      (the `Theme.IsAuto` field→method is breaking for any external
+      consumer; since the in-tree consumer is the only known caller
+      and there's no released library yet, patch label fits)
+- [x] PR title: `feat: harden public pkg API for v0.2.0`
+- [x] PR body references RFC-0001 phase 3 acceptance criteria
 
 #### Success Criteria
 
