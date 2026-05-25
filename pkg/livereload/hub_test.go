@@ -177,6 +177,55 @@ func TestHub_CloseDropsAllClients(t *testing.T) {
 	}
 }
 
+// TestHub_HandleAfterClose verifies that HandleWebSocket and
+// HandleSSE refuse to register clients on a closed Hub instead of
+// crashing — exercises the addWS/addSSE closed-hub branch.
+func TestHub_HandleAfterClose(t *testing.T) {
+	t.Parallel()
+	hub := livereload.NewHub()
+	mux := http.NewServeMux()
+	mux.HandleFunc("/ws", hub.HandleWebSocket)
+	mux.HandleFunc("/events", hub.HandleSSE)
+	srv := httptest.NewServer(mux)
+	t.Cleanup(srv.Close)
+
+	if err := hub.Close(); err != nil {
+		t.Fatalf("close hub: %v", err)
+	}
+
+	// SSE GET against a closed hub should return without registering.
+	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
+	defer cancel()
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, srv.URL+"/events", http.NoBody)
+	if err != nil {
+		t.Fatalf("new request: %v", err)
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("GET /events: %v", err)
+	}
+	_ = resp.Body.Close()
+
+	// WS dial against a closed hub: upgrade succeeds but the conn is
+	// closed immediately. The read fails.
+	wsURL := "ws" + strings.TrimPrefix(srv.URL, "http") + "/ws"
+	conn, dialResp, dialErr := websocket.DefaultDialer.Dial(wsURL, nil)
+	if dialErr == nil {
+		if dialResp != nil && dialResp.Body != nil {
+			_ = dialResp.Body.Close()
+		}
+		_ = conn.SetReadDeadline(time.Now().Add(testTimeout))
+		if _, _, readErr := conn.ReadMessage(); readErr == nil {
+			t.Error("expected read error from closed-hub WS, got nil")
+		}
+		_ = conn.Close()
+	}
+
+	if got := hub.Count(); got != 0 {
+		t.Errorf("hub.Count = %d after close, want 0", got)
+	}
+}
+
 func TestHub_ConcurrentBroadcastNoRace(t *testing.T) {
 	t.Parallel()
 	hub, srv := newTestServer(t)

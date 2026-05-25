@@ -248,6 +248,29 @@ func TestRender_MarkdownFixture(t *testing.T) {
 	}
 }
 
+// TestParser_AllOptionsOff verifies the disable-side of each toggle.
+// The default Parser enables every extension, so the only way to
+// exercise the false branch of the With* setters is to call them
+// explicitly here.
+func TestParser_AllOptionsOff(t *testing.T) {
+	t.Parallel()
+
+	p := parser.New(
+		parser.WithGFM(false),
+		parser.WithSyntaxHighlighting(false),
+		parser.WithMermaid(false),
+		parser.WithMath(false),
+		parser.WithCallouts(false),
+	)
+	html, err := p.Render([]byte("# Plain"))
+	if err != nil {
+		t.Fatalf("Render: %v", err)
+	}
+	if !strings.Contains(string(html), "<h1") {
+		t.Errorf("expected heading even with all extensions off, got: %s", html)
+	}
+}
+
 const mermaidFixture = "```mermaid\ngraph TD\nA-->B\n```\n"
 
 // TestParser_WithMermaidRenderMode_Client asserts the default client

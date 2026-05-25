@@ -134,6 +134,9 @@ func New(opts ...Option) *Parser {
 func (p *Parser) Render(src []byte) ([]byte, error) {
 	var buf bytes.Buffer
 	if err := p.md.Convert(src, &buf); err != nil {
+		// coverage: goldmark.Convert only errors on impossible
+		// conditions (nil writer, malformed AST from a broken
+		// extender). The default extender set never triggers this.
 		return nil, err
 	}
 	return buf.Bytes(), nil

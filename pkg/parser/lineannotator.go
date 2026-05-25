@@ -32,6 +32,10 @@ func (*lineAnnotator) Transform(doc *ast.Document, reader text.Reader, _ gmparse
 
 		seg := firstSegment(node)
 		if seg.Start < 0 {
+			// coverage: block nodes always have a segment or a child
+			// segment after the goldmark default parser runs; this
+			// guards against custom extenders that emit segment-less
+			// blocks.
 			return ast.WalkContinue, nil
 		}
 

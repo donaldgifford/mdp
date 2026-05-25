@@ -148,6 +148,68 @@ func TestWrapHandler_HonorsCustomPaths(t *testing.T) {
 	}
 }
 
+func TestWrapHandler_WarnsOnCustomPathWithoutCustomClientJS(t *testing.T) {
+	t.Parallel()
+	hub := livereload.NewHub()
+	t.Cleanup(func() { _ = hub.Close() })
+
+	// Exercises the construction-time slog.Warn in WrapHandler.
+	// We don't capture the log here — the point is to cover the branch
+	// and confirm WrapHandler still returns a working handler.
+	inner := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		_, _ = w.Write([]byte("<html><body></body></html>"))
+	})
+	handler := livereload.WrapHandler(inner, hub, livereload.WithWSPath("/socket"))
+
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/", http.NoBody))
+	if !strings.Contains(rec.Body.String(), "<script>") {
+		t.Errorf("expected default ClientJS injected, body = %q", rec.Body.String())
+	}
+}
+
+func TestWrapHandler_HonorsCustomInjectionPoint(t *testing.T) {
+	t.Parallel()
+	hub := livereload.NewHub()
+	t.Cleanup(func() { _ = hub.Close() })
+
+	inner := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		_, _ = w.Write([]byte("<html><body>hi</body></html><!-- end -->"))
+	})
+
+	rec := httptest.NewRecorder()
+	wrapped := livereload.WrapHandler(inner, hub,
+		livereload.WithInjectionPoint("<!-- end -->"),
+	)
+	wrapped.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/", http.NoBody))
+
+	body := rec.Body.String()
+	if !strings.Contains(body, "</body></html><script>") {
+		t.Errorf("expected <script> injected before custom marker, body = %q", body)
+	}
+}
+
+func TestWrapHandler_PreservesUnderlyingStatusCode(t *testing.T) {
+	t.Parallel()
+	hub := livereload.NewHub()
+	t.Cleanup(func() { _ = hub.Close() })
+
+	inner := http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		w.WriteHeader(http.StatusTeapot)
+		_, _ = w.Write([]byte("<html><body>err</body></html>"))
+	})
+
+	rec := httptest.NewRecorder()
+	livereload.WrapHandler(inner, hub).ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/", http.NoBody))
+
+	if rec.Code != http.StatusTeapot {
+		t.Errorf("status = %d, want %d", rec.Code, http.StatusTeapot)
+	}
+}
+
 func TestWrapHandler_InjectsIntoSniffedHTMLWhenContentTypeUnset(t *testing.T) {
 	t.Parallel()
 	hub := livereload.NewHub()

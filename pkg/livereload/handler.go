@@ -174,6 +174,9 @@ func (r *injectingRecorder) Flush() {
 	}
 	//nolint:gosec // G705: pass-through middleware — the wrapped handler is responsible for output safety.
 	if _, err := r.w.Write(body); err != nil {
+		// coverage: response write failure means the client
+		// disconnected before we finished sending; nothing to do
+		// except log.
 		slog.Debug("livereload: write response failed", "error", err)
 	}
 }

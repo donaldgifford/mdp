@@ -160,6 +160,9 @@ var builtinThemes = map[string]Theme{
 func mustReadThemeCSS(filename string) string {
 	data, err := assets.FS.ReadFile("themes/" + filename)
 	if err != nil {
+		// coverage: embedded assets are baked into the binary; a read
+		// failure here means the package was built with a missing
+		// theme file, which a single test run would catch immediately.
 		panic(fmt.Sprintf("failed to read embedded theme file %q: %v", filename, err))
 	}
 	return string(data)
@@ -202,6 +205,9 @@ func readThemeFile(path string) (string, error) {
 	// Convert relative paths to absolute
 	absPath, err := filepath.Abs(path)
 	if err != nil {
+		// coverage: filepath.Abs returns an error only when os.Getwd
+		// fails, which requires the process's CWD to have been deleted
+		// — essentially unreachable in normal operation.
 		return "", fmt.Errorf("resolving theme file path %q: %w", path, err)
 	}
 
