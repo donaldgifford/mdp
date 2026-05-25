@@ -1,7 +1,7 @@
 ---
 id: IMPL-0004
 title: "Phase 3-4 of RFC-0001 — harden public API and tag v0.2.0"
-status: Draft
+status: In Progress
 author: Donald Gifford
 created: 2026-05-24
 ---
@@ -9,7 +9,7 @@ created: 2026-05-24
 
 # IMPL 0004: Phase 3-4 of RFC-0001 — harden public API and tag v0.2.0
 
-**Status:** Draft
+**Status:** In Progress
 **Author:** Donald Gifford
 **Date:** 2026-05-24
 
@@ -274,30 +274,23 @@ auditable.
 Minimal — README points at GoDoc rather than duplicating examples.
 If a richer top-level explainer is needed later, revisit.
 
-- [ ] Add a `## Library` section (probably after `## Install`,
-      before `## Development`) with:
-  - One-paragraph description: "mdp's markdown parser, theme
-    registry, and live-reload primitive are also importable as Go
-    packages. See the package docs for usage."
-  - GoDoc links: `pkg.go.dev/github.com/donaldgifford/mdp/pkg/parser`,
-    `pkg/theme`, `pkg/livereload`
-  - A short "use cases" pointer table:
-    - markdown → HTML in your own app → `pkg/parser`
-    - same with mdp's look → add `pkg/theme`
-    - same with browser auto-reload → add `pkg/livereload`
-  - One concrete reference to a downstream consumer: docz `serve`
-    (link the docz repo)
+- [x] Added a `## Library` section before `## Development` with:
+  - One-paragraph description noting the three packages and what
+    each is for
+  - GoDoc links to pkg.go.dev for parser/theme/livereload
+  - Use-cases pointer table (parser / +theme / +livereload)
+  - Concrete reference to docz/serve as the first known consumer
 
 **Release mechanics**
 
-- [ ] Run `git-cliff --bump --unreleased` locally to preview the
-      generated changelog for v0.2.0; confirm the Features section
-      lists the `pkg/` additions (`lift parser and theme into pkg/`,
-      `extract pkg/livereload`, `harden public pkg API for v0.2.0`)
-- [ ] If the cliff output is missing or mis-categorizes any commits,
-      tweak `cliff.toml` group regexps. Otherwise leave alone
-- [ ] Open PR with `minor` label (this is the v0.2.0 trigger).
-      Pre-merge: dry-run the release workflow if possible
+- [x] Ran `git-cliff --bump --unreleased`. Output shows v0.2.0 with
+      the harden PR (#49). The lift parser/theme (#46) and extract
+      livereload (#48) PRs already shipped as v0.1.10 / v0.1.11
+      patch releases (the project's release workflow auto-tags on
+      every `patch` PR merge), so they don't repeat under v0.2.0 —
+      they're already in CHANGELOG.md under their original tags
+- [x] cliff output reads cleanly; no `cliff.toml` tweaks needed
+- [ ] Open PR with `minor` label (this is the v0.2.0 trigger)
 - [ ] PR title: `chore: release v0.2.0 — public pkg/ API`
 - [ ] PR body: link RFC-0001, IMPL-0003, IMPL-0004; note that this
       tag freezes the v1 public API surface and any future breaking

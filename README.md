@@ -204,6 +204,33 @@ brew install donaldgifford/tap/mdp
 # Download the archive for your platform from the releases page
 ```
 
+## Library
+
+mdp's markdown parser, theme registry, and live-reload primitive are
+also importable as Go packages — useful if you're building your own
+preview-style app and want mdp's rendering or live-reload behavior
+without shelling out to the CLI. See the package docs for usage:
+
+- [`pkg/parser`](https://pkg.go.dev/github.com/donaldgifford/mdp/pkg/parser)
+  — goldmark pipeline (GFM, syntax highlighting, Mermaid, math,
+  callouts) with `data-source-line` annotations for scroll sync.
+- [`pkg/theme`](https://pkg.go.dev/github.com/donaldgifford/mdp/pkg/theme)
+  — theme registry; resolves built-in names, `auto`, or a CSS file
+  path to a Theme struct.
+- [`pkg/livereload`](https://pkg.go.dev/github.com/donaldgifford/mdp/pkg/livereload)
+  — transport-agnostic `Hub` (WebSocket + SSE) plus a `WrapHandler`
+  middleware that injects a reload `<script>` into HTML responses.
+
+| Use case | Import |
+|---|---|
+| Render markdown → HTML in your own app | `pkg/parser` |
+| Same, with mdp's look | add `pkg/theme` |
+| Same, with browser auto-reload | add `pkg/livereload` |
+
+[docz](https://github.com/donaldgifford/docz) uses these packages
+in its `serve` command — a real-world consumer to look at for
+integration patterns.
+
 ## Development
 
 ```bash
