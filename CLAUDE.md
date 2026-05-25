@@ -32,9 +32,10 @@ cmd/mdp/           -> CLI entrypoint (cobra with --version, --verbose)
 pkg/
   parser/          -> Goldmark pipeline: GFM, highlighting, mermaid, math, line annotations (PUBLIC)
   theme/           -> Built-in theme registry; Resolve() maps name/path/auto -> Theme struct (PUBLIC)
+  livereload/      -> Transport-agnostic Hub (WS+SSE) + WrapHandler injection middleware + ClientJS (PUBLIC)
 internal/
   cli/             -> Root and serve commands with flag handling
-  server/          -> HTTP server, WebSocket/SSE hubs, stdin reader, auth token
+  server/          -> HTTP server orchestrator: routes, template, stdin reader, auth token, mdp-specific wsMessage shape; consumes pkg/livereload
   watcher/         -> fsnotify file watcher with 50ms debounce
 assets/
   themes/          -> One CSS file per built-in theme (embedded via go:embed)
@@ -45,10 +46,19 @@ build.lua          -> Auto-run by lazy.nvim on install/update (binary download/b
 scripts/install.sh -> CLI alternative to build.lua (same logic in bash)
 ```
 
-`pkg/parser` and `pkg/theme` are part of the public Go library
-introduced by RFC-0001; external consumers can `import` them.
-`internal/server`, `internal/watcher`, and `internal/cli` stay
+`pkg/parser`, `pkg/theme`, and `pkg/livereload` are part of the public
+Go library introduced by RFC-0001; external consumers can `import`
+them. `internal/server`, `internal/watcher`, and `internal/cli` stay
 internal — they're CLI-specific.
+
+`pkg/livereload.Hub` uses per-connection sender goroutines with a
+buffered `chan []byte` (size 8) so `Broadcast` is non-blocking and
+gorilla/websocket's single-writer requirement is satisfied. The wire
+format on top of the hub is owned by the caller — mdp marshals the
+`wsMessage{Type:"content"|"cursor",...}` JSON shape in
+`internal/server`; that shape is mdp's contract with its
+`assets/preview.js`, not `pkg/livereload`'s contract with consumers
+(which is just `[]byte`).
 
 **Data flow:** Neovim buffer -> Lua plugin -> stdin JSON -> Go binary -> goldmark parse -> WebSocket/SSE hub -> browser. Browser handles Mermaid, KaTeX, highlight.js client-side.
 
