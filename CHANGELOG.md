@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] - 2026-05-25
+
+### Documentation
+
+- Add README ## Library section for v0.2.0 (#50)
+
 ## [0.1.12] - 2026-05-25
 
 ### Added
@@ -148,6 +154,7 @@ All notable changes to this project will be documented in this file.
 - Add feature tests and update-vendor Makefile target
 - **server**: Add scroll sync tests
 
+[0.2.0]: https://github.com/donaldgifford/mdp/compare/v0.1.12...v0.2.0
 [0.1.12]: https://github.com/donaldgifford/mdp/compare/v0.1.11...v0.1.12
 [0.1.11]: https://github.com/donaldgifford/mdp/compare/v0.1.10...v0.1.11
 [0.1.10]: https://github.com/donaldgifford/mdp/compare/v0.1.9...v0.1.10
