@@ -1,7 +1,7 @@
 ---
 id: IMPL-0003
 title: "Phase 1-2 of RFC-0001 — lift parser/theme and extract livereload"
-status: Draft
+status: In Progress
 author: Donald Gifford
 created: 2026-05-24
 ---
@@ -9,7 +9,7 @@ created: 2026-05-24
 
 # IMPL 0003: Phase 1-2 of RFC-0001 — lift parser/theme and extract livereload
 
-**Status:** Draft
+**Status:** In Progress
 **Author:** Donald Gifford
 **Date:** 2026-05-24
 
@@ -19,7 +19,7 @@ created: 2026-05-24
   - [In Scope](#in-scope)
   - [Out of Scope](#out-of-scope)
 - [Implementation Phases](#implementation-phases)
-  - [Phase 0: Add -race to CI test step (precursor)](#phase-0-add--race-to-ci-test-step-precursor)
+  - [Phase 0: Add test-race make target for local dev (optional precursor)](#phase-0-add-test-race-make-target-for-local-dev-optional-precursor)
     - [Tasks](#tasks)
     - [Success Criteria](#success-criteria)
   - [Phase 1: Lift parser and theme to pkg/](#phase-1-lift-parser-and-theme-to-pkg)
@@ -362,9 +362,11 @@ requirement means tests are the critical artifact.
 
 **PR**
 
-- [ ] Open PR with `patch` label
-- [ ] PR title: `feat: extract pkg/livereload from internal/server`
-- [ ] PR body references DESIGN-0002 § "pkg/livereload (phase 2)" and
+- [x] Open PR with `patch` label — [PR #47](https://github.com/donaldgifford/mdp/pull/47)
+      (base: `feat/impl-0003-phase-1` while PR #46 is open; flip to
+      `main` after #46 merges)
+- [x] PR title: `feat: extract pkg/livereload from internal/server`
+- [x] PR body references DESIGN-0002 § "pkg/livereload (phase 2)" and
       explicitly notes the gorilla concurrent-write race fix as a
       side-effect
 
