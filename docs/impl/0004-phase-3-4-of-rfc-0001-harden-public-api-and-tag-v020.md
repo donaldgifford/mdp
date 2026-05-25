@@ -113,20 +113,19 @@ outcomes).
 
 **Cross-package isolation audit**
 
-- [ ] Run
+- [x] Run
       `grep -rn "donaldgifford/mdp/pkg/" pkg/parser/ pkg/theme/ pkg/livereload/ --include='*.go' | grep -v _test.go`
-      to confirm no `pkg/X` package imports another `pkg/Y` package
-      (parser must not import theme/livereload; theme must not
-      import parser/livereload; livereload must not import
-      parser/theme). Allowed cross-deps: `pkg/theme` → `assets`
-      (stdlib-of-mdp; already documented)
-- [ ] Run
-      `go doc -all ./pkg/parser ./pkg/theme ./pkg/livereload`
-      and confirm every exported symbol's signature uses only stdlib
-      types or types from its own package. Document anything that
-      does cross packages and decide whether it's intentional
-- [ ] If audit surfaces unintended coupling, file as a follow-up PR
-      rather than fixing inline (keeps this PR scoped to hardening)
+      → returns nothing. No `pkg/X` package imports another `pkg/Y`
+      package
+- [x] Run
+      `go doc -all ./pkg/parser ./pkg/theme ./pkg/livereload` →
+      every exported symbol's signature uses only stdlib types or
+      types from its own package. One intentional exception:
+      `parser.WithMermaidRenderMode(mode mermaid.RenderMode)` takes
+      a type from `go.abhg.dev/goldmark/mermaid` since that's the
+      mode enum the underlying extender uses; consumers who don't
+      set the option don't have to import that package
+- [x] Audit surfaced no unintended coupling
 
 **Per-package doc.go (primary docs surface)**
 
@@ -135,28 +134,15 @@ The README's Library section (phase 4) defers to GoDoc rather than
 duplicating prose. Each `doc.go` holds the package-level GoDoc
 comment with usage examples rendered as fenced code blocks.
 
-- [ ] `pkg/parser/doc.go`: package overview; covers GFM, syntax
-      highlighting, Mermaid + Math + callouts feature flags. Include
-      two code-block examples:
-  - minimal `parser.New().Render([]byte("# Hi"))`
-  - parser with all `With*` options including the new
-    `WithMermaidRenderMode`
-- [ ] `pkg/theme/doc.go`: package overview; explain the theme
-      registry, `Resolve` / `Names`, and the binary-bloat note
-      (importing `pkg/theme` pulls in `assets`' embedded vendor
-      JS/CSS). Include a code-block example showing
-      `theme.Resolve("github-light")` + reading the resolved fields
-      (`CSS`, `HljsVendorCSS`, `MermaidTheme`, `IsAuto()`).
-- [ ] `pkg/livereload/doc.go`: package overview with the **transport
-      contract** spelled out — WS frame format (TextMessage carrying
-      opaque `[]byte` payload), SSE event framing
-      (`data: <payload>\n\n`), and the explicit statement that
-      `Broadcast` payloads are consumer-defined. Include a single
-      composition example: build a `Hub`, wrap a stdlib
-      `http.HandlerFunc` with `WrapHandler`, broadcast opaque bytes,
-      browser reloads on receipt. **Do not** include a typed/JSON
-      message example — that's mdp's contract, not livereload's, and
-      muddles the "payload is opaque" point.
+- [x] `pkg/parser/doc.go`: minimal `parser.New().Render([]byte("# Hi"))`
+      example + all-options example including `WithMermaidRenderMode`
+- [x] `pkg/theme/doc.go`: `Resolve("github-light")` example reading
+      the resolved fields (`MermaidTheme`, `IsAuto()`,
+      `HljsVendorCSS`); binary-bloat note included
+- [x] `pkg/livereload/doc.go`: transport contract (WS TextMessage,
+      SSE `data: ...\n\n` framing, opaque payload); concurrency +
+      security sections; single composition example using only
+      stdlib + livereload (no typed/JSON example per Q2)
 
 **Per-package example_test.go (compile-time isolation backstop)**
 
@@ -167,68 +153,56 @@ plus stdlib; if anyone later adds a cross-`pkg/` import to the
 public surface, the example fails to build. Examples are intentionally
 small — the rich examples live in `doc.go`.
 
-- [ ] `pkg/parser/example_test.go`:
-  - [ ] `ExampleNew`: 5-line `parser.New().Render([]byte("# Hi"))`
+- [x] `pkg/parser/example_test.go`:
+  - [x] `ExampleNew`: 5-line `parser.New().Render([]byte("# Hi"))`
         with `// Output:` assertion
-  - [ ] Import block: only `parser` + stdlib (`fmt`)
-- [ ] `pkg/theme/example_test.go`:
-  - [ ] `ExampleResolve`: `theme.Resolve("github-light")` and print
-        the resolved `MermaidTheme` string
-  - [ ] Import block: only `theme` + stdlib (`fmt`)
-- [ ] `pkg/livereload/example_test.go`:
-  - [ ] `ExampleHub`: `NewHub()`, `Count()`, `Close()` — no network
-        needed for the minimal example. The point is to prove
-        nothing else has to be imported to use the package
-  - [ ] Import block: only `livereload` + stdlib (`fmt`).
-        No `pkg/parser`, no `pkg/theme`, no `gorilla/websocket`
-        (the dependency is transitive only)
+  - [x] Import block: only `parser` + `fmt`
+- [x] `pkg/theme/example_test.go`:
+  - [x] `ExampleResolve`: `theme.Resolve("github-light")` and prints
+        `MermaidTheme`, `IsAuto()`, `HljsVendorCSS`
+  - [x] Import block: only `theme` + `fmt`
+- [x] `pkg/livereload/example_test.go`:
+  - [x] `ExampleHub`: `NewHub()`, `Count()`, `Close()` — no network
+        required
+  - [x] Import block: only `livereload` + `fmt`. Notably no
+        gorilla/websocket (transitive only)
 
 **pkg/parser: WithMermaidRenderMode option**
 
-- [ ] Add `Option` `WithMermaidRenderMode(mode mermaid.RenderMode) Option`
+- [x] Add `WithMermaidRenderMode(mode mermaid.RenderMode) Option`
       to `pkg/parser/parser.go`. Stored in `config.mermaidMode`,
-      defaults to `mermaid.RenderModeClient` (preserves current
-      behavior)
-- [ ] Update the existing mermaid extender block (currently
-      `mermaid.Extender{RenderMode: mermaid.RenderModeClient}`) to
-      use `cfg.mermaidMode`
-- [ ] Add a unit test in `pkg/parser/parser_test.go`:
-      `TestParser_MermaidRenderMode_Server` exercises
-      `mermaid.RenderModeServer` against a fixture markdown with a
-      mermaid block; assert the rendered HTML contains an `<svg>`
-      (server-side render) rather than a `<pre class="mermaid">`
-      placeholder (client-side render)
-- [ ] Mention `WithMermaidRenderMode` in `pkg/parser/doc.go`'s
-      "all-options" code block
+      defaults to `mermaid.RenderModeClient`
+- [x] Updated the mermaid extender block to use `cfg.mermaidMode`
+- [x] `TestParser_WithMermaidRenderMode_Server` exercises
+      `RenderModeServer` against a fixture with a mermaid block;
+      asserts `<svg>` is emitted (not `<pre class="mermaid">`).
+      Skipped via `t.Skip` when the `mmdc` CLI is not on `$PATH`
+      so the suite stays green on machines without it.
+      `TestParser_WithMermaidRenderMode_Client` asserts the default
+      client-mode behavior
+- [x] `WithMermaidRenderMode` documented in `pkg/parser/doc.go`'s
+      all-options code block
 
 **pkg/theme: exported field audit**
 
-- [ ] `CSS string` — keep as field (load-bearing; consumers inject
-      directly into HTML).
-- [ ] `HljsVendorCSS string` — keep as field (precise name; path is
-      ergonomic to use as a string).
-- [ ] `MermaidTheme string` — keep as field (passed to
-      `mermaid.initialize()` by consumers).
-- [ ] **Convert `IsAuto bool` → `Theme.IsAuto() bool` method.** Make
-      the underlying field unexported (e.g., `isAuto bool`); add a
-      pointer-receiver method `func (t Theme) IsAuto() bool { return t.isAuto }`.
-      Rationale: accessor reads more clearly at call sites
-      (`theme.Resolve("auto").IsAuto()`) than a bool field, and this
-      is the last chance to make the change before v0.2.0 freezes
-      the API
-- [ ] Update `internal/server/server.go` call sites that read
-      `theme.IsAuto` to call `theme.IsAuto()`
-- [ ] Update `pkg/theme` tests for the new shape
-- [ ] Update the `pkg/theme` doc.go example to use `IsAuto()`
+- [x] `CSS string` — kept as field (load-bearing).
+- [x] `HljsVendorCSS string` — kept as field.
+- [x] `MermaidTheme string` — kept as field.
+- [x] Converted `IsAuto bool` → `Theme.IsAuto() bool` method.
+      Underlying field is now `isAuto bool` (unexported)
+- [x] Updated `internal/server/server.go` `pageData.IsAuto`
+      initializer to call `s.theme.IsAuto()`
+- [x] Updated `pkg/theme/theme_test.go` call sites (4) to use
+      `IsAuto()`
+- [x] `pkg/theme/doc.go` example uses `IsAuto()`
 
 **Documentation and isolation proofs**
 
-- [ ] Run `go test ./pkg/...` — all examples compile and run cleanly
-- [ ] Run `go vet ./pkg/...` — no issues
-- [ ] Confirm with
-      `go doc github.com/donaldgifford/mdp/pkg/parser`
-      (and theme, livereload) that the package docs render as
-      expected on the command line
+- [x] `go test ./pkg/...` — all `Example*` and unit tests pass
+- [x] `go vet ./pkg/...` — clean (covered by `make lint`)
+- [x] `go doc github.com/donaldgifford/mdp/pkg/parser` (and theme,
+      livereload) — package docs render with sections, examples, and
+      method/function lists as expected
 
 **Coverage hardening (100% target on exported symbols)**
 
@@ -239,15 +213,24 @@ in practice) are acceptable exemptions — annotate inline with a
 `// coverage: <reason>` comment so the gap is intentional and
 auditable.
 
-- [ ] `go test -cover ./pkg/parser ./pkg/theme ./pkg/livereload`
-      and inspect per-package coverage. Add tests for any exported
-      function/method that isn't fully covered
-- [ ] For each gap that won't be closed (defensive guards, etc.),
-      add a `// coverage: <reason>` comment and document the
-      exemption in the PR body
+- [x] Per-package coverage after additional tests:
+      `pkg/parser` 97.0%, `pkg/theme` 93.8%, `pkg/livereload` 89.7%.
+      Added `TestParser_AllOptionsOff` (covers every disable-side
+      With* setter), `TestWrapHandler_HonorsCustomInjectionPoint`,
+      `TestWrapHandler_PreservesUnderlyingStatusCode`,
+      `TestWrapHandler_WarnsOnCustomPathWithoutCustomClientJS`,
+      `TestHub_HandleAfterClose`
+- [x] All remaining sub-100 lines annotated with
+      `// coverage: <reason>` (defensive guards on goldmark.Convert
+      errors, embedded-asset panic, filepath.Abs error, gorilla
+      conn.Close errors, websocket upgrade failure, SSE non-Flusher
+      writer, SSE drop loop, response write failure, idempotent
+      remove guards)
 - [ ] Update `.codecov.yml` if needed to assert per-`pkg/` thresholds
-      higher than the project-wide 60% (see `CLAUDE.md` § CI/CD).
-      Project-wide threshold stays at the current 60%
+      higher than the project-wide 60% *(deferred — codecov is not
+      currently wired up; existing project-wide 60% in CLAUDE.md is
+      enforced via `make test-coverage` thresholds rather than
+      codecov.yml. Tracking a follow-up if codecov is added.)*
 
 **PR**
 
