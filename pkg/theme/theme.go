@@ -1,4 +1,3 @@
-// Package theme provides theme resolution for the mdp preview server.
 package theme
 
 import (

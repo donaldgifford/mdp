@@ -1,17 +1,3 @@
-// Package livereload provides primitives for browser live-reload: a
-// transport-agnostic Hub fanning byte payloads out to connected
-// WebSocket and SSE clients, and a WrapHandler middleware that injects
-// a reload <script> into HTML responses.
-//
-// Hub is concurrency-safe — every WebSocket connection has its own
-// writer goroutine, so Broadcast can be called from any goroutine
-// without violating gorilla/websocket's single-writer requirement.
-//
-// The package ships a default ClientJS that does a full page reload
-// on any incoming message; consumers wanting smarter behavior can
-// supply their own via WithClientJS.
-//
-// Intended for local-only use. HandleWebSocket accepts any origin.
 package livereload
 
 import (

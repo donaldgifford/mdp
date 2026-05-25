@@ -1,4 +1,3 @@
-// Package parser provides markdown-to-HTML conversion using goldmark.
 package parser
 
 import (
