@@ -5,6 +5,38 @@ coverage:
       default:
         target: 60%
         threshold: 40%
+
+# Per-component thresholds for the public Go library packages. These
+# enforce the IMPL-0004 commitment that pkg/{parser,theme,livereload}
+# stay close to 100% line coverage on exported symbols; defensive
+# gaps are annotated with `// coverage: <reason>` in source.
+component_management:
+  individual_components:
+    - component_id: pkg_parser
+      name: pkg/parser
+      paths:
+        - "pkg/parser/**"
+      statuses:
+        - type: project
+          target: 95%
+          threshold: 1%
+    - component_id: pkg_theme
+      name: pkg/theme
+      paths:
+        - "pkg/theme/**"
+      statuses:
+        - type: project
+          target: 90%
+          threshold: 1%
+    - component_id: pkg_livereload
+      name: pkg/livereload
+      paths:
+        - "pkg/livereload/**"
+      statuses:
+        - type: project
+          target: 85%
+          threshold: 1%
+
 ignore:
   - "main.go"
   - "docs"

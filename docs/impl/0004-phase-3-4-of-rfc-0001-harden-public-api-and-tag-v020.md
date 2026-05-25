@@ -226,11 +226,12 @@ auditable.
       conn.Close errors, websocket upgrade failure, SSE non-Flusher
       writer, SSE drop loop, response write failure, idempotent
       remove guards)
-- [ ] Update `.codecov.yml` if needed to assert per-`pkg/` thresholds
-      higher than the project-wide 60% *(deferred — codecov is not
-      currently wired up; existing project-wide 60% in CLAUDE.md is
-      enforced via `make test-coverage` thresholds rather than
-      codecov.yml. Tracking a follow-up if codecov is added.)*
+- [x] `.codecov.yml` updated with per-component thresholds for the
+      public packages: pkg/parser 95%, pkg/theme 90%,
+      pkg/livereload 85% (1% threshold each). Project-wide default
+      stays at 60% so non-public code isn't held to the higher bar.
+      Enforces the IMPL commitment via codecov status checks on
+      every PR
 
 **PR**
 
