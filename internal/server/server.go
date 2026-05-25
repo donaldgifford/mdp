@@ -364,7 +364,7 @@ func (s *Server) handleIndex(w http.ResponseWriter, _ *http.Request) {
 		BaseCSS:       s.baseCSS,
 		ThemeCSS:      template.CSS(s.theme.CSS),
 		HljsVendorCSS: s.theme.HljsVendorCSS,
-		IsAuto:        s.theme.IsAuto,
+		IsAuto:        s.theme.IsAuto(),
 		MermaidTheme:  s.theme.MermaidTheme,
 		CustomCSS:     customCSS,
 		JS:            s.js,

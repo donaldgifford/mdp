@@ -25,8 +25,8 @@ func TestResolve_Auto(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Resolve(%q) error = %v, want nil", tt.input, err)
 			}
-			if !theme.IsAuto {
-				t.Errorf("Resolve(%q).IsAuto = %v, want true", tt.input, theme.IsAuto)
+			if !theme.IsAuto() {
+				t.Errorf("Resolve(%q).IsAuto() = false, want true", tt.input)
 			}
 			if theme.CSS != "" {
 				t.Errorf("Resolve(%q).CSS = %q, want empty", tt.input, theme.CSS)
@@ -53,8 +53,8 @@ func TestResolve_BuiltinNames(t *testing.T) {
 			if err != nil {
 				t.Fatalf("Resolve(%q) error = %v, want nil", name, err)
 			}
-			if theme.IsAuto {
-				t.Errorf("Resolve(%q).IsAuto = true, want false for named theme", name)
+			if theme.IsAuto() {
+				t.Errorf("Resolve(%q).IsAuto() = true, want false for named theme", name)
 			}
 			if theme.CSS == "" {
 				t.Errorf("Resolve(%q).CSS is empty, want non-empty for named theme", name)
@@ -104,8 +104,8 @@ func TestResolve_FilePath(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Resolve(%q) error = %v, want nil", cssFile, err)
 	}
-	if theme.IsAuto {
-		t.Errorf("Resolve(%q).IsAuto = true, want false for file theme", cssFile)
+	if theme.IsAuto() {
+		t.Errorf("Resolve(%q).IsAuto() = true, want false for file theme", cssFile)
 	}
 	if theme.CSS != testCSS {
 		t.Errorf("Resolve(%q).CSS = %q, want %q", cssFile, theme.CSS, testCSS)
@@ -264,8 +264,8 @@ func TestAllBuiltins(t *testing.T) {
 			}
 
 			// All named themes should not be auto
-			if theme.IsAuto {
-				t.Errorf("theme %q has IsAuto = true, want false", name)
+			if theme.IsAuto() {
+				t.Errorf("theme %q has IsAuto() = true, want false", name)
 			}
 		})
 	}
