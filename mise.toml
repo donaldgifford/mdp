@@ -23,6 +23,6 @@ prettier = "3.8.3"
 # renovate: datasource=github-releases depName=segmentio/golines
 golines = "0.13.0"
 # renovate: datasource=github-releases depName=golangci/golangci-lint
-golangci-lint = "2.11.4"
+golangci-lint = "2.12.2"
 # renovate: datasource=github-releases depName=orhun/git-cliff
 git-cliff = "2.13.1"
