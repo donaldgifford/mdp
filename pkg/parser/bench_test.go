@@ -40,3 +40,44 @@ func generateMarkdown(n int) []byte {
 
 	return []byte(sb.String())
 }
+
+// mixedSource exercises the same extension set real consumers hit:
+// GFM table + fenced code block + callout. Used by the mutex-cost
+// benchmarks added for INV-0003 / IMPL-0005.
+var mixedSource = []byte(`# Bench
+
+| col1 | col2 |
+|------|------|
+|   a  |   b  |
+|   c  |   d  |
+
+` + "```go\n" + `func main() {
+    fmt.Println("hello")
+}
+` + "```\n" + `
+
+> [!NOTE]
+> This is a callout that exercises the gm-alert-callouts renderer.
+`)
+
+func BenchmarkRenderMixed(b *testing.B) {
+	p := parser.New()
+	b.SetBytes(int64(len(mixedSource)))
+	for b.Loop() {
+		if _, err := p.Render(mixedSource); err != nil {
+			b.Fatalf("render: %v", err)
+		}
+	}
+}
+
+func BenchmarkRenderMixedParallel(b *testing.B) {
+	p := parser.New()
+	b.SetBytes(int64(len(mixedSource)))
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			if _, err := p.Render(mixedSource); err != nil {
+				b.Fatalf("render: %v", err)
+			}
+		}
+	})
+}

@@ -43,4 +43,11 @@
 //
 // Parser.Render is safe for concurrent use. A single Parser may be
 // shared across goroutines.
+//
+// Note: as a temporary workaround for a known data race in
+// gm-alert-callouts@v0.8.0 (see INV-0003), Render currently
+// serializes goldmark conversion behind a per-Parser mutex.
+// Throughput-sensitive callers that fan out across many goroutines
+// should construct multiple Parser instances until the upstream
+// fix lands.
 package parser

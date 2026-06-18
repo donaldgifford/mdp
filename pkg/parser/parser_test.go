@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"sync"
 	"testing"
 
 	"go.abhg.dev/goldmark/mermaid"
@@ -313,5 +314,53 @@ func TestParser_WithMermaidRenderMode_Server(t *testing.T) {
 	}
 	if strings.Contains(got, `<pre class="mermaid"`) {
 		t.Errorf("server mode should not emit client-mode placeholder, got: %s", got)
+	}
+}
+
+// TestParser_ConcurrentRender_NoRace guards the public-API contract
+// that a single *Parser is safe to share across goroutines. The
+// upstream gm-alert-callouts extension holds a shared cases.Caser
+// that is not safe for concurrent use — see INV-0003. This test
+// must pass under `-race`; failure means the local mitigation in
+// Parser.Render has regressed.
+func TestParser_ConcurrentRender_NoRace(t *testing.T) {
+	t.Parallel()
+
+	const (
+		goroutines = 32
+		iterations = 16
+	)
+
+	// Callout-heavy input: every iteration hits the gm-alert-callouts
+	// renderer that owns the shared cases.Caser.
+	src := []byte(strings.Join([]string{
+		"> [!NOTE]\n> note body",
+		"> [!TIP]\n> tip body",
+		"> [!IMPORTANT]\n> important body",
+		"> [!WARNING]\n> warning body",
+		"> [!CAUTION]\n> caution body",
+	}, "\n\n"))
+
+	p := parser.New()
+
+	var wg sync.WaitGroup
+	errs := make(chan error, goroutines*iterations)
+
+	for range goroutines {
+		wg.Go(func() {
+			for range iterations {
+				if _, err := p.Render(src); err != nil {
+					errs <- err
+					return
+				}
+			}
+		})
+	}
+
+	wg.Wait()
+	close(errs)
+
+	for err := range errs {
+		t.Fatalf("concurrent Render returned error: %v", err)
 	}
 }
