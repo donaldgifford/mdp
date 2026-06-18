@@ -15,6 +15,7 @@ Design docs, plans, and implementation docs can reference investigations by ID
 |----|-------|--------|------|--------|------|
 | INV-0001 | GitHub-style callout and alert rendering | Concluded | 2026-04-03 | Donald Gifford | [0001-github-style-callout-and-alert-rendering.md](0001-github-style-callout-and-alert-rendering.md) |
 | INV-0002 | Expose mdp as a Go library for other apps | Concluded | 2026-05-23 | Donald Gifford | [0002-expose-mdp-as-go-library.md](0002-expose-mdp-as-go-library.md) |
+| INV-0003 | callout extension race in TestRender_GitHubCallout | Open | 2026-06-18 | Donald Gifford | [0003-callout-extension-race-in-testrendergithubcallout.md](0003-callout-extension-race-in-testrendergithubcallout.md) |
 <!-- END DOCZ AUTO-GENERATED -->
 <!-- BEGIN DOCZ AUTO-GENERATED -->
 ## All INVESTIGATIONs
