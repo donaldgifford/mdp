@@ -1,7 +1,7 @@
 ---
 id: IMPL-0005
 title: "local mitigation for INV-0003 callout extension race"
-status: In Progress
+status: Completed
 author: Donald Gifford
 created: 2026-06-18
 ---
@@ -9,7 +9,7 @@ created: 2026-06-18
 
 # IMPL 0005: local mitigation for INV-0003 callout extension race
 
-**Status:** In Progress
+**Status:** Completed
 **Author:** Donald Gifford
 **Date:** 2026-06-18
 
@@ -175,7 +175,7 @@ either (a) accidentally remove it before upstream fixes the bug, or
       mutex and link INV-0003.
 - [x] Update INV-0003 status section: add an entry under
       **References** linking back to this IMPL doc.
-- [ ] Update INV-0003 status: `In Progress` → `Concluded` after
+- [x] Update INV-0003 status: `In Progress` → `Concluded` after
       this IMPL merges (Phase 5).
 
 #### Success Criteria
@@ -225,13 +225,13 @@ isn't a guess.
 - [x] Stage and commit per Phase 1-4 with conventional commit messages.
       Suggested split: one commit per phase, OR a single squash-friendly
       commit titled `fix(parser): serialize Render to work around INV-0003 race`.
-- [ ] Push the branch and open a PR targeting `main` with:
+- [x] Push the branch and open a PR targeting `main` with:
       the captured stack trace from Phase 1, the benchmark numbers
       from Phase 4, and an explicit "remove this when
       gm-alert-callouts ships a fix — see INV-0003 fix plan" note.
-- [ ] Label the PR `patch` (per the project's semver-via-labels
+- [x] Label the PR `patch` (per the project's semver-via-labels
       workflow).
-- [ ] Merge once CI is green; the PR's merge commit closes the
+- [x] Merge once CI is green; the PR's merge commit closes the
       callout flake.
 
 #### Success Criteria
