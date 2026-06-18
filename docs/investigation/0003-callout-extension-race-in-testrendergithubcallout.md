@@ -1,7 +1,7 @@
 ---
 id: INV-0003
 title: "callout extension race in TestRender_GitHubCallout"
-status: In Progress
+status: Concluded
 author: Donald Gifford
 created: 2026-06-18
 ---
@@ -9,7 +9,7 @@ created: 2026-06-18
 
 # INV 0003: callout extension race in TestRender_GitHubCallout
 
-**Status:** In Progress
+**Status:** Concluded
 **Author:** Donald Gifford
 **Date:** 2026-06-18
 
