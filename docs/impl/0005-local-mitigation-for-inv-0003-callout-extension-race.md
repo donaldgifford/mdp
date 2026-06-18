@@ -285,6 +285,10 @@ When `gm-alert-callouts` ships a fixed release per the
 
 Each question lists `a` as the recommendation; alternatives follow.
 
+**Resolved (2026-06-18):** 1a, 2a, 3a, 4a, 5a, 6a. Question 7 deferred —
+ship the local mitigation first, then come back to file the upstream
+issue / fork PR per the [INV-0003 fix plan](../investigation/0003-fix-plan-upstream-callout-race.md).
+
 ### 1. Mutex scope: always lock, or only when callouts are enabled?
 
 The `callouts` config flag is already plumbed; if a consumer
