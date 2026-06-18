@@ -1,7 +1,7 @@
 ---
 id: IMPL-0005
 title: "local mitigation for INV-0003 callout extension race"
-status: Draft
+status: In Progress
 author: Donald Gifford
 created: 2026-06-18
 ---
@@ -9,7 +9,7 @@ created: 2026-06-18
 
 # IMPL 0005: local mitigation for INV-0003 callout extension race
 
-**Status:** Draft
+**Status:** In Progress
 **Author:** Donald Gifford
 **Date:** 2026-06-18
 
@@ -101,18 +101,18 @@ gate against any future change that drops the guard prematurely.
 
 #### Tasks
 
-- [ ] Confirm `github.com/zmtcreative/gm-alert-callouts` is still at
+- [x] Confirm `github.com/zmtcreative/gm-alert-callouts` is still at
       `v0.8.0` (`go list -m -versions ...`); if a new version exists,
       check its changelog before continuing.
-- [ ] Add `TestParser_ConcurrentRender_NoRace` to
+- [x] Add `TestParser_ConcurrentRender_NoRace` to
       `pkg/parser/parser_test.go`:
       one shared `*Parser`, callout-heavy markdown, fan out to ~32
       goroutines × ~16 iterations, `sync.WaitGroup` join, fail on
       any non-nil error.
-- [ ] Run the new test on a stock checkout (before any fix) with
+- [x] Run the new test on a stock checkout (before any fix) with
       `go test -race -count=5 -run TestParser_ConcurrentRender_NoRace ./pkg/parser/`
       and confirm it reliably reports a race / panic.
-- [ ] Capture a one-paragraph note in the PR description with the
+- [x] Capture a one-paragraph note in the PR description with the
       stack trace snippet (so reviewers can see "this fails before
       → passes after").
 
@@ -133,18 +133,18 @@ without leaking implementation detail into the public API.
 
 #### Tasks
 
-- [ ] Add a `mu sync.Mutex` field to the `Parser` struct in
+- [x] Add a `mu sync.Mutex` field to the `Parser` struct in
       `pkg/parser/parser.go`.
-- [ ] Wrap the body of `Parser.Render` in `p.mu.Lock()` /
+- [x] Wrap the body of `Parser.Render` in `p.mu.Lock()` /
       `defer p.mu.Unlock()`.
-- [ ] Add a single-line comment above the lock referencing
+- [x] Add a single-line comment above the lock referencing
       INV-0003 and the upstream fix plan, e.g.:
       `// Serialize Convert until gm-alert-callouts ships a fix — see INV-0003.`
-- [ ] Run `make fmt` and `make lint` — both must pass clean.
-- [ ] Run `TestParser_ConcurrentRender_NoRace` with
+- [x] Run `make fmt` and `make lint` — both must pass clean.
+- [x] Run `TestParser_ConcurrentRender_NoRace` with
       `go test -race -count=20 -run TestParser_ConcurrentRender_NoRace ./pkg/parser/`
       and confirm zero races and zero panics.
-- [ ] Run the full `pkg/parser` race suite:
+- [x] Run the full `pkg/parser` race suite:
       `go test -race -count=5 ./pkg/parser/` — must be green.
 
 #### Success Criteria
@@ -166,14 +166,14 @@ either (a) accidentally remove it before upstream fixes the bug, or
 
 #### Tasks
 
-- [ ] Update `pkg/parser/doc.go` with a short note: "`Render` is
+- [x] Update `pkg/parser/doc.go` with a short note: "`Render` is
       currently serialized per `*Parser` to work around a known
       data race in `gm-alert-callouts@v0.8.0` (see INV-0003).
       Throughput-sensitive consumers should construct multiple
       `*Parser` instances."
-- [ ] Update `CLAUDE.md`'s `pkg/parser` paragraph to mention the
+- [x] Update `CLAUDE.md`'s `pkg/parser` paragraph to mention the
       mutex and link INV-0003.
-- [ ] Update INV-0003 status section: add an entry under
+- [x] Update INV-0003 status section: add an entry under
       **References** linking back to this IMPL doc.
 - [ ] Update INV-0003 status: `In Progress` → `Concluded` after
       this IMPL merges (Phase 5).
@@ -195,15 +195,15 @@ isn't a guess.
 
 #### Tasks
 
-- [ ] Add `BenchmarkRender` to `pkg/parser/parser_test.go`:
+- [x] Add `BenchmarkRender` to `pkg/parser/parser_test.go`:
       single-goroutine baseline rendering a representative document
       (mix of GFM table + code block + callout).
-- [ ] Add `BenchmarkRenderParallel` using `b.RunParallel`:
+- [x] Add `BenchmarkRenderParallel` using `b.RunParallel`:
       same document, all goroutines hitting the same `*Parser`.
-- [ ] Run on `main` (pre-fix) and on the fix branch:
+- [x] Run on `main` (pre-fix) and on the fix branch:
       `go test -bench=BenchmarkRender -benchmem -count=10 ./pkg/parser/ | tee bench.out`
       and capture both into the PR description.
-- [ ] If single-goroutine `ns/op` regresses >5%, investigate before
+- [x] If single-goroutine `ns/op` regresses >5%, investigate before
       shipping; otherwise note the measured overhead in the PR body.
 
 #### Success Criteria
@@ -220,9 +220,9 @@ isn't a guess.
 
 #### Tasks
 
-- [ ] Create branch `fix/parser-serialize-render-inv-0003` (if not
+- [x] Create branch `fix/parser-serialize-render-inv-0003` (if not
       already on it) off `main`.
-- [ ] Stage and commit per Phase 1-4 with conventional commit messages.
+- [x] Stage and commit per Phase 1-4 with conventional commit messages.
       Suggested split: one commit per phase, OR a single squash-friendly
       commit titled `fix(parser): serialize Render to work around INV-0003 race`.
 - [ ] Push the branch and open a PR targeting `main` with:
