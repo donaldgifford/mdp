@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.1] - 2026-06-18
+
+### Documentation
+
+- Finalize RFC-0001 doc statuses post-v0.2.0 release (#51)
+
+### Fixed
+
+- **parser**: Serialize Render to work around INV-0003 gm-alert-callouts race (#65)
+
+### Miscellaneous
+
+- **codecov**: Add per-component thresholds for public pkg/ (#52)
+
 ## [0.2.0] - 2026-05-25
 
 ### Documentation
@@ -154,6 +168,7 @@ All notable changes to this project will be documented in this file.
 - Add feature tests and update-vendor Makefile target
 - **server**: Add scroll sync tests
 
+[0.2.1]: https://github.com/donaldgifford/mdp/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/donaldgifford/mdp/compare/v0.1.12...v0.2.0
 [0.1.12]: https://github.com/donaldgifford/mdp/compare/v0.1.11...v0.1.12
 [0.1.11]: https://github.com/donaldgifford/mdp/compare/v0.1.10...v0.1.11
