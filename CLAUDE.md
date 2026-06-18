@@ -77,6 +77,14 @@ the goldmark-mermaid render mode. Default stays `RenderModeClient`
 (emits `<pre class="mermaid">` placeholders); setting
 `RenderModeServer` switches to inline `<svg>` via the `mmdc` CLI.
 
+`pkg/parser.Parser.Render` holds a per-`Parser` `sync.Mutex` and
+serializes `goldmark.Convert` as a temporary workaround for a data
+race in `gm-alert-callouts@v0.8.0` (shared `cases.Caser`). The
+regression test is `TestParser_ConcurrentRender_NoRace`. Remove the
+mutex (but keep the test) once upstream releases a fix — see
+[INV-0003](docs/investigation/0003-callout-extension-race-in-testrendergithubcallout.md)
+and [IMPL-0005](docs/impl/0005-local-mitigation-for-inv-0003-callout-extension-race.md).
+
 **Data flow:** Neovim buffer -> Lua plugin -> stdin JSON -> Go binary -> goldmark parse -> WebSocket/SSE hub -> browser. Browser handles Mermaid, KaTeX, highlight.js client-side.
 
 **Dual input modes:** Editor plugin pipes buffer via stdin (`--stdin` flag); standalone CLI watches file on disk via fsnotify.

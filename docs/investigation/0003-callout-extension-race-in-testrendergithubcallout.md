@@ -176,6 +176,8 @@ Longer-term (after upstream fix):
 
 - [RFC-0001](../rfc/0001-public-mdp-go-library.md) — public Go library contract
 - [IMPL-0004](../impl/0004-phase-3-4-of-rfc-0001-harden-public-api-and-tag-v020.md) — hardening pass that surfaced the flake
+- [IMPL-0005](../impl/0005-local-mitigation-for-inv-0003-callout-extension-race.md) — local mitigation (per-`Parser` mutex)
+- [INV-0003 fix plan](./0003-fix-plan-upstream-callout-race.md) — upstream fork/PR playbook
 - `gm-alert-callouts@v0.8.0/internal/renderer/header.go:29,68,151` — shared `titleCaser` field
 - `golang.org/x/text@v0.27.0/cases/cases.go` — `cases.Caser` docs
 - `golang.org/x/text@v0.27.0/transform/transform.go:650` — panic site
