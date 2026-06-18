@@ -2,6 +2,7 @@ package parser
 
 import (
 	"bytes"
+	"sync"
 
 	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
 	mathjax "github.com/litao91/goldmark-mathjax"
@@ -18,6 +19,7 @@ import (
 // Parser converts markdown to HTML using goldmark.
 type Parser struct {
 	md goldmark.Markdown
+	mu sync.Mutex
 }
 
 // Option configures a Parser.
@@ -132,6 +134,13 @@ func New(opts ...Option) *Parser {
 
 // Render converts markdown bytes to HTML bytes.
 func (p *Parser) Render(src []byte) ([]byte, error) {
+	// Serialize Convert to work around a data race in
+	// gm-alert-callouts@v0.8.0 (shared cases.Caser, not safe for
+	// concurrent use). Remove when upstream ships a fix — see
+	// INV-0003 and IMPL-0005.
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
 	var buf bytes.Buffer
 	if err := p.md.Convert(src, &buf); err != nil {
 		// coverage: goldmark.Convert only errors on impossible
