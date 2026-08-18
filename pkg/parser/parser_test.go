@@ -262,6 +262,7 @@ func TestParser_AllOptionsOff(t *testing.T) {
 		parser.WithMermaid(false),
 		parser.WithMath(false),
 		parser.WithCallouts(false),
+		parser.WithFootnotes(false),
 	)
 	html, err := p.Render([]byte("# Plain"))
 	if err != nil {

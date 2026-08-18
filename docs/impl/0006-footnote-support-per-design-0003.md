@@ -163,7 +163,7 @@ option shape exactly, and cover the new exported symbol.
 - [x] 6. Add a paragraph to `pkg/parser/doc.go` warning that
   `data-source-line` is **not** monotonic in document order when
   footnotes are enabled (DESIGN-0003 Decision 2 follow-on obligation)
-- [ ] 7. Amend `TestParser_AllOptionsOff` (`parser_test.go:256`) to
+- [x] 7. Amend `TestParser_AllOptionsOff` (`parser_test.go:256`) to
   pass `parser.WithFootnotes(false)`
 - [ ] 8. Add `TestRender_Footnote` — asserts `<sup id="fnref:1">`,
   `href="#fn:1"`, `class="footnote-ref"`, `<li id="fn:1"`, and
