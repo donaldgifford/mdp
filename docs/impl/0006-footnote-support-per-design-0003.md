@@ -411,10 +411,16 @@ custom properties all 13 themes already define (verified).
 - [ ] 4. ⏳ **Awaiting author.** Visually verify two dark themes
   (`github` in dark mode, `tokyo-night`) and two light themes
   (`rose-pine-dawn`, `catppuccin-latte`)
-- [ ] 5. ⏳ **Awaiting author.** Click a `.footnote-ref` — confirm it
-  jumps to the definition and `:target` highlighting fires
-- [ ] 6. ⏳ **Awaiting author.** Click a `↩︎` backlink — confirm it
-  returns to the reference
+- [ ] 5. ⏳ **Awaiting author — visual half only.** Click a
+  `.footnote-ref` — confirm it jumps to the definition and `:target`
+  highlighting fires. The *navigational* half is now automated by
+  `TestRender_FootnoteAnchorsResolve`, which proves the `href` resolves
+  to a real, non-duplicated `id`; what a browser adds is the highlight
+  and the smooth scroll
+- [ ] 6. ⏳ **Awaiting author — visual half only.** Click a `↩︎`
+  backlink — confirm it returns to the reference. The round trip itself
+  is now automated by `TestRender_FootnoteBacklinksRoundTrip`, including
+  the one-to-many repeated-reference case
 
 **Static pre-check for tasks 4-6.** The dominant failure mode in a
 visual check is a selector that matches nothing, which looks identical
@@ -596,6 +602,7 @@ holds.
 | `pkg/parser/lineannotator.go` | Modify | Reword the `seg.Start < 0` guard comment; drop the stale `// coverage:` annotation |
 | `pkg/parser/parser_test.go` | Modify | Seven new footnote tests; amend `TestParser_AllOptionsOff` and `TestRender_MarkdownFixture` |
 | `pkg/parser/lineannotator_test.go` | Modify | Ordering regression tests (mid-document, reference-order, monotonic-outside-footnotes) |
+| `pkg/parser/footnoteanchor_test.go` | **Add** | `TestRender_FootnoteAnchorsResolve` (no dangling or duplicated anchor ids) and `TestRender_FootnoteBacklinksRoundTrip` (reference → definition → back to the same reference) |
 | `pkg/parser/fnbench_test.go` | **Add** | `BenchmarkFootnoteOverhead` (cost of the default-on option on footnote-free input) and `BenchmarkFootnoteRender` (scaling with reference count) — see [Performance](#performance) |
 | `pkg/parser/testdata/fixture.md` | Modify | `## Footnotes` section |
 | `assets/preview.js` | Modify | `findScrollTarget` selector excludes `.footnotes` descendants |
@@ -639,6 +646,11 @@ holds.
 - [x] Fixture: `TestRender_MarkdownFixture` asserts footnote output
 - [x] Race: `make test-coverage` under `-race` — clean, `pkg/parser` at
   97.3%
+- [x] Anchors: `TestRender_FootnoteAnchorsResolve` — every footnote
+  `href` resolves to a real id, and no id is duplicated
+- [x] Anchors: `TestRender_FootnoteBacklinksRoundTrip` — reference →
+  definition → back to the *same* reference, including the one-to-many
+  repeated-reference case
 - [x] Performance: `BenchmarkFootnoteOverhead` — enabling footnotes
   costs nothing measurable on footnote-free input (0.06% of mean, ~60x
   below the noise floor; identical allocations). See [Performance](#performance)
