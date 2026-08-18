@@ -784,7 +784,7 @@ same way.
 
 Questions 1–7 were raised during drafting and resolved by the author
 on 2026-08-18 — see [Resolved Decisions](#resolved-decisions).
-Question 8 was discovered during implementation and is **open**.
+Questions 8-11 were discovered during implementation and are **open**.
 
 ---
 
@@ -904,6 +904,64 @@ this question was drafted.
 - **d. Accept the gap permanently** — document in `CLAUDE.md` that the
   exclusion is load-bearing and rely on review. Zero cost, no
   enforcement.
+
+---
+
+**11. How should the flaky `internal/server` WebSocket tests be
+handled?**
+
+Discovered in Phase 5 while confirming CI on this PR. Two consecutive
+CI runs failed on **different** tests with the same symptom, then a
+third passed unchanged:
+
+| Run | Test | Failure |
+|---|---|---|
+| 1 | `TestWireFormat_WSContentMatchesPriorBaseline` | `wire_test.go:25` — `read tcp …: i/o timeout` |
+| 2 | `TestReadStdin_ContentMessage` | `stdin_test.go:78` — `read tcp …: i/o timeout` |
+| 3 | — | passed, no code change |
+
+Cause: six WebSocket reads across four test files share a hardcoded
+**2-second** deadline.
+
+```text
+internal/server/livereload_test.go:62   scrollsync_test.go:77,191
+internal/server/stdin_test.go:73,155    wire_test.go:80
+```
+
+A GitHub-hosted runner that stalls briefly under contention blows the
+deadline and the read fails. Nothing is wrong with the production
+code — this is the test's own timing assumption.
+
+**This PR did not cause it, and that was checked rather than assumed.**
+The branch touches no `internal/` code at all
+(`git diff origin/main...HEAD -- internal/` is empty); both failures
+landed on **documentation-only** commits; the commit that added new
+parallel test load (`assets/footnotecss_test.go`) had already passed
+CI several runs earlier; the tests pass 30 consecutive local runs and
+continue to pass with all cores saturated. Recent `main` runs are
+green — the older `main` failures are the INV-0003 callout race, fixed
+in v0.2.1.
+
+It blocks nothing today, since a re-run clears it, but it makes CI an
+unreliable merge gate and will resurface on unrelated PRs.
+
+- **a. (Recommended) Fix in a separate PR, tracked by a new issue** —
+  replace the fixed deadlines with a generous ceiling (10-30s) or, better,
+  poll until the expected message arrives with an overall test timeout.
+  A deadline that exists to stop a hung test from wedging the suite does
+  not need to be tight; 2 s buys nothing and costs reliability. Keeps
+  this PR scoped to the approved design, matching the routing chosen for
+  [Question 8](#open-questions).
+- **b. Fix inside this PR** — makes CI dependable here immediately, at
+  the cost of widening a footnote PR into `internal/server` test
+  infrastructure it otherwise never touches.
+- **c. Retry the job when it happens** — zero effort, but every
+  contributor pays the confusion, and a real regression in these tests
+  would be indistinguishable from the noise.
+- **d. Mark the tests as flaky / skip in CI** — removes the signal
+  entirely, including for genuine WebSocket regressions. Not
+  recommended: the wire-format baseline is the contract with
+  `assets/preview.js`.
 
 ---
 
