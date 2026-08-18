@@ -386,6 +386,40 @@ custom properties all 13 themes already define (verified).
   jumps to the definition and `:target` highlighting fires
 - [ ] 6. ⏳ **Awaiting author.** Click a `↩︎` backlink — confirm it
   returns to the reference
+
+**Static pre-check for tasks 4-6.** The dominant failure mode in a
+visual check is a selector that matches nothing, which looks identical
+to a colour that happens to be wrong. That half is now ruled out
+mechanically. Every selector in the `/* Footnotes */` block was run
+against the page the built binary actually serves for
+`testdata/fixture.md`, parsed with jsdom:
+
+| Selector | Matches |
+|---|---|
+| `.footnotes` | 1 |
+| `.footnotes hr` | 1 |
+| `.footnotes ol` | 1 |
+| `.footnotes li` | 2 |
+| `.footnotes li:target` | 2 (probed without `:target`) |
+| `.footnotes p:last-child` | 2 |
+| `.footnote-ref` | 4 |
+| `.footnote-backref` | 4 |
+| `.footnote-backref:hover` | 4 (probed without `:hover`) |
+
+Two structural assumptions the CSS depends on were confirmed at the
+same time: `<hr>` is the **first element child** of `.footnotes`, so
+the 1px hairline override of the global `0.25em` rule applies; and the
+scroll-sync exclusion selector genuinely shrinks the candidate set
+(27 annotated elements → 23 body, 4 excluded).
+
+`:target` and `:hover` are state pseudo-classes with no static
+equivalent, so their structural part was probed with the state
+stripped. What remains for the author is therefore aesthetic judgment —
+contrast, spacing, whether the muted grey reads correctly on each
+palette — not "does the CSS apply at all".
+
+This check is not committed: it is a one-off, and standing JS coverage
+is [Question 9](#open-questions).
 - [x] 7. Verify a document containing **no** footnotes is visually
   unchanged (the new rules are inert). Confirmed by rendering a
   footnote-free document and checking the `#content` div contains no
