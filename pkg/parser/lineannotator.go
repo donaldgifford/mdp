@@ -32,10 +32,13 @@ func (*lineAnnotator) Transform(doc *ast.Document, reader text.Reader, _ gmparse
 
 		seg := firstSegment(node)
 		if seg.Start < 0 {
-			// coverage: block nodes always have a segment or a child
-			// segment after the goldmark default parser runs; this
-			// guards against custom extenders that emit segment-less
-			// blocks.
+			// Some container nodes have neither their own segment nor
+			// a first child that carries one, and are intentionally
+			// left unannotated. FootnoteList is the common case: it
+			// wraps the endnote list but occupies no source range of
+			// its own, so the emitted <div class="footnotes"> has no
+			// data-source-line. Its child Footnote nodes still get
+			// annotated from their definition's first line.
 			return ast.WalkContinue, nil
 		}
 

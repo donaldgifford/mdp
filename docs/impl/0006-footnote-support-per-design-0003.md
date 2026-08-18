@@ -251,7 +251,7 @@ regression in the feature, and the highest-value phase.
   exclusion exists (footnote definitions relocate to the end of the
   render while keeping their source line, which breaks the `break`
   below)
-- [ ] 3. Reword the comment on the `seg.Start < 0` guard at
+- [x] 3. Reword the comment on the `seg.Start < 0` guard at
   `pkg/parser/lineannotator.go:34-40`: drop the `// coverage:`
   annotation and describe the real case — container nodes such as
   `FootnoteList` legitimately have neither their own segment nor a
