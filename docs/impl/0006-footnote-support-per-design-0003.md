@@ -195,20 +195,36 @@ option shape exactly, and cover the new exported symbol.
 - [x] 14. Add `TestRender_FootnoteUndefinedReference` — `[^missing]`
   with no definition renders as literal text with no empty
   `.footnotes` div
-- [ ] 15. Run `make fmt` (gci import ordering) then `make lint`
+- [x] 15. Run `make fmt` (gci import ordering) then `make lint`
 
 #### Success Criteria
 
-- `go build ./...` succeeds
-- `make lint` passes with zero warnings
+- `go build ./...` succeeds — **met**
+- `make lint` introduces no new findings — **met**. Note: `make lint`
+  exits non-zero on a clean checkout of `main`, reporting 6 issues
+  (`goconst` ×4 in `pkg/theme/theme.go`, `nolintlint` ×2 in
+  `pkg/livereload/`). These are **pre-existing and unrelated**: CI
+  pins golangci-lint `v2.11.4` (`.github/workflows/ci.yml:36`) while
+  `mise.toml:47` pins `2.12.2`, and the extra findings come from
+  checks new in 2.12.x. CI lint is green. The working gate for this
+  IMPL is therefore "no findings beyond that 6-issue baseline". The
+  version drift is tracked separately — see
+  [Open Question 8](#open-questions)
 - All seven new tests pass, plus the amended `TestParser_AllOptionsOff`
+  — **met** (9 including subtests)
 - Rendering `Text.[^1]\n\n[^1]: Note.` produces
   `<div class="footnotes" role="doc-endnotes">` containing
-  `<li id="fn:1">`
-- The same input with `WithFootnotes(false)` produces the literal
-  string `[^1]` and no `.footnotes` substring
-- `go test ./pkg/parser/ -cover` reports **≥ 95%** (baseline before
-  this work: 97.1%; `.codecov.yml:15-22` target 95%, threshold 1%)
+  `<li id="fn:1">` — **met**
+- The same input with `WithFootnotes(false)` produces **no
+  `.footnotes` substring** — **met**. The original criterion also
+  required the literal string `[^1]`; that holds only for multi-word
+  definition bodies (see task 13) and was amended during
+  implementation
+- `go test ./pkg/parser/ -cover` reports **≥ 95%** — **met at 97.3%**
+  (baseline before this work: 97.1%; `.codecov.yml:15-22` target 95%,
+  threshold 1%)
+- `go test -race ./pkg/parser/` clean, including
+  `TestParser_ConcurrentRender_NoRace` — **met**
 
 ---
 
@@ -477,10 +493,57 @@ holds.
   `TestParser_ConcurrentRender_NoRace` must keep passing.
 ## Open Questions
 
-None remaining. All seven questions raised during drafting were
-resolved by the author on 2026-08-18. Six settled on the recommended
-option; question 4 was deferred to a tracked GitHub issue. See
-[Resolved Decisions](#resolved-decisions).
+Questions 1–7 were raised during drafting and resolved by the author
+on 2026-08-18 — see [Resolved Decisions](#resolved-decisions).
+Question 8 was discovered during implementation and is **open**.
+
+---
+
+**8. How should the golangci-lint version drift be resolved?**
+
+Discovered in Phase 1. `make lint` exits non-zero on a clean checkout
+of `main`, with 6 findings unrelated to footnotes:
+
+```text
+pkg/theme/theme.go:57,60,63,69      goconst     (4)
+pkg/livereload/handler.go:158       nolintlint  (1)
+pkg/livereload/hub.go:195           nolintlint  (1)
+```
+
+Cause: **CI and local run different linter versions.**
+
+| Where | Version | Source |
+|---|---|---|
+| CI | `v2.11.4` | `.github/workflows/ci.yml:36` (hardcoded) |
+| Local | `2.12.2` | `mise.toml:47` (Renovate-managed) |
+
+The `goconst` findings come from a threshold change in 2.12.x; the
+`nolintlint` findings are `//nolint:gosec` directives for rule G706
+that 2.12.x no longer considers necessary. CI lint is **green**, so
+this blocks nothing today — but it means `make lint` is not a reliable
+local gate, and Phase 4's "`make ci` passes with zero errors"
+criterion cannot be taken literally until it is resolved.
+
+This is out of IMPL-0006's scope either way — none of it is footnote
+code. The question is only how to record and route it.
+
+- **a. (Recommended) Fix the drift in a separate PR, tracked by a new
+  issue** — bump `.github/workflows/ci.yml` to the mise-pinned version
+  and clear the 6 findings there. Keeps this PR scoped to the approved
+  design, and fixes the root cause (a hardcoded CI version that
+  Renovate doesn't manage) rather than the symptom. Phase 4's
+  criterion is then read as "no findings beyond the documented
+  baseline" for this PR.
+- **b. Fix it inside this PR as a separate commit** — makes `make ci`
+  literally green here, at the cost of widening the PR with unrelated
+  `pkg/theme` and `pkg/livereload` changes that have nothing to do
+  with footnotes.
+- **c. Pin `mise.toml` back to 2.11.4 to match CI** — smallest change
+  and makes local match CI immediately, but freezes the toolchain at
+  an older version and fights Renovate, which will re-bump it.
+- **d. Add the CI workflow to Renovate's managed set so both move
+  together** — best long-term hygiene, and arguably the real fix, but
+  larger than a version bump and worth its own design discussion.
 
 ## Resolved Decisions
 
