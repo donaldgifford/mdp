@@ -843,6 +843,41 @@ green pipeline.
 Phase 2 verified the fix against jsdom by hand, but that was a
 one-off: the check lives in a commit message, not in the repo.
 
+**Updated after Phases 2-5 — the "one-off" framing is no longer
+accurate.** Four separate jsdom verifications were ultimately needed,
+none of which survive in the repo:
+
+| Verification | What it established |
+|---|---|
+| `findScrollTarget` on the mid-document case | Cursor line 9 selected the footnote before the fix, the correct paragraph after |
+| Full cursor sweep, fixed vs pre-fix selector | The fix changes exactly one cursor line; cursor-on-definition is not a regression |
+| Footnote CSS selector match | All 9 selectors match real elements; `<hr>` is `.footnotes`' first child |
+| Footnote-free equivalence sweep | 2124 cursor positions across 7 real documents, 0 behavioural differences |
+
+Two things sharpen the question beyond what was known when it was
+first written:
+
+1. **The gap is recurring, not incidental.** Every phase that touched
+   scroll sync or styling needed a fresh ad-hoc harness, and each was
+   discarded. A fifth will be needed for the next change in this area.
+2. **Ad-hoc harnesses produced a wrong answer once.** The equivalence
+   sweep's first positive control reported zero differences on a
+   document that *does* have footnotes — a `sed` used to adapt the
+   script had also rewritten `if (isNaN(line)) continue;` inside
+   `findScrollTarget`, altering the algorithm identically for both
+   selectors and masking every difference. It was caught only because
+   a positive control was run deliberately. A committed harness with a
+   fixed positive-control case makes that class of error
+   non-recurring; a throwaway script re-invites it every time.
+
+This does not change the recommendation for **this** PR — option (a)
+still holds, because Decision 7 scoped this to a single PR matching
+the approved design, and a `package.json`, lockfile, CI job, and Node
+pin are not footnote work. It does mean the issue option (a) creates
+should carry this evidence and a higher priority than "nice to have",
+and that option (b) is materially more defensible than it looked when
+this question was drafted.
+
 - **a. (Recommended) Defer to its own issue, out of scope here** —
   adding a JS toolchain (runner, jsdom dependency, CI job, and a
   `make` target) to a Go project is a real decision about build
