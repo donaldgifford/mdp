@@ -408,9 +408,15 @@ custom properties all 13 themes already define (verified).
   bundled JS. Note the binary is `./mdp` and the subcommand is
   `mdp serve <file>` — not `./bin/mdp --file` as earlier drafts of
   this doc said
-- [ ] 4. ⏳ **Awaiting author.** Visually verify two dark themes
-  (`github` in dark mode, `tokyo-night`) and two light themes
-  (`rose-pine-dawn`, `catppuccin-latte`)
+- [ ] 4. ⏳ **Awaiting author — aesthetic judgment only.** Visually
+  verify two dark themes (`github` in dark mode, `tokyo-night`) and two
+  light themes (`rose-pine-dawn`, `catppuccin-latte`). The structural
+  half is automated by
+  `TestFootnoteCSSPropertiesDefinedByEveryTheme`, which proves all 13
+  themes define every custom property the footnote rules consume — so
+  no theme can render footnotes with an invisible hairline or
+  default-coloured note text. What remains is whether the palette
+  *reads* well, which no test can judge
 - [ ] 5. ⏳ **Awaiting author — visual half only.** Click a
   `.footnote-ref` — confirm it jumps to the definition and `:target`
   highlighting fires. The *navigational* half is now automated by
@@ -602,6 +608,7 @@ holds.
 | `pkg/parser/lineannotator.go` | Modify | Reword the `seg.Start < 0` guard comment; drop the stale `// coverage:` annotation |
 | `pkg/parser/parser_test.go` | Modify | Seven new footnote tests; amend `TestParser_AllOptionsOff` and `TestRender_MarkdownFixture` |
 | `pkg/parser/lineannotator_test.go` | Modify | Ordering regression tests (mid-document, reference-order, monotonic-outside-footnotes) |
+| `assets/footnotecss_test.go` | **Add** | `TestFootnoteCSSPropertiesDefinedByEveryTheme` — derives the custom properties used by footnote rules from `preview.css` and asserts every built-in theme defines them |
 | `pkg/parser/footnoteanchor_test.go` | **Add** | `TestRender_FootnoteAnchorsResolve` (no dangling or duplicated anchor ids) and `TestRender_FootnoteBacklinksRoundTrip` (reference → definition → back to the same reference) |
 | `pkg/parser/fnbench_test.go` | **Add** | `BenchmarkFootnoteOverhead` (cost of the default-on option on footnote-free input) and `BenchmarkFootnoteRender` (scaling with reference count) — see [Performance](#performance) |
 | `pkg/parser/testdata/fixture.md` | Modify | `## Footnotes` section |
@@ -646,6 +653,10 @@ holds.
 - [x] Fixture: `TestRender_MarkdownFixture` asserts footnote output
 - [x] Race: `make test-coverage` under `-race` — clean, `pkg/parser` at
   97.3%
+- [x] Themes: `TestFootnoteCSSPropertiesDefinedByEveryTheme` — all 13
+  themes define every property the footnote CSS consumes; the list is
+  derived from `preview.css`, so new `var()` references are covered
+  automatically
 - [x] Anchors: `TestRender_FootnoteAnchorsResolve` — every footnote
   `href` resolves to a real id, and no id is duplicated
 - [x] Anchors: `TestRender_FootnoteBacklinksRoundTrip` — reference →
