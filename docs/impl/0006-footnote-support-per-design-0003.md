@@ -323,11 +323,39 @@ To run the check, use the footnotes section added to
 one definition **mid-document** for exactly this purpose:
 
 ```bash
-make build && ./bin/mdp --file pkg/parser/testdata/fixture.md
+make build && ./mdp serve pkg/parser/testdata/fixture.md
 ```
 
 Put the cursor on the final line and confirm the preview scrolls
 there, not to the endnote list.
+
+**Full cursor sweep.** `findScrollTarget`'s real algorithm was run
+under jsdom over every cursor line in the mid-document case, against
+both the fixed and the pre-fix selector:
+
+| Cursor | With fix | Naive (pre-fix) |
+|---|---|---|
+| 1 | `<h1 line=1> Title` | `<h1 line=1> Title` |
+| 3 | `<p line=3> Intro…` | `<p line=3> Intro…` |
+| 4 | `<p line=3> Intro…` | `<p line=3> Intro…` |
+| 5 *(on the definition)* | `<p line=3> Intro…` | `<p line=3> Intro…` |
+| 6 | `<p line=3> Intro…` | `<p line=3> Intro…` |
+| 7 | `<h2 line=7> Section` | `<h2 line=7> Section` |
+| 9 | `<p line=9> Body paragraph.` | **`<p line=5> The note text.`** |
+
+Two things worth pinning down, because a plausible-sounding worry about
+this change turns out to be unfounded:
+
+1. The fix changes the result on **line 9 only** — precisely the case
+   that was broken. Every other line is byte-identical before and
+   after, so the exclusion carries no collateral behavior change.
+2. A cursor **on** the definition line (5) resolves to the preceding
+   body paragraph, not to the footnote — but it does so **in both
+   variants**. This is not a regression the exclusion introduced: the
+   scan's `break` already fires at `<h2 line=7>` before it ever reaches
+   the endnote list. It is inherent to a stop-at-first-larger scan.
+   Recorded in `pkg/parser/doc.go` as consumer guidance, since anyone
+   reimplementing the scan will hit it.
 
 ---
 

@@ -29,6 +29,15 @@
 // .footnotes subtree, or they will select a footnote instead of the
 // intended block. Outside that subtree the values are non-decreasing.
 //
+// Skipping the subtree means footnote entries are never selected as
+// scroll targets, so a cursor sitting on a definition line resolves to
+// the nearest preceding body block instead. That is a property of the
+// scan, not of the exclusion: a scan that stops at the first larger
+// value already passes the definition's line before reaching the
+// endnote list, so it behaves the same either way. Callers needing a
+// definition to be reachable should look it up by its line directly
+// rather than relying on the ordered scan.
+//
 // # Minimal usage
 //
 // The zero-config Parser is suitable for most callers:

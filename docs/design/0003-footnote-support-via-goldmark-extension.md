@@ -464,8 +464,10 @@ deleting it) is out of scope here but worth a follow-up.
 **Manual verification:**
 
 1. `make build && make test && make lint`
-2. `./bin/mdp --file <doc-with-footnotes>.md` — check the endnote
+2. `./mdp serve <doc-with-footnotes>.md` — check the endnote
    list, click a `.footnote-ref`, click the `↩︎` backlink.
+   (Corrected during IMPL-0006: the binary is `./mdp` and the
+   subcommand is `serve`; `./bin/mdp --file` does not exist.)
 3. Spot-check one theme per family (github, tokyo-night,
    rose-pine-dawn, catppuccin-latte) — two light, two dark — to
    confirm the muted text and hairline rule read correctly.
