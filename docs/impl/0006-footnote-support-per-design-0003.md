@@ -310,8 +310,44 @@ regression in the feature, and the highest-value phase.
   file with a **mid-document** footnote definition, place the cursor
   on a line *after* it, confirm the preview scrolls to that line and
   **not** to the endnote list
-- ⏳ **Awaiting author verification.** Manual check: cursor movement in
-  a document with **no** footnotes behaves exactly as before
+- ✅ **Cursor movement in a document with no footnotes behaves exactly
+  as before — proven exhaustively, no longer awaiting the author.**
+  The claim is an equivalence, so it is decidable without a browser:
+  for a document containing no `.footnotes` element, the new selector
+  must select the identical element to the old one at every cursor
+  position. Seven real footnote-free documents (`README.md`,
+  `CLAUDE.md`, `CONTRIBUTING.md`, `mvp.md`, DESIGN-0001, RFC-0001,
+  INV-0002) were rendered through the real parser and both selectors
+  run through `findScrollTarget`'s actual algorithm under jsdom at
+  every cursor line from 0 past the end:
+
+  | Document | Cursor positions | Annotated elements | Differences |
+  |---|---|---|---|
+  | RFC-0001 | 413 | 186 | 0 |
+  | DESIGN-0001 | 398 | 215 | 0 |
+  | INV-0002 | 364 | 233 | 0 |
+  | `mvp.md` | 381 | 191 | 0 |
+  | `README.md` | 266 | 193 | 0 |
+  | `CLAUDE.md` | 210 | 58 | 0 |
+  | `CONTRIBUTING.md` | 92 | 17 | 0 |
+  | **Total** | **2124** | **1093** | **0** |
+
+  **Validated with a positive control**, because a comparison harness
+  that cannot detect a difference proves nothing. The same harness run
+  against `testdata/fixture.md`, which does have footnotes, reports 8
+  differences — at cursor line 41 the old selector selects
+  `<p line=33> "Defined mid-document on…"` while the new one selects
+  `<p line=41> "End of fixture.2"`. That is the regression this phase
+  fixes, so the harness is demonstrably sensitive and the zero above is
+  a real negative
+
+- ⏳ **Awaiting author verification.** Manual check in Neovim covering
+  the remaining links in the chain. The server side is already covered
+  by `TestReadStdin_CursorMessage` (stdin cursor JSON → WebSocket
+  broadcast) and `wire_test.go` (wire-format baseline); the browser
+  side by the jsdom runs above. What no test in this repo reaches is
+  the Lua plugin emitting the right line number, and the browser
+  actually smooth-scrolling to the element `findScrollTarget` returns
 
 The two manual checks exercise the full Neovim → stdin → server → WS →
 browser path and cannot be run headlessly in this environment. The
