@@ -454,6 +454,10 @@ func TestRender_MarkdownFixture(t *testing.T) {
 		{"task list", `type="checkbox"`},
 		{"blockquote", "<blockquote"},
 		{"horizontal rule", "<hr"},
+		{"footnote", `class="footnotes"`},
+		{"footnote reference", `class="footnote-ref"`},
+		{"footnote backlink", `class="footnote-backref"`},
+		{"link inside a footnote", `href="https://example.com/footnote"`},
 	}
 
 	for _, tc := range checks {

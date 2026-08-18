@@ -421,29 +421,48 @@ holds.
 
 #### Tasks
 
-- [ ] 1. Add a `## Footnotes` section to
+- [x] 1. Add a `## Footnotes` section to
   `pkg/parser/testdata/fixture.md` exercising a reference, a
   definition containing a link, and a repeated reference
-- [ ] 2. Add `{"footnote", "class=\"footnotes\""}` to the `checks`
+- [x] 2. Add `{"footnote", "class=\"footnotes\""}` to the `checks`
   table in `TestRender_MarkdownFixture` (`parser_test.go:215-250`)
-- [ ] 3. Run `make test-coverage` and inspect `pkg/parser` line
+- [x] 3. Run `make test-coverage` and inspect `pkg/parser` line
   coverage
-- [ ] 4. Confirm the reworded guard at `lineannotator.go:34-40` now
+- [x] 4. Confirm the reworded guard at `lineannotator.go:34-40` now
   shows as **covered** (it was previously annotated as unreachable;
   `FootnoteList` reaches it on every footnote render)
-- [ ] 5. Confirm no remaining `// coverage:` annotation in `pkg/parser`
+- [x] 5. Confirm no remaining `// coverage:` annotation in `pkg/parser`
   describes a now-reachable branch
-- [ ] 6. Run `make ci` (lint + test + build + license-check)
+- [x] 6. Run `make ci` (lint + test + build + license-check)
 
 #### Success Criteria
 
-- `make ci` passes with zero errors
-- `pkg/parser` coverage **≥ 95%**, and not more than 1% below the
-  97.1% baseline (the codecov component threshold)
-- `TestRender_MarkdownFixture` asserts footnote output
+- ~~`make ci` passes with zero errors~~ — **cannot be met literally;
+  superseded by the per-stage results below.** `make ci` runs `lint`
+  first and that stage exits non-zero on a clean checkout of `main`
+  for reasons unrelated to footnotes. See
+  [Open Question 8](#open-questions)
+
+  | Stage | Result |
+  |---|---|
+  | `lint` | 6 findings, **all pre-existing** — identical set to a clean `main` checkout. golangci-lint 2.12.2 locally vs v2.11.4 in CI |
+  | `test` | **PASS** |
+  | `build` | **PASS** — `✓ mdp built` |
+  | `license-check` | **PASS** — exit 0, no new entries |
+
+  One finding during this phase *was* mine — a `prealloc` warning from
+  building the ordering-test table with `append`. Fixed by including
+  the fixture case in the slice literal rather than appending, which
+  reads better anyway. Lint is back to exactly the 6-issue baseline.
+- `pkg/parser` coverage **≥ 95%** — **met at 97.3%**, up from the
+  97.1% pre-work baseline
+- `TestRender_MarkdownFixture` asserts footnote output — **met**, and
+  extended beyond the planned single check to also assert the
+  reference, the backlink, and a link *inside* a definition
 - `go test -race ./...` passes, including
-  `TestParser_ConcurrentRender_NoRace`
-- `make license-check` passes with no new entries (no new dependency)
+  `TestParser_ConcurrentRender_NoRace` — **met**
+- `make license-check` passes with no new entries — **met** (no new
+  dependency; `extension.Footnote` ships in the existing goldmark)
 
 ---
 
@@ -639,6 +658,53 @@ one-off: the check lives in a commit message, not in the repo.
 - **d. Accept the gap permanently** — document in `CLAUDE.md` that the
   exclusion is load-bearing and rely on review. Zero cost, no
   enforcement.
+
+---
+
+**10. What should happen to the dead `KindDocument` guard in
+`lineAnnotator.Transform`?**
+
+Found during the Phase 4 coverage audit. `pkg/parser/lineannotator.go`
+tests three conditions in order:
+
+```go
+if node.Type() != ast.TypeBlock {   // line 26
+    return ast.WalkContinue, nil
+}
+if node.Kind() == ast.KindDocument { // line 29 -- unreachable
+    return ast.WalkContinue, nil
+}
+```
+
+`(*ast.Document).Type()` returns `TypeDocument`, not `TypeBlock`
+(`goldmark@v1.8.5/ast/block.go:63-65`), so the first check already
+returns for the document node and the second can never fire. The
+coverage profile agrees across the whole suite:
+
+```text
+pkg/parser/lineannotator.go:29.38,31.4  count=0
+```
+
+It is the only reason `Transform` reports 93.3% rather than 100%. This
+is **pre-existing** — it predates footnotes and is unrelated to this
+work — but it violates the `CLAUDE.md` convention that un-exercisable
+lines carry a `// coverage: <reason>` annotation, and Phase 4 task 5
+is exactly the audit that surfaces it.
+
+Not blocking: `pkg/parser` is at 97.3% against a 95% gate.
+
+- **a. (Recommended) Delete the three lines in a follow-up PR** —
+  provably unreachable, so removing it cannot change behavior, and it
+  takes `Transform` to 100%. Keeping it out of this PR preserves the
+  footnote-only scope; it is unrelated code in a file this PR happens
+  to touch.
+- **b. Delete it here** — the file is already open and the proof is in
+  hand. Widens the diff slightly with an unrelated change.
+- **c. Add a `// coverage:` annotation instead** — satisfies the
+  convention without deleting anything, but documents dead code as
+  though it were intentional defence, which is misleading.
+- **d. Leave it entirely alone** — zero risk, but the convention
+  violation and the missing 6.7% stay unexplained for the next reader.
 
 ## Resolved Decisions
 

@@ -1,6 +1,7 @@
 package parser_test
 
 import (
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -170,6 +171,14 @@ func TestLineAnnotator_FootnoteOrdering(t *testing.T) {
 func TestLineAnnotator_NonFootnoteOrderIsMonotonic(t *testing.T) {
 	t.Parallel()
 
+	// The shared fixture carries a deliberately mid-document
+	// definition, so it exercises the invariant on realistic input and
+	// cannot drift out of sync with it unnoticed.
+	fixture, err := os.ReadFile("testdata/fixture.md")
+	if err != nil {
+		t.Fatalf("reading fixture: %v", err)
+	}
+
 	tests := []struct {
 		name string
 		md   string
@@ -193,6 +202,10 @@ func TestLineAnnotator_NonFootnoteOrderIsMonotonic(t *testing.T) {
 		{
 			name: "no footnotes at all",
 			md:   "# Title\n\nParagraph.\n\n## Section\n\nAnother paragraph.\n",
+		},
+		{
+			name: "testdata/fixture.md",
+			md:   string(fixture),
 		},
 	}
 

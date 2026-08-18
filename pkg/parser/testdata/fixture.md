@@ -26,6 +26,18 @@ def hello():
 > This is a blockquote.
 > It spans multiple lines.
 
+## Footnotes
+
+A reference to a note[^one] and a second reference to the same one[^one].
+
+[^one]: Defined mid-document on purpose. Scroll sync must not target
+    this from a cursor placed further down the file. It also contains
+    a [link](https://example.com/footnote).
+
+Another paragraph with a different note.[^two]
+
 ---
 
-End of fixture.
+End of fixture.[^two]
+
+[^two]: Defined at the end of the file.
