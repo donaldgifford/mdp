@@ -257,15 +257,15 @@ regression in the feature, and the highest-value phase.
   `FootnoteList` legitimately have neither their own segment nor a
   first child with one, and are intentionally left unannotated
   (DESIGN-0003 Decision 7)
-- [ ] 4. Add `TestLineAnnotator_FootnoteOrdering` to
+- [x] 4. Add `TestLineAnnotator_FootnoteOrdering` to
   `pkg/parser/lineannotator_test.go` covering the **mid-document
   definition** case; assert the document-order sequence is
   `1, 3, 7, 9, 5, 5`
-- [ ] 5. Add a sub-case for the **reference-order vs definition-order**
+- [x] 5. Add a sub-case for the **reference-order vs definition-order**
   shape found during re-verification; assert the `<li>` source lines
   come out `4, 3` (descending) even though both definitions sit at the
   end of the file
-- [ ] 6. Add `TestLineAnnotator_NonFootnoteOrderIsMonotonic` asserting
+- [x] 6. Add `TestLineAnnotator_NonFootnoteOrderIsMonotonic` asserting
   the invariant `findScrollTarget` actually depends on: **the
   subsequence of `data-source-line` values outside the `.footnotes`
   subtree is non-decreasing.** Implement by splitting the rendered
@@ -273,16 +273,37 @@ regression in the feature, and the highest-value phase.
   ([Decision 2](#resolved-decisions)); also assert the marker appears
   **at most once**, so the test fails loudly if goldmark ever moves
   the footnote list
-- [ ] 7. Verify `<div class="footnotes">` itself carries no
+- [x] 7. Verify `<div class="footnotes">` itself carries no
   `data-source-line` attribute
-- [ ] 8. Run `make test-coverage` (race detector) — no new races
+- [x] 8. Run `make test-coverage` (race detector) — no new races
 
 #### Success Criteria
 
-- All three new/extended annotator tests pass
-- `TestLineAnnotator_NonFootnoteOrderIsMonotonic` **fails** if the
-  `:not(...)` exclusion is reverted — verify by temporarily reverting,
-  re-running, then restoring
+- All three new/extended annotator tests pass — **met** (11 subtests)
+- ~~`TestLineAnnotator_NonFootnoteOrderIsMonotonic` **fails** if the
+  `:not(...)` exclusion is reverted~~ — **unachievable as written;
+  replaced by the two criteria below.** The Go test reads only
+  rendered HTML; it never loads `assets/preview.js`, so a change to
+  the JS selector cannot fail it. Verified empirically: reverting the
+  selector leaves the test green. The plan conflated "the invariant
+  the JS depends on" (Go-testable) with "the JS honours that
+  invariant" (not Go-testable, since the repo has no JS test
+  harness — see [Open Question 9](#open-questions))
+- **Go side:** `TestLineAnnotator_NonFootnoteOrderIsMonotonic` fails
+  when the `.footnotes` split is removed from the assertion itself,
+  proving the check is live rather than vacuous — **met**. Both
+  footnote cases fail with the decrease point named:
+
+  ```text
+  body data-source-line values [1 3 7 9 5 5] decrease at index 4 (9 > 5)
+  body data-source-line values [1 4 4 3 3] decrease at index 3 (4 > 3)
+  ```
+
+- **JS side:** the selector is verified against a real DOM engine
+  (jsdom) by running `findScrollTarget`'s actual algorithm over the
+  mid-document fixture — **met** in the Phase 2 task 1-2 commit.
+  Cursor line 9 selected the footnote before the fix and the correct
+  paragraph after; lines 3 and 7 were unchanged
 - `make test-coverage` passes under `-race`
 - Manual check in Neovim: open a file with a **mid-document** footnote
   definition, place the cursor on a line *after* it, confirm the
@@ -544,6 +565,42 @@ code. The question is only how to record and route it.
 - **d. Add the CI workflow to Renovate's managed set so both move
   together** — best long-term hygiene, and arguably the real fix, but
   larger than a version bump and worth its own design discussion.
+
+---
+
+**9. Should `assets/preview.js` get a test harness?**
+
+Discovered in Phase 2. The repo has no JS test infrastructure — no
+`package.json`, no test runner, and CI never executes `preview.js`.
+That was defensible when the file was glue code, but
+`findScrollTarget` now carries a load-bearing correctness invariant
+(the `.footnotes` exclusion) that nothing in CI protects. Deleting the
+`:not(...)` clause today reintroduces the scroll-sync bug with a fully
+green pipeline.
+
+Phase 2 verified the fix against jsdom by hand, but that was a
+one-off: the check lives in a commit message, not in the repo.
+
+- **a. (Recommended) Defer to its own issue, out of scope here** —
+  adding a JS toolchain (runner, jsdom dependency, CI job, and a
+  `make` target) to a Go project is a real decision about build
+  surface and maintenance, not a footnote task. It also invites the
+  question of whether the other ~240 lines of `preview.js` should be
+  covered. Record the gap now, decide deliberately later.
+- **b. Add a minimal harness in this PR** — `node --test` plus jsdom,
+  covering `findScrollTarget` only. Closes the specific hole while it
+  is fresh, at the cost of a `package.json`, a lockfile, a CI job, and
+  a Node version pin in `mise.toml` — all landing inside a PR labelled
+  "footnote support".
+- **c. Guard it from the Go side instead** — assert in an
+  `internal/server` test that the served `preview.js` contains the
+  `.footnotes` exclusion. Cheap and needs no new toolchain, but it is
+  string-matching an asset rather than testing behavior, and would
+  pass on a selector that is present but wrong. IMPL-0006 Decision 5
+  already rejected this shape once.
+- **d. Accept the gap permanently** — document in `CLAUDE.md` that the
+  exclusion is load-bearing and rely on review. Zero cost, no
+  enforcement.
 
 ## Resolved Decisions
 
