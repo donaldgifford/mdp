@@ -236,7 +236,7 @@ regression in the feature, and the highest-value phase.
 
 #### Tasks
 
-- [ ] 1. Change the selector at `assets/preview.js:102` to exclude the
+- [x] 1. Change the selector at `assets/preview.js:102` to exclude the
   footnotes subtree (DESIGN-0003 Decision 2):
 
   ```javascript
@@ -247,7 +247,7 @@ regression in the feature, and the highest-value phase.
 
   [Decision 1](#resolved-decisions) confirms this form over the
   `contains()` / `closest()` alternatives
-- [ ] 2. Add a short comment above the selector explaining *why* the
+- [x] 2. Add a short comment above the selector explaining *why* the
   exclusion exists (footnote definitions relocate to the end of the
   render while keeping their source line, which breaks the `break`
   below)

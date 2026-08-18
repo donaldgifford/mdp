@@ -99,7 +99,18 @@
   function findScrollTarget(targetLine) {
     if (!content) return null;
 
-    var elements = content.querySelectorAll("[data-source-line]");
+    // Footnote definitions render into a trailing .footnotes list but
+    // keep the source line where they were defined, so their
+    // data-source-line values are out of document order. Two shapes
+    // produce this: a definition placed mid-document, and
+    // first-reference numbering when reference order differs from
+    // definition order. Excluding the subtree keeps the remaining
+    // values non-decreasing, which the `break` below relies on --
+    // without it, a cursor line past a definition selects the footnote
+    // instead of the intended block.
+    var elements = content.querySelectorAll(
+      "[data-source-line]:not(.footnotes [data-source-line])"
+    );
     var best = null;
 
     for (var i = 0; i < elements.length; i++) {
