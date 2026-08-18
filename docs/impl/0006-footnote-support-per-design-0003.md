@@ -165,24 +165,34 @@ option shape exactly, and cover the new exported symbol.
   footnotes are enabled (DESIGN-0003 Decision 2 follow-on obligation)
 - [x] 7. Amend `TestParser_AllOptionsOff` (`parser_test.go:256`) to
   pass `parser.WithFootnotes(false)`
-- [ ] 8. Add `TestRender_Footnote` — asserts `<sup id="fnref:1">`,
+- [x] 8. Add `TestRender_Footnote` — asserts `<sup id="fnref:1">`,
   `href="#fn:1"`, `class="footnote-ref"`, `<li id="fn:1"`, and
   `class="footnotes"`
-- [ ] 9. Add `TestRender_FootnoteWithLink` — a `[text](url)` inside a
+- [x] 9. Add `TestRender_FootnoteWithLink` — a `[text](url)` inside a
   definition renders as `<a href="url">` (the question that motivated
   DESIGN-0003)
-- [ ] 10. Add `TestRender_FootnoteMultiParagraph` — a 4-space-indented
+- [x] 10. Add `TestRender_FootnoteMultiParagraph` — a 4-space-indented
   continuation produces two `<p>` inside one `<li>`, with the backlink
   attached to the **last** paragraph
-- [ ] 11. Add `TestRender_FootnoteRepeatedReference` — two refs to one
+- [x] 11. Add `TestRender_FootnoteRepeatedReference` — two refs to one
   label produce `id="fnref:1"` and `id="fnref1:1"` plus two
   `.footnote-backref` anchors
-- [ ] 12. Add `TestRender_FootnoteNamedLabel` — `[^zeta]`/`[^alpha]`
+- [x] 12. Add `TestRender_FootnoteNamedLabel` — `[^zeta]`/`[^alpha]`
   render as `1`/`2` by first-reference order, not definition order
-- [ ] 13. Add `TestRender_FootnoteDisabled` — `WithFootnotes(false)`
-  leaves `[^1]` as literal text and emits no `.footnotes` div (mirrors
-  `TestRender_CalloutDisabled`)
-- [ ] 14. Add `TestRender_FootnoteUndefinedReference` — `[^missing]`
+- [x] 13. Add `TestRender_FootnoteDisabled` — `WithFootnotes(false)`
+  emits no footnote markup (mirrors `TestRender_CalloutDisabled`).
+  **Amended during implementation:** the original wording ("leaves
+  `[^1]` as literal text") is only true for multi-word definition
+  bodies. With the extension off, `[^1]: Note.` is a valid CommonMark
+  *link reference definition* — `[^1]` is a legal link label and
+  `Note.` a legal destination — so goldmark renders
+  `<a href="Note.">^1</a>` and drops the definition line. A body with
+  spaces (`[^1]: The note text.`) is not a valid destination, so it
+  stays literal. The test is table-driven over both shapes; the
+  invariant asserted in both is "no footnote markup", which is what
+  the toggle actually promises. This is upstream CommonMark behavior,
+  not an mdp defect
+- [x] 14. Add `TestRender_FootnoteUndefinedReference` — `[^missing]`
   with no definition renders as literal text with no empty
   `.footnotes` div
 - [ ] 15. Run `make fmt` (gci import ordering) then `make lint`
