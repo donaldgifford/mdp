@@ -338,7 +338,7 @@ custom properties all 13 themes already define (verified).
 
 #### Tasks
 
-- [ ] 1. Append a `/* Footnotes */` block to `assets/preview.css` after
+- [x] 1. Append a `/* Footnotes */` block to `assets/preview.css` after
   the callout rules:
 
   ```css
@@ -368,29 +368,49 @@ custom properties all 13 themes already define (verified).
   .footnote-backref:hover { text-decoration: none; }
   ```
 
-- [ ] 2. Confirm `.footnotes hr` overrides the global `hr` rule at
+- [x] 2. Confirm `.footnotes hr` overrides the global `hr` rule at
   `assets/preview.css:228-234` (`height: 0.25em`) — later in file plus
   higher specificity, so no `!important` needed
-- [ ] 3. `make build` and open a document with footnotes
-- [ ] 4. Visually verify two dark themes (`github` in dark mode,
-  `tokyo-night`) and two light themes (`rose-pine-dawn`,
-  `catppuccin-latte`)
-- [ ] 5. Click a `.footnote-ref` — confirm it jumps to the definition
-  and `:target` highlighting fires
-- [ ] 6. Click a `↩︎` backlink — confirm it returns to the reference
-- [ ] 7. Verify a document containing **no** footnotes is visually
-  unchanged (the new rules are inert)
+- [x] 3. `make build` and serve a document with footnotes. Verified
+  headlessly: the built binary serves the endnote HTML
+  (`class="footnotes" role="doc-endnotes"`, `<li id="fn:1"
+  data-source-line="5">`, `.footnote-ref`, `.footnote-backref`), the
+  new CSS embedded in the page, and the `.footnotes` exclusion in the
+  bundled JS. Note the binary is `./mdp` and the subcommand is
+  `mdp serve <file>` — not `./bin/mdp --file` as earlier drafts of
+  this doc said
+- [ ] 4. ⏳ **Awaiting author.** Visually verify two dark themes
+  (`github` in dark mode, `tokyo-night`) and two light themes
+  (`rose-pine-dawn`, `catppuccin-latte`)
+- [ ] 5. ⏳ **Awaiting author.** Click a `.footnote-ref` — confirm it
+  jumps to the definition and `:target` highlighting fires
+- [ ] 6. ⏳ **Awaiting author.** Click a `↩︎` backlink — confirm it
+  returns to the reference
+- [x] 7. Verify a document containing **no** footnotes is visually
+  unchanged (the new rules are inert). Confirmed by rendering a
+  footnote-free document and checking the `#content` div contains no
+  `.footnotes`, `.footnote-ref`, `.footnote-backref`, or `<sup>` — the
+  new rules have nothing to match
 
 #### Success Criteria
 
 - The endnote list renders as muted, smaller text below a **hairline**
-  rule — not the global thick bar
-- Reference superscripts and backlinks are legible in all four
-  spot-checked themes
-- `git diff --stat assets/themes/` is **empty** — zero theme files
-  modified
-- Anchor navigation works in both directions
-- No visual change to documents without footnotes
+  rule — not the global thick bar. **Structurally met**: `.footnotes
+  hr` has specificity (0,1,1) against the global `hr` rule's (0,0,1)
+  and is later in the file, so it wins on both counts. Visual
+  confirmation is part of task 4
+- ⏳ Reference superscripts and backlinks are legible in all four
+  spot-checked themes — **awaiting author**. The three custom
+  properties the footnote rules consume (`--color-fg-muted`,
+  `--color-border-muted`, `--color-canvas-subtle`) are defined in
+  **13/13** themes, so nothing falls back to an unset value
+- `git diff --stat assets/themes/` is **empty** — **met**, zero theme
+  files modified
+- ⏳ Anchor navigation works in both directions — **awaiting author**
+  (browser interaction; the `id`/`href` pairs are present and correct
+  in the served HTML)
+- No visual change to documents without footnotes — **met**, see
+  task 7
 
 ---
 
