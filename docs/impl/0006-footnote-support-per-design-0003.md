@@ -158,9 +158,9 @@ option shape exactly, and cover the new exported symbol.
   regardless of where they appear in the source
 - [x] 4. Register `extension.Footnote` in `New` under
   `if cfg.footnotes { ... }`, placed after the callouts block
-- [ ] 5. Add `WithFootnotes` to the "All options" block in
+- [x] 5. Add `WithFootnotes` to the "All options" block in
   `pkg/parser/doc.go`
-- [ ] 6. Add a paragraph to `pkg/parser/doc.go` warning that
+- [x] 6. Add a paragraph to `pkg/parser/doc.go` warning that
   `data-source-line` is **not** monotonic in document order when
   footnotes are enabled (DESIGN-0003 Decision 2 follow-on obligation)
 - [ ] 7. Amend `TestParser_AllOptionsOff` (`parser_test.go:256`) to
