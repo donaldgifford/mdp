@@ -304,12 +304,30 @@ regression in the feature, and the highest-value phase.
   mid-document fixture — **met** in the Phase 2 task 1-2 commit.
   Cursor line 9 selected the footnote before the fix and the correct
   paragraph after; lines 3 and 7 were unchanged
-- `make test-coverage` passes under `-race`
-- Manual check in Neovim: open a file with a **mid-document** footnote
-  definition, place the cursor on a line *after* it, confirm the
-  preview scrolls to that line and **not** to the endnote list
-- Manual check: cursor movement in a document with **no** footnotes
-  behaves exactly as before
+- `make test-coverage` passes under `-race` — **met**
+- ⏳ **Awaiting author verification.** Manual check in Neovim: open a
+  file with a **mid-document** footnote definition, place the cursor
+  on a line *after* it, confirm the preview scrolls to that line and
+  **not** to the endnote list
+- ⏳ **Awaiting author verification.** Manual check: cursor movement in
+  a document with **no** footnotes behaves exactly as before
+
+The two manual checks exercise the full Neovim → stdin → server → WS →
+browser path and cannot be run headlessly in this environment. The
+`findScrollTarget` algorithm itself is covered by the jsdom
+verification above, which is the part of that path this phase changed;
+what remains unverified is the end-to-end integration.
+
+To run the check, use the footnotes section added to
+`pkg/parser/testdata/fixture.md` in Phase 4 — it deliberately places
+one definition **mid-document** for exactly this purpose:
+
+```bash
+make build && ./bin/mdp --file pkg/parser/testdata/fixture.md
+```
+
+Put the cursor on the final line and confirm the preview scrolls
+there, not to the endnote list.
 
 ---
 
