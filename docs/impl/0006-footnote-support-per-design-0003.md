@@ -38,6 +38,7 @@ created: 2026-08-18
     - [Success Criteria](#success-criteria-4)
 - [File Changes](#file-changes)
 - [Testing Plan](#testing-plan)
+- [Performance](#performance)
 - [Dependencies](#dependencies)
 - [Open Questions](#open-questions)
 - [Resolved Decisions](#resolved-decisions)
@@ -595,6 +596,7 @@ holds.
 | `pkg/parser/lineannotator.go` | Modify | Reword the `seg.Start < 0` guard comment; drop the stale `// coverage:` annotation |
 | `pkg/parser/parser_test.go` | Modify | Seven new footnote tests; amend `TestParser_AllOptionsOff` and `TestRender_MarkdownFixture` |
 | `pkg/parser/lineannotator_test.go` | Modify | Ordering regression tests (mid-document, reference-order, monotonic-outside-footnotes) |
+| `pkg/parser/fnbench_test.go` | **Add** | `BenchmarkFootnoteOverhead` (cost of the default-on option on footnote-free input) and `BenchmarkFootnoteRender` (scaling with reference count) — see [Performance](#performance) |
 | `pkg/parser/testdata/fixture.md` | Modify | `## Footnotes` section |
 | `assets/preview.js` | Modify | `findScrollTarget` selector excludes `.footnotes` descendants |
 | `assets/preview.css` | Modify | `.footnotes`, `.footnote-ref`, `.footnote-backref` rules |
@@ -637,12 +639,63 @@ holds.
 - [x] Fixture: `TestRender_MarkdownFixture` asserts footnote output
 - [x] Race: `make test-coverage` under `-race` — clean, `pkg/parser` at
   97.3%
+- [x] Performance: `BenchmarkFootnoteOverhead` — enabling footnotes
+  costs nothing measurable on footnote-free input (0.06% of mean, ~60x
+  below the noise floor; identical allocations). See [Performance](#performance)
+- [x] Performance: `BenchmarkFootnoteRender` — cost scales close to
+  linearly with reference count; no quadratic collect pass
 - [ ] ⏳ **Awaiting author.** Manual: Neovim cursor sync past a
   mid-document definition
 - [ ] ⏳ **Awaiting author.** Manual: visual check across 2 dark + 2
   light themes
 - [ ] ⏳ **Awaiting author.** Manual: forward and backward anchor
   navigation
+
+## Performance
+
+Neither DESIGN-0003 nor the original version of this plan set a
+performance gate, which left the central risk of
+[Decision 1](#resolved-decisions) unmeasured: footnotes default to
+**on**, so every caller pays whatever the extension costs, including
+the overwhelming majority of documents containing no footnotes at all.
+
+`BenchmarkFootnoteOverhead` in `pkg/parser/fnbench_test.go` measures it
+by rendering identical 1000-line footnote-free input through a
+default parser and a `WithFootnotes(false)` parser.
+
+M5 Max, `-benchtime=500x -count=12`:
+
+| Variant | Mean ns/op | Min | Max | Spread | allocs/op |
+|---|---|---|---|---|---|
+| `on_default` | 985,634 | 963,342 | 999,560 | 3.8% | 13,558 |
+| `off` | 986,190 | 959,426 | 1,001,426 | 4.4% | 13,558 |
+
+Allocations are identical and the means differ by **0.06%** — roughly
+60x below the within-variant noise floor. There is no measurable cost
+to enabling footnotes on documents that do not use them, which is the
+evidence Decision 1 was missing. goldmark's footnote block parser only
+engages on a `[^` at the start of a line, so an unused extension does
+effectively nothing.
+
+`BenchmarkFootnoteRender` covers documents that do use footnotes,
+scaling references so the collect-and-relocate pass is visible:
+
+| References | ns/op | allocs/op | ns per ref |
+|---|---|---|---|
+| 10 | 29,960 | 303 | 2,996 |
+| 100 | 272,779 | 2,762 | 2,728 |
+| 500 | 1,783,260 | 16,064 | 3,567 |
+
+Per-reference cost rises about 30% from 100 to 500 — mildly
+superlinear, nowhere near the 5x that a quadratic collect pass would
+show at that step. Allocations track references almost exactly
+(5x references → 5.8x allocations).
+
+**Measurement caveat, recorded because it produced a wrong reading
+first:** at `-benchtime=50x` the first sub-benchmark absorbs warm-up
+and reports a spurious 15% gap between the variants. The figures above
+use a large benchtime with `-count` to average it out. Re-measure the
+same way.
 
 ## Dependencies
 
