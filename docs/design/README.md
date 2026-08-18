@@ -34,5 +34,5 @@ docz create design "Your Design Title"
 |----|-------|--------|------|--------|------|
 | DESIGN-0001 | Themes | Approved | 2026-03-05 | Donald Gifford | [0001-themes.md](0001-themes.md) |
 | DESIGN-0002 | Refactor mdp internals into public pkg packages | Implemented | 2026-05-23 | Donald Gifford | [0002-refactor-mdp-internals-into-public-pkg-packages.md](0002-refactor-mdp-internals-into-public-pkg-packages.md) |
-| DESIGN-0003 | Footnote support via goldmark extension | Approved | 2026-08-18 | Donald Gifford | [0003-footnote-support-via-goldmark-extension.md](0003-footnote-support-via-goldmark-extension.md) |
+| DESIGN-0003 | Footnote support via goldmark extension | Implemented | 2026-08-18 | Donald Gifford | [0003-footnote-support-via-goldmark-extension.md](0003-footnote-support-via-goldmark-extension.md) |
 <!-- END DOCZ AUTO-GENERATED -->

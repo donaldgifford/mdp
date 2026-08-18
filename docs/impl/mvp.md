@@ -280,7 +280,7 @@ release.
 - [ ] Integration with other editors: VS Code extension, Helix plugin, Zed
       extension
 - [ ] Emoji rendering (`:emoji_name:` → unicode)
-- [ ] Footnote support via goldmark extension
+- [x] Footnote support via goldmark extension
 
 ### Success Criteria
 

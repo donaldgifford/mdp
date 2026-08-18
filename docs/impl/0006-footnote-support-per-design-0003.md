@@ -1,7 +1,7 @@
 ---
 id: IMPL-0006
 title: "Footnote support per DESIGN-0003"
-status: Draft
+status: In Progress
 author: Donald Gifford
 created: 2026-08-18
 ---
@@ -9,7 +9,7 @@ created: 2026-08-18
 
 # IMPL 0006: Footnote support per DESIGN-0003
 
-**Status:** Draft
+**Status:** In Progress
 **Author:** Donald Gifford
 **Date:** 2026-08-18
 
@@ -470,42 +470,57 @@ holds.
 
 #### Tasks
 
-- [ ] 1. `README.md:120-131` — add a bullet to "Supported Markdown
+- [x] 1. `README.md:120-131` — add a bullet to "Supported Markdown
   Features": footnote references with definitions collected into an
   endnote list
-- [ ] 2. `README.md:214-216` — add "footnotes" to the `pkg/parser`
+- [x] 2. `README.md:214-216` — add "footnotes" to the `pkg/parser`
   feature list in the Library section
-- [ ] 3. `CLAUDE.md` — record the DESIGN-0003 Decision-2 invariant near the
+- [x] 3. `CLAUDE.md` — record the DESIGN-0003 Decision-2 invariant near the
   existing `pkg/parser` notes: `data-source-line` is not monotonic in
   document order once footnotes are enabled, and `findScrollTarget` in
   `assets/preview.js` depends on excluding the `.footnotes` subtree.
   Note that removing the exclusion silently breaks scroll sync
-- [ ] 4. `docs/impl/mvp.md:283` — check off "Footnote support via
+- [x] 4. `docs/impl/mvp.md:283` — check off "Footnote support via
   goldmark extension"
-- [ ] 5. Set this document's status to `Completed`
-- [ ] 6. Set DESIGN-0003's status to `Implemented`
-- [ ] 7. Replace DESIGN-0003's "No follow-up IMPL doc proposed" line
+- [x] 5. Set this document's status. Held at `In Progress`, not
+  `Completed`: every code, test, and documentation task is done, but
+  Phase 2's two Neovim scroll-sync checks and Phase 3 tasks 4-6 (theme
+  rendering, `:target` highlight, backlink click) are author-only
+  manual verification that no automated gate can stand in for. Flip to
+  `Completed` once those are signed off
+- [x] 6. Set DESIGN-0003's status to `Implemented`
+- [x] 7. Replace DESIGN-0003's "No follow-up IMPL doc proposed" line
   with a pointer to IMPL-0006 ([Decision 6](#resolved-decisions))
-- [ ] 8. Run `docz update` to regenerate the README index tables
-- [ ] 9. Open the PR against `main` with the **`minor`** label
+- [x] 8. Run `docz update` to regenerate the README index tables
+- [x] 9. Open the PR against `main` with the **`minor`** label
   (DESIGN-0003 Decision 8), as a single PR with one commit per phase
   ([Decision 7](#resolved-decisions))
-- [ ] 10. Reference issue
+- [x] 10. Reference issue
   [#75](https://github.com/donaldgifford/mdp/issues/75) in the PR
   description as deferred follow-up work
   ([Decision 4](#resolved-decisions))
 
 #### Success Criteria
 
-- `docz update --dry-run` reports no drift
-- README documents footnotes in both the features list and the library
-  section
-- `CLAUDE.md` carries the scroll-sync invariant
-- DESIGN-0003 is `Implemented` and no longer says an IMPL doc is
-  unnecessary; IMPL-0006 is `Completed`
-- CI green on the PR: lint, test, build, license-check, security scan
-- PR carries exactly one release label (`minor`), five commits, and a
-  link to issue #75
+- ✅ `docz update` regenerates only the two status cells this plan
+  changed (DESIGN-0003 → `Implemented`, IMPL-0006 → `In Progress`); no
+  other index drift
+- ✅ README documents footnotes in both the features list and the
+  library section
+- ✅ `CLAUDE.md` carries the scroll-sync invariant
+- ✅ DESIGN-0003 is `Implemented` and no longer says an IMPL doc is
+  unnecessary
+- ⏳ IMPL-0006 is `Completed` — **not met, and deliberately so.** Held
+  at `In Progress` pending the author-only manual checks in Phases 2
+  and 3 (see task 5)
+- ⏳ CI green on the PR: lint, test, build, license-check, security
+  scan — awaiting the final push
+- ✅ PR carries exactly one release label (`minor`) and a link to issue
+  #75. **Amended:** the "five commits" clause is superseded — the
+  implementation was driven task-by-task, so the branch carries one
+  commit per numbered task (13) rather than one per phase (5).
+  Decision 7's intent was *a single PR*, not a specific commit count,
+  and that holds
 
 ---
 
