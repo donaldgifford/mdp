@@ -704,11 +704,17 @@ holds.
 - [x] Performance: `BenchmarkFootnoteRender` — cost scales close to
   linearly with reference count; no quadratic collect pass
 - [ ] ⏳ **Awaiting author.** Manual: Neovim cursor sync past a
-  mid-document definition
-- [ ] ⏳ **Awaiting author.** Manual: visual check across 2 dark + 2
-  light themes
-- [ ] ⏳ **Awaiting author.** Manual: forward and backward anchor
-  navigation
+  mid-document definition — the Lua plugin emitting the right line and
+  the browser scrolling to it. The equivalence half (no-footnote
+  documents unchanged) is closed; see [Phase 2](#phase-2-scroll-sync-correctness)
+- [ ] ⏳ **Awaiting author — aesthetic judgment only.** Manual: visual
+  check across 2 dark + 2 light themes. Structural half covered by
+  `TestFootnoteCSSPropertiesDefinedByEveryTheme`
+- [ ] ⏳ **Awaiting author — visual half only.** Manual: forward and
+  backward anchor navigation. The `href`/`id` wiring and the round trip
+  are covered by `TestRender_FootnoteAnchorsResolve` and
+  `TestRender_FootnoteBacklinksRoundTrip`; what needs eyes is the
+  `:target` highlight and the scroll animation
 
 ## Performance
 
