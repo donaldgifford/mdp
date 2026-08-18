@@ -148,15 +148,15 @@ option shape exactly, and cover the new exported symbol.
 
 #### Tasks
 
-- [ ] 1. Add `footnotes bool` to the `config` struct in
+- [x] 1. Add `footnotes bool` to the `config` struct in
   `pkg/parser/parser.go` (after `callouts`, matching field order to
   option order)
-- [ ] 2. Set `footnotes: true` in `defaultConfig()` (DESIGN-0003 Decision 1)
-- [ ] 3. Add the `WithFootnotes(enabled bool) Option` setter with a doc
+- [x] 2. Set `footnotes: true` in `defaultConfig()` (DESIGN-0003 Decision 1)
+- [x] 3. Add the `WithFootnotes(enabled bool) Option` setter with a doc
   comment noting that definitions are collected into a
   `<div class="footnotes">` endnote list at the end of the output
   regardless of where they appear in the source
-- [ ] 4. Register `extension.Footnote` in `New` under
+- [x] 4. Register `extension.Footnote` in `New` under
   `if cfg.footnotes { ... }`, placed after the callouts block
 - [ ] 5. Add `WithFootnotes` to the "All options" block in
   `pkg/parser/doc.go`
