@@ -93,7 +93,8 @@ func WithFootnotes(enabled bool) Option {
 }
 
 // New creates a Parser with the given options. By default, GFM extensions,
-// syntax highlighting, Mermaid, and math are all enabled.
+// syntax highlighting, Mermaid, math, callouts, and footnotes are all
+// enabled.
 func New(opts ...Option) *Parser {
 	cfg := defaultConfig()
 	for _, o := range opts {
