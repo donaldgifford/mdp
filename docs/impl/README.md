@@ -37,4 +37,5 @@ docz create impl "Your Implementation Title"
 | IMPL-0003 | Phase 1-2 of RFC-0001 — lift parser/theme and extract livereload | Completed | 2026-05-24 | Donald Gifford | [0003-phase-1-2-of-rfc-0001-lift-parsertheme-and-extract-livereload.md](0003-phase-1-2-of-rfc-0001-lift-parsertheme-and-extract-livereload.md) |
 | IMPL-0004 | Phase 3-4 of RFC-0001 — harden public API and tag v0.2.0 | Completed | 2026-05-24 | Donald Gifford | [0004-phase-3-4-of-rfc-0001-harden-public-api-and-tag-v020.md](0004-phase-3-4-of-rfc-0001-harden-public-api-and-tag-v020.md) |
 | IMPL-0005 | local mitigation for INV-0003 callout extension race | Completed | 2026-06-18 | Donald Gifford | [0005-local-mitigation-for-inv-0003-callout-extension-race.md](0005-local-mitigation-for-inv-0003-callout-extension-race.md) |
+| IMPL-0006 | Footnote support per DESIGN-0003 | Draft | 2026-08-18 | Donald Gifford | [0006-footnote-support-per-design-0003.md](0006-footnote-support-per-design-0003.md) |
 <!-- END DOCZ AUTO-GENERATED -->
