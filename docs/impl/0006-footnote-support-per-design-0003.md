@@ -545,26 +545,42 @@ holds.
 
 ## Testing Plan
 
-- [ ] Unit: reference + definition produce `.footnote-ref`, `#fn:1`,
-  `.footnotes`
-- [ ] Unit: link inside a definition renders as an `<a href>`
-- [ ] Unit: multi-paragraph definition (4-space continuation), backlink
-  on the last paragraph
-- [ ] Unit: repeated reference → `fnref:1` + `fnref1:1`, two backlinks
-- [ ] Unit: named labels numbered by first-reference order
-- [ ] Unit: `WithFootnotes(false)` leaves `[^1]` literal
-- [ ] Unit: undefined reference `[^missing]` stays literal, no empty
-  `.footnotes` div
-- [ ] Regression: document-order sequence for the mid-document case
-  (`1, 3, 7, 9, 5, 5`)
-- [ ] Regression: descending `<li>` lines (`4, 3`) when reference order
-  differs from definition order
-- [ ] Invariant: values outside `.footnotes` are non-decreasing
-- [ ] Fixture: `TestRender_MarkdownFixture` asserts footnote output
-- [ ] Race: `make test-coverage` under `-race`
-- [ ] Manual: Neovim cursor sync past a mid-document definition
-- [ ] Manual: visual check across 2 dark + 2 light themes
-- [ ] Manual: forward and backward anchor navigation
+- [x] Unit: reference + definition produce `.footnote-ref`, `#fn:1`,
+  `.footnotes` — `TestRender_Footnote`
+- [x] Unit: link inside a definition renders as an `<a href>` —
+  `TestRender_FootnoteWithLink`
+- [x] Unit: multi-paragraph definition (4-space continuation), backlink
+  on the last paragraph — `TestRender_FootnoteMultiParagraph`
+- [x] Unit: repeated reference → `fnref:1` + `fnref1:1`, two backlinks
+  — `TestRender_FootnoteRepeatedReference`
+- [x] Unit: named labels numbered by first-reference order —
+  `TestRender_FootnoteNamedLabel`
+- [x] Unit: `WithFootnotes(false)` emits no footnote markup —
+  `TestRender_FootnoteDisabled`. **Amended:** the original wording
+  ("leaves `[^1]` literal") was wrong. With footnotes off,
+  `[^1]: Note.` is a valid CommonMark *link reference definition*
+  because the body is a single word, so `[^1]` renders as
+  `<a href="Note.">^1</a>`. The test is table-driven over both the
+  single-word and multi-word definition bodies and asserts the claim
+  that actually holds in both: no footnote markup is emitted
+- [x] Unit: undefined reference `[^missing]` stays literal, no empty
+  `.footnotes` div — `TestRender_FootnoteUndefinedReference`
+- [x] Regression: document-order sequence for the mid-document case
+  (`1, 3, 7, 9, 5, 5`) — `TestLineAnnotator_FootnoteOrdering`
+- [x] Regression: descending `<li>` lines (`4, 3`) when reference order
+  differs from definition order — same test, second case
+- [x] Invariant: values outside `.footnotes` are non-decreasing —
+  `TestLineAnnotator_NonFootnoteOrderIsMonotonic`, 5 cases including
+  `testdata/fixture.md`
+- [x] Fixture: `TestRender_MarkdownFixture` asserts footnote output
+- [x] Race: `make test-coverage` under `-race` — clean, `pkg/parser` at
+  97.3%
+- [ ] ⏳ **Awaiting author.** Manual: Neovim cursor sync past a
+  mid-document definition
+- [ ] ⏳ **Awaiting author.** Manual: visual check across 2 dark + 2
+  light themes
+- [ ] ⏳ **Awaiting author.** Manual: forward and backward anchor
+  navigation
 
 ## Dependencies
 
