@@ -32,6 +32,7 @@ type config struct {
 	mermaidMode        mermaid.RenderMode
 	math               bool
 	callouts           bool
+	footnotes          bool
 }
 
 func defaultConfig() config {
@@ -42,6 +43,7 @@ func defaultConfig() config {
 		mermaidMode:        mermaid.RenderModeClient,
 		math:               true,
 		callouts:           true,
+		footnotes:          true,
 	}
 }
 
@@ -82,8 +84,17 @@ func WithCallouts(enabled bool) Option {
 	return func(c *config) { c.callouts = enabled }
 }
 
+// WithFootnotes enables or disables extended-syntax footnotes
+// ([^1] references and [^1]: definitions). Definitions are collected
+// into a <div class="footnotes"> endnote list rendered at the end of
+// the output, regardless of where they appear in the source.
+func WithFootnotes(enabled bool) Option {
+	return func(c *config) { c.footnotes = enabled }
+}
+
 // New creates a Parser with the given options. By default, GFM extensions,
-// syntax highlighting, Mermaid, and math are all enabled.
+// syntax highlighting, Mermaid, math, callouts, and footnotes are all
+// enabled.
 func New(opts ...Option) *Parser {
 	cfg := defaultConfig()
 	for _, o := range opts {
@@ -114,6 +125,9 @@ func New(opts ...Option) *Parser {
 		extensions = append(extensions, alertcallouts.NewAlertCallouts(
 			alertcallouts.UseGFMStrictIcons(),
 		))
+	}
+	if cfg.footnotes {
+		extensions = append(extensions, extension.Footnote)
 	}
 
 	md := goldmark.New(

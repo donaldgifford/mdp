@@ -1,7 +1,7 @@
 ---
 id: DESIGN-0003
 title: "Footnote support via goldmark extension"
-status: Approved
+status: Implemented
 author: Donald Gifford
 created: 2026-08-18
 ---
@@ -9,7 +9,7 @@ created: 2026-08-18
 
 # DESIGN 0003: Footnote support via goldmark extension
 
-**Status:** Approved
+**Status:** Implemented
 **Author:** Donald Gifford
 **Date:** 2026-08-18
 
@@ -464,8 +464,10 @@ deleting it) is out of scope here but worth a follow-up.
 **Manual verification:**
 
 1. `make build && make test && make lint`
-2. `./bin/mdp --file <doc-with-footnotes>.md` — check the endnote
+2. `./mdp serve <doc-with-footnotes>.md` — check the endnote
    list, click a `.footnote-ref`, click the `↩︎` backlink.
+   (Corrected during IMPL-0006: the binary is `./mdp` and the
+   subcommand is `serve`; `./bin/mdp --file` does not exist.)
 3. Spot-check one theme per family (github, tokyo-night,
    rose-pine-dawn, catppuccin-latte) — two light, two dark — to
    confirm the muted text and hairline rule read correctly.
@@ -505,9 +507,18 @@ no footnotes.
 user-visible rendering feature plus a new exported symbol on a public
 package.
 
-**No follow-up IMPL doc proposed** — the phase tracking in an IMPL
-would just restate the file table above. If the scroll-sync work grows
-past a one-line selector change, that's the trigger to split it out.
+**Implemented by
+[IMPL-0006](../impl/0006-footnote-support-per-design-0003.md).** This
+section originally read "No follow-up IMPL doc proposed — the phase
+tracking would just restate the file table above." That judgement did
+not hold up: the implementation plan surfaced material this design
+lacked, including a second `data-source-line` ordering hazard
+(first-reference numbering, which breaks ordering even with all
+definitions at the end of a file), the fact that `WithFootnotes(false)`
+does not always leave `[^1]` literal because CommonMark link reference
+definitions take over, and a Phase 2 acceptance criterion that was not
+achievable as written. See IMPL-0006 for the phased task breakdown and
+its own resolved decisions.
 
 ## Open Questions
 

@@ -212,6 +212,220 @@ func TestRender_CalloutDisabled(t *testing.T) {
 	}
 }
 
+func TestRender_Footnote(t *testing.T) {
+	t.Parallel()
+
+	p := parser.New()
+	html, err := p.Render([]byte("Text.[^1]\n\n[^1]: The note.\n"))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	got := string(html)
+	for _, want := range []string{
+		`<sup id="fnref:1">`,
+		`href="#fn:1"`,
+		`class="footnote-ref"`,
+		`<li id="fn:1"`,
+		`class="footnotes"`,
+		`class="footnote-backref"`,
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("expected %q in output, got: %s", want, got)
+		}
+	}
+}
+
+func TestRender_FootnoteWithLink(t *testing.T) {
+	t.Parallel()
+
+	md := "Text.[^1]\n\n[^1]: See [the guide](https://example.com/guide) for details.\n"
+
+	p := parser.New()
+	html, err := p.Render([]byte(md))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	got := string(html)
+	for _, want := range []string{
+		`<a href="https://example.com/guide">the guide</a>`,
+		`class="footnotes"`,
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("expected %q in output, got: %s", want, got)
+		}
+	}
+}
+
+func TestRender_FootnoteMultiParagraph(t *testing.T) {
+	t.Parallel()
+
+	md := "Text.[^long]\n\n[^long]:\n    First paragraph.\n\n    Second paragraph.\n"
+
+	p := parser.New()
+	html, err := p.Render([]byte(md))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	got := string(html)
+	for _, want := range []string{"First paragraph.", "Second paragraph."} {
+		if !strings.Contains(got, want) {
+			t.Errorf("expected %q in output, got: %s", want, got)
+		}
+	}
+
+	// Both paragraphs belong to a single <li>.
+	if n := strings.Count(got, "<li id="); n != 1 {
+		t.Errorf("expected 1 footnote list item, got %d: %s", n, got)
+	}
+
+	// The backlink attaches to the last paragraph, not the first.
+	backref := strings.Index(got, `class="footnote-backref"`)
+	second := strings.Index(got, "Second paragraph.")
+	if backref < second {
+		t.Errorf("expected backlink after the last paragraph, got: %s", got)
+	}
+}
+
+func TestRender_FootnoteRepeatedReference(t *testing.T) {
+	t.Parallel()
+
+	md := "First.[^a]\n\nSecond.[^a]\n\n[^a]: Shared note.\n"
+
+	p := parser.New()
+	html, err := p.Render([]byte(md))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	got := string(html)
+	for _, want := range []string{`id="fnref:1"`, `id="fnref1:1"`} {
+		if !strings.Contains(got, want) {
+			t.Errorf("expected %q in output, got: %s", want, got)
+		}
+	}
+
+	// One definition, but a backlink per reference.
+	if n := strings.Count(got, `class="footnote-backref"`); n != 2 {
+		t.Errorf("expected 2 backlinks for 2 references, got %d: %s", n, got)
+	}
+	if n := strings.Count(got, "<li id="); n != 1 {
+		t.Errorf("expected 1 footnote list item, got %d: %s", n, got)
+	}
+}
+
+// TestRender_FootnoteNamedLabel verifies that named labels render as
+// sequential integers numbered by order of first *reference*, not by
+// the order the definitions appear in the source.
+func TestRender_FootnoteNamedLabel(t *testing.T) {
+	t.Parallel()
+
+	md := "Alpha.[^zeta] Beta.[^alpha]\n\n" +
+		"[^alpha]: Defined second in source.\n" +
+		"[^zeta]: Defined first in source.\n"
+
+	p := parser.New()
+	html, err := p.Render([]byte(md))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	got := string(html)
+
+	// [^zeta] is referenced first, so it becomes fn:1 even though its
+	// definition comes second in the source.
+	zeta := strings.Index(got, "Defined first in source.")
+	alpha := strings.Index(got, "Defined second in source.")
+	if zeta < 0 || alpha < 0 {
+		t.Fatalf("expected both definitions in output, got: %s", got)
+	}
+	if zeta > alpha {
+		t.Errorf("expected first-referenced footnote to render first, got: %s", got)
+	}
+
+	// Labels are replaced by integers in the rendered references.
+	for _, want := range []string{`href="#fn:1"`, `href="#fn:2"`} {
+		if !strings.Contains(got, want) {
+			t.Errorf("expected %q in output, got: %s", want, got)
+		}
+	}
+	if strings.Contains(got, "zeta") || strings.Contains(got, "alpha") {
+		t.Errorf("expected labels replaced by integers, got: %s", got)
+	}
+}
+
+// TestRender_FootnoteDisabled verifies WithFootnotes(false) emits no
+// footnote markup.
+//
+// Note the second case: with the extension off, a definition whose
+// body is a single word is a valid CommonMark *link reference
+// definition* ([^1] is a legal link label), so goldmark turns the
+// reference into an anchor. That is upstream CommonMark behavior, not
+// mdp's — the invariant that matters here is only that no footnote
+// markup is produced.
+func TestRender_FootnoteDisabled(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name        string
+		md          string
+		wantLiteral bool
+	}{
+		{
+			name:        "multi-word definition stays literal text",
+			md:          "Text.[^1]\n\n[^1]: The note text.\n",
+			wantLiteral: true,
+		},
+		{
+			name:        "single-word definition is a link reference definition",
+			md:          "Text.[^1]\n\n[^1]: Note.\n",
+			wantLiteral: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			p := parser.New(parser.WithFootnotes(false))
+			html, err := p.Render([]byte(tc.md))
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			got := string(html)
+			for _, unwanted := range []string{"footnotes", "footnote-ref", "footnote-backref"} {
+				if strings.Contains(got, unwanted) {
+					t.Errorf("expected no %q when footnotes disabled, got: %s", unwanted, got)
+				}
+			}
+			if tc.wantLiteral && !strings.Contains(got, "[^1]") {
+				t.Errorf("expected literal [^1] when footnotes disabled, got: %s", got)
+			}
+		})
+	}
+}
+
+func TestRender_FootnoteUndefinedReference(t *testing.T) {
+	t.Parallel()
+
+	p := parser.New()
+	html, err := p.Render([]byte("Text.[^missing]\n"))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	got := string(html)
+	if !strings.Contains(got, "[^missing]") {
+		t.Errorf("expected undefined reference to stay literal, got: %s", got)
+	}
+	if strings.Contains(got, "footnotes") {
+		t.Errorf("expected no footnotes section for an undefined reference, got: %s", got)
+	}
+}
+
 func TestRender_MarkdownFixture(t *testing.T) {
 	t.Parallel()
 
@@ -240,6 +454,10 @@ func TestRender_MarkdownFixture(t *testing.T) {
 		{"task list", `type="checkbox"`},
 		{"blockquote", "<blockquote"},
 		{"horizontal rule", "<hr"},
+		{"footnote", `class="footnotes"`},
+		{"footnote reference", `class="footnote-ref"`},
+		{"footnote backlink", `class="footnote-backref"`},
+		{"link inside a footnote", `href="https://example.com/footnote"`},
 	}
 
 	for _, tc := range checks {
@@ -262,6 +480,7 @@ func TestParser_AllOptionsOff(t *testing.T) {
 		parser.WithMermaid(false),
 		parser.WithMath(false),
 		parser.WithCallouts(false),
+		parser.WithFootnotes(false),
 	)
 	html, err := p.Render([]byte("# Plain"))
 	if err != nil {

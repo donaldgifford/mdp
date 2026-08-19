@@ -126,6 +126,8 @@ mdp serve [flags] <file>
 - **KaTeX math**: inline `$...$` and block `$$...$$` expressions
 - **GitHub-style callouts**: `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`,
   `> [!WARNING]`, `> [!CAUTION]` with themed icons and colors
+- **Footnotes**: `[^1]` references with `[^1]: ...` definitions, collected
+  into a linked endnote list with back-references
 - **Relative images**: images referenced with relative paths are resolved from
   the markdown file's directory
 
@@ -213,7 +215,8 @@ without shelling out to the CLI. See the package docs for usage:
 
 - [`pkg/parser`](https://pkg.go.dev/github.com/donaldgifford/mdp/pkg/parser)
   — goldmark pipeline (GFM, syntax highlighting, Mermaid, math,
-  callouts) with `data-source-line` annotations for scroll sync.
+  callouts, footnotes) with `data-source-line` annotations for scroll
+  sync.
 - [`pkg/theme`](https://pkg.go.dev/github.com/donaldgifford/mdp/pkg/theme)
   — theme registry; resolves built-in names, `auto`, or a CSS file
   path to a Theme struct.

@@ -167,6 +167,43 @@ blockquote {
 .callout-warning   { --callout-color: var(--callout-warning-color);   --callout-bg: var(--callout-warning-bg); }
 .callout-caution   { --callout-color: var(--callout-caution-color);   --callout-bg: var(--callout-caution-bg); }
 
+/* Footnotes
+   Values resolve through custom properties every built-in theme
+   already defines, so no theme file needs a footnote entry. */
+.footnotes {
+  margin-top: 32px;
+  font-size: 0.875em;
+  color: var(--color-fg-muted);
+}
+
+/* goldmark hardcodes an <hr> as the first child of .footnotes. The
+   global rule below styles hr as a 0.25em bar, which reads as a
+   document break rather than an endnote separator. */
+.footnotes hr {
+  height: 1px;
+  margin: 0 0 16px 0;
+  background-color: var(--color-border-muted);
+}
+
+.footnotes ol { margin-bottom: 0; }
+
+/* Offset the jump target so a clicked footnote is not flush against
+   the viewport edge. */
+.footnotes li { scroll-margin-top: 48px; }
+
+.footnotes li:target { background-color: var(--color-canvas-subtle); }
+
+.footnotes p:last-child { margin-bottom: 0; }
+
+.footnote-ref { font-weight: 600; }
+
+.footnote-backref {
+  text-decoration: none;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+.footnote-backref:hover { text-decoration: none; }
+
 /* Code */
 code {
   padding: 0.2em 0.4em;

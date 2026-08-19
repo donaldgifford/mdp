@@ -2,12 +2,41 @@
 // goldmark pipeline. The default Parser enables GFM extensions
 // (tables, strikethrough, task lists, autolinks), syntax highlighting
 // with chroma's github style, client-side Mermaid diagrams, MathJax,
-// and GitHub-style callouts.
+// GitHub-style callouts, and extended-syntax footnotes.
 //
 // Every block-level element in the output carries a data-source-line
 // attribute pointing at its 1-indexed line in the source, which
 // downstream consumers can use for scroll-sync or other cursor-aware
 // integrations.
+//
+// # data-source-line ordering
+//
+// With footnotes enabled, data-source-line values are NOT guaranteed
+// to be non-decreasing in document order. Footnote definitions are
+// collected into a <div class="footnotes"> endnote list rendered last,
+// but each entry keeps the source line where it was defined. Two
+// shapes produce out-of-order values:
+//
+//   - A definition placed mid-document renders after body content that
+//     appears later in the source.
+//   - Footnotes are numbered by first-reference order, so when
+//     reference order differs from definition order the entries
+//     themselves are out of source order — even with every definition
+//     at the end of the file.
+//
+// Consumers that map a cursor line to an element by scanning in
+// document order and stopping at the first larger value must skip the
+// .footnotes subtree, or they will select a footnote instead of the
+// intended block. Outside that subtree the values are non-decreasing.
+//
+// Skipping the subtree means footnote entries are never selected as
+// scroll targets, so a cursor sitting on a definition line resolves to
+// the nearest preceding body block instead. That is a property of the
+// scan, not of the exclusion: a scan that stops at the first larger
+// value already passes the definition's line before reaching the
+// endnote list, so it behaves the same either way. Callers needing a
+// definition to be reachable should look it up by its line directly
+// rather than relying on the ordered scan.
 //
 // # Minimal usage
 //
@@ -37,6 +66,7 @@
 //	    parser.WithMermaidRenderMode(mermaid.RenderModeClient),
 //	    parser.WithMath(true),
 //	    parser.WithCallouts(true),
+//	    parser.WithFootnotes(true),
 //	)
 //
 // # Concurrency

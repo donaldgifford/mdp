@@ -85,6 +85,27 @@ mutex (but keep the test) once upstream releases a fix — see
 [INV-0003](docs/investigation/0003-callout-extension-race-in-testrendergithubcallout.md)
 and [IMPL-0005](docs/impl/0005-local-mitigation-for-inv-0003-callout-extension-race.md).
 
+`pkg/parser.WithFootnotes(bool)` toggles goldmark's
+`extension.Footnote` (default on). Note that `extension.GFM` does
+**not** include footnotes — it is exactly Linkify, Table,
+Strikethrough, and TaskList.
+
+**`data-source-line` is not monotonic when footnotes are enabled.**
+Definitions render into a trailing `<div class="footnotes">` but keep
+the source line where they were defined, so document order can go
+backwards. Two shapes cause it: a definition placed mid-document, and
+first-reference numbering when reference order differs from definition
+order (the second bites even with all definitions at the end of the
+file). `findScrollTarget` in `assets/preview.js` therefore selects
+`"[data-source-line]:not(.footnotes [data-source-line])"` — **removing
+that exclusion silently breaks scroll sync** with no test failure, as
+the repo has no JS test harness. The Go-side guard is
+`TestLineAnnotator_NonFootnoteOrderIsMonotonic`, which asserts the
+invariant the selector depends on (values outside `.footnotes` are
+non-decreasing) but cannot see the selector itself. See
+[DESIGN-0003](docs/design/0003-footnote-support-via-goldmark-extension.md)
+and [IMPL-0006](docs/impl/0006-footnote-support-per-design-0003.md).
+
 **Data flow:** Neovim buffer -> Lua plugin -> stdin JSON -> Go binary -> goldmark parse -> WebSocket/SSE hub -> browser. Browser handles Mermaid, KaTeX, highlight.js client-side.
 
 **Dual input modes:** Editor plugin pipes buffer via stdin (`--stdin` flag); standalone CLI watches file on disk via fsnotify.
