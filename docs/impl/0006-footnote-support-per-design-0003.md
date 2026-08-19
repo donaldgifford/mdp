@@ -306,10 +306,11 @@ regression in the feature, and the highest-value phase.
   Cursor line 9 selected the footnote before the fix and the correct
   paragraph after; lines 3 and 7 were unchanged
 - `make test-coverage` passes under `-race` — **met**
-- ⏳ **Awaiting author verification.** Manual check in Neovim: open a
-  file with a **mid-document** footnote definition, place the cursor
-  on a line *after* it, confirm the preview scrolls to that line and
-  **not** to the endnote list
+- ✅ **Met (2026-08-19).** Manual check in Neovim: with a
+  **mid-document** footnote definition and the cursor on a line *after*
+  it, the preview scrolls to that line and **not** to the endnote
+  list. Confirmed by the author both via `POST /cursor` against a
+  running server and through the plugin's stdin channel
 - ✅ **Cursor movement in a document with no footnotes behaves exactly
   as before — proven exhaustively, no longer awaiting the author.**
   The claim is an equivalence, so it is decidable without a browser:
@@ -364,14 +365,14 @@ regression in the feature, and the highest-value phase.
   distance is a poor proxy — on a short document nothing moves, and
   for a late cursor the right and wrong targets sit close together.
 
-- ⏳ **Remaining: the Lua link only.** The chain is
+- ✅ **Neovim end-to-end confirmed by author (2026-08-19).** Cursor
+  movement in Neovim drives the preview to the correct element via the
+  plugin's stdin channel. The chain is
   Lua → stdin → server → WebSocket → browser. The last three links are
-  now covered — `TestReadStdin_CursorMessage` for stdin → WebSocket,
-  `wire_test.go` for the wire format, and the live run above for
-  WebSocket → correct element. What is untested is
-  `lua/mdp/init.lua` emitting the right line number, which this PR does
-  not modify and which predates footnotes. Worth one confirmation in
-  Neovim, but no footnote-specific risk remains in it.
+  each covered — `TestReadStdin_CursorMessage` for stdin → WebSocket,
+  `wire_test.go` for the wire format, the `POST /cursor` run above for
+  WebSocket → correct element, and now the author's Neovim session for
+  the Lua link. Every link in the chain is verified.
 
   **Gotcha worth recording:** `mdp serve <file>` standalone has no
   cursor source — the watcher drives live reload only. Scroll sync
@@ -575,16 +576,22 @@ implementation detail. Recorded for the author rather than acted on.
   hr` has specificity (0,1,1) against the global `hr` rule's (0,0,1)
   and is later in the file, so it wins on both counts. Visual
   confirmation is part of task 4
-- ⏳ Reference superscripts and backlinks are legible in all four
-  spot-checked themes — **awaiting author**. The three custom
-  properties the footnote rules consume (`--color-fg-muted`,
-  `--color-border-muted`, `--color-canvas-subtle`) are defined in
-  **13/13** themes, so nothing falls back to an unset value
+- ✅ Reference superscripts and backlinks are legible in all four
+  spot-checked themes — **met (2026-08-18)**, confirmed by author
+  screenshots of `github` dark, `tokyo-night`, `rose-pine-dawn` and
+  `catppuccin-latte`. The three custom properties the footnote rules
+  consume (`--color-fg-muted`, `--color-border-muted`,
+  `--color-canvas-subtle`) are defined in **13/13** themes and now
+  enforced by `TestFootnoteCSSPropertiesDefinedByEveryTheme`, so
+  nothing falls back to an unset value
 - `git diff --stat assets/themes/` is **empty** — **met**, zero theme
   files modified
-- ⏳ Anchor navigation works in both directions — **awaiting author**
-  (browser interaction; the `id`/`href` pairs are present and correct
-  in the served HTML)
+- ✅ Anchor navigation works in both directions — **met
+  (2026-08-18)**. `:target` highlighting confirmed on rose-pine-dawn,
+  catppuccin-latte and tokyo-night; footnote 1's second backlink
+  confirmed resolving to `#fnref1:1`, the second reference, which is
+  the one-to-many case `TestRender_FootnoteBacklinksRoundTrip` asserts
+  statically
 - No visual change to documents without footnotes — **met**, see
   task 7
 
@@ -778,10 +785,9 @@ holds.
   below the noise floor; identical allocations). See [Performance](#performance)
 - [x] Performance: `BenchmarkFootnoteRender` — cost scales close to
   linearly with reference count; no quadratic collect pass
-- [ ] ⏳ **Awaiting author.** Manual: Neovim cursor sync past a
-  mid-document definition — the Lua plugin emitting the right line and
-  the browser scrolling to it. The equivalence half (no-footnote
-  documents unchanged) is closed; see [Phase 2](#phase-2-scroll-sync-correctness)
+- [x] Manual: Neovim cursor sync past a mid-document definition —
+  confirmed by author (2026-08-19), both via `POST /cursor` against a
+  running server and through the Neovim plugin's stdin channel
 - [x] Manual: visual check across 2 dark + 2 light themes — `github`
   dark, `tokyo-night`, `rose-pine-dawn`, `catppuccin-latte` all
   confirmed by author screenshots (2026-08-18)
