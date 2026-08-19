@@ -1,7 +1,7 @@
 ---
 id: IMPL-0006
 title: "Footnote support per DESIGN-0003"
-status: In Progress
+status: Completed
 author: Donald Gifford
 created: 2026-08-18
 ---
@@ -9,7 +9,7 @@ created: 2026-08-18
 
 # IMPL 0006: Footnote support per DESIGN-0003
 
-**Status:** In Progress
+**Status:** Completed
 **Author:** Donald Gifford
 **Date:** 2026-08-18
 
@@ -665,12 +665,11 @@ holds.
   Note that removing the exclusion silently breaks scroll sync
 - [x] 4. `docs/impl/mvp.md:283` — check off "Footnote support via
   goldmark extension"
-- [x] 5. Set this document's status. Held at `In Progress`, not
-  `Completed`: every code, test, and documentation task is done, but
-  Phase 2's two Neovim scroll-sync checks and Phase 3 tasks 4-6 (theme
-  rendering, `:target` highlight, backlink click) are author-only
-  manual verification that no automated gate can stand in for. Flip to
-  `Completed` once those are signed off
+- [x] 5. Set this document's status to `Completed`. Deliberately held
+  at `In Progress` until the author-only checks were signed off rather
+  than marked complete on the strength of the automated work alone;
+  all are now confirmed (2026-08-18/19)
+
 - [x] 6. Set DESIGN-0003's status to `Implemented`
 - [x] 7. Replace DESIGN-0003's "No follow-up IMPL doc proposed" line
   with a pointer to IMPL-0006 ([Decision 6](#resolved-decisions))
@@ -693,11 +692,16 @@ holds.
 - ✅ `CLAUDE.md` carries the scroll-sync invariant
 - ✅ DESIGN-0003 is `Implemented` and no longer says an IMPL doc is
   unnecessary
-- ⏳ IMPL-0006 is `Completed` — **not met, and deliberately so.** Held
-  at `In Progress` pending the author-only manual checks in Phases 2
-  and 3 (see task 5)
-- ⏳ CI green on the PR: lint, test, build, license-check, security
-  scan — awaiting the final push
+- ✅ IMPL-0006 is `Completed` — **met (2026-08-19)**. Held at
+  `In Progress` until every author-only check was signed off: the
+  four-theme visual sweep, `:target` highlighting, bidirectional
+  anchor navigation, and Neovim cursor sync past a mid-document
+  definition. All are now confirmed
+- ✅ CI green on the PR: lint, test, build, license-check, security
+  scan — **met**, all 7 checks passing. Note that
+  [Question 11](#open-questions) records a ~10% flake rate in the
+  `internal/server` WebSocket tests, unrelated to this work; a green
+  run may need a re-run to obtain
 - ✅ PR carries exactly one release label (`minor`) and a link to issue
   #75. **Amended:** the "five commits" clause is superseded — the
   implementation was driven task-by-task, so the branch carries one
