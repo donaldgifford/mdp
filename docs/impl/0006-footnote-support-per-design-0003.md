@@ -444,24 +444,19 @@ custom properties all 13 themes already define (verified).
   bundled JS. Note the binary is `./mdp` and the subcommand is
   `mdp serve <file>` — not `./bin/mdp --file` as earlier drafts of
   this doc said
-- [ ] 4. 🔶 **Partially verified — one dark theme confirmed by author
-  screenshot (2026-08-18).** The endnote list renders correctly:
-  definitions relocated to the end despite `[^one]` being defined
-  mid-document, numbering by first reference, two backlinks on each
-  item matching its two references, `.footnotes hr` overriding the
-  global `0.25em` bar to a visible hairline, `--color-fg-muted` and
-  the `0.875em` size resolving, the in-definition link rendering as a
-  link, and the backlink glyph in text presentation rather than emoji.
-  **Two light themes since confirmed** (rose-pine-dawn,
-  catppuccin-latte). **Still needed: `tokyo-night`.** Visually
-  verify two dark themes (`github` in dark mode, `tokyo-night`) and two
-  light themes (`rose-pine-dawn`, `catppuccin-latte`). The structural
-  half is automated by
-  `TestFootnoteCSSPropertiesDefinedByEveryTheme`, which proves all 13
-  themes define every custom property the footnote rules consume — so
-  no theme can render footnotes with an invisible hairline or
-  default-coloured note text. What remains is whether the palette
-  *reads* well, which no test can judge
+- [x] 4. **Verified by author screenshots (2026-08-18).** All four
+  themes confirmed: `github` dark and `tokyo-night` (dark),
+  `rose-pine-dawn` and `catppuccin-latte` (light). On each, the endnote
+  list renders with definitions relocated to the end despite `[^one]`
+  being defined mid-document, numbering by first reference, two
+  backlinks per item matching its two references, `.footnotes hr`
+  overriding the global `0.25em` bar to a hairline, `--color-fg-muted`
+  and the `0.875em` size resolving, the in-definition link rendering as
+  a link, and the backlink glyph in text presentation rather than
+  emoji. The structural half was already automated by
+  `TestFootnoteCSSPropertiesDefinedByEveryTheme`; these screenshots
+  cover what no test can judge — whether the palette reads well
+
 - [x] 5. **Verified by author screenshots (2026-08-18).** Clicking a
   `.footnote-ref` jumps to the definition and `:target` highlighting
   fires — confirmed on rose-pine-dawn and catppuccin-latte, both
@@ -511,6 +506,37 @@ is [Question 9](#open-questions).
   footnote-free document and checking the `#content` div contains no
   `.footnotes`, `.footnote-ref`, `.footnote-backref`, or `<sup>` — the
   new rules have nothing to match
+
+**Observation from the theme sweep — `:target` contrast varies.**
+
+Recorded late: an earlier commit message said this was captured when a
+conditional insert had silently skipped it. The finding stands, the
+record did not.
+
+The highlight resolves `--color-canvas-subtle` against
+`--color-canvas-default`, and the two are not consistently related:
+
+| Theme | default → subtle | Direction | Contrast |
+|---|---|---|---|
+| `donald` | `#16161e` → `#13131a` | darker | 1.028 |
+| `rose-pine-dawn` | `#faf4ed` → `#fffaf3` | **lighter** | 1.052 |
+| `tokyo-night` | `#1a1b26` → `#16161e` | darker | 1.052 |
+| `catppuccin-latte` | `#eff1f5` → `#e6e9ef` | darker | 1.076 |
+| `tokyo-night-day` | `#e1e2e7` → `#d5d6db` | darker | 1.122 |
+
+`tokyo-night` and `rose-pine-dawn` have the **same ratio, 1.052**, yet
+the band reads clearly on the first and faintly on the second. So the
+ratio is not the predictor — direction relative to the surrounding
+canvas is. A darker band on a dark canvas reads; a lighter band on an
+already near-white canvas does not. `rose-pine-dawn` is the only light
+theme whose subtle canvas moves lighter, which isolates it as the
+single outlier rather than implying a general problem across the set.
+
+Cosmetic, and **not** treated as a defect. It works on every theme,
+DESIGN-0003 Decision 4 scoped theme files out of this work, and
+swapping the highlight for something palette-independent — a left
+border on `:target`, say — is a design change rather than an
+implementation detail. Recorded for the author rather than acted on.
 
 #### Success Criteria
 
@@ -726,14 +752,14 @@ holds.
   mid-document definition — the Lua plugin emitting the right line and
   the browser scrolling to it. The equivalence half (no-footnote
   documents unchanged) is closed; see [Phase 2](#phase-2-scroll-sync-correctness)
-- [ ] ⏳ **Awaiting author — aesthetic judgment only.** Manual: visual
-  check across 2 dark + 2 light themes. Structural half covered by
-  `TestFootnoteCSSPropertiesDefinedByEveryTheme`
-- [ ] ⏳ **Awaiting author — visual half only.** Manual: forward and
-  backward anchor navigation. The `href`/`id` wiring and the round trip
-  are covered by `TestRender_FootnoteAnchorsResolve` and
-  `TestRender_FootnoteBacklinksRoundTrip`; what needs eyes is the
-  `:target` highlight and the scroll animation
+- [x] Manual: visual check across 2 dark + 2 light themes — `github`
+  dark, `tokyo-night`, `rose-pine-dawn`, `catppuccin-latte` all
+  confirmed by author screenshots (2026-08-18)
+- [x] Manual: forward and backward anchor navigation — `:target`
+  highlighting confirmed on rose-pine-dawn, catppuccin-latte and
+  tokyo-night; footnote 1's second backlink confirmed resolving to
+  `#fnref1:1`, the second reference, matching the one-to-many mapping
+  `TestRender_FootnoteBacklinksRoundTrip` asserts
 
 ## Performance
 
