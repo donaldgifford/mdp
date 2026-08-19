@@ -869,11 +869,25 @@ same way.
 
 Questions 1–7 were raised during drafting and resolved by the author
 on 2026-08-18 — see [Resolved Decisions](#resolved-decisions).
-Questions 8-11 were discovered during implementation and are **open**.
+Questions 8-11 were discovered during implementation and were
+**resolved by the author on 2026-08-19**. Each retains its full
+analysis below; the resolution is recorded at the head of the
+question.
 
 ---
 
 **8. How should the golangci-lint version drift be resolved?**
+
+> **Resolved 2026-08-19 — variant of (a).** The author bumped
+> `.github/workflows/ci.yml` to `v2.12.2` manually to match the
+> `mise.toml` pin.
+>
+> ⚠️ **The bump alone turns CI red.** The 6 findings below are
+> genuine errors at 2.12.2 and currently appear only locally because
+> CI still ran 2.11.4. Aligning the versions without also clearing
+> them moves the failure into CI. The fix and the findings have to
+> land together — which is what option (a) meant by "bump the version
+> **and** clear the 6 findings there". Tracked separately from #76.
 
 Discovered in Phase 1. `make lint` exits non-zero on a clean checkout
 of `main`, with 6 findings unrelated to footnotes:
@@ -922,6 +936,11 @@ code. The question is only how to record and route it.
 ---
 
 **9. Should `assets/preview.js` get a test harness?**
+
+> **Resolved 2026-08-19 — (a), deferred to its own issue.** Filed as
+> [#77](https://github.com/donaldgifford/mdp/issues/77) with the full
+> analysis, including all four jsdom verifications and the
+> false-negative incident.
 
 Discovered in Phase 2. The repo has no JS test infrastructure — no
 `package.json`, no test runner, and CI never executes `preview.js`.
@@ -995,6 +1014,24 @@ this question was drafted.
 **11. How should the flaky `internal/server` WebSocket tests be
 handled?**
 
+> **Resolved 2026-08-19 — deferred, issue filed
+> ([#78](https://github.com/donaldgifford/mdp/issues/78)).** The
+> author asked whether the 2026-08-17 GitHub outage explained this,
+> and to ignore it if the problem could not be shown to persist
+> afterwards.
+>
+> **It persists, so the outage does not explain it.** Three further
+> failures occurred on **2026-08-19**, two days after the outage, and
+> two on 2026-08-18. Five distinct tests have now failed with the
+> identical `i/o timeout` signature at ~2.02s, and every one is among
+> the six sharing a 2-second read deadline.
+>
+> The distribution also argues against an outage: a network incident
+> would break checkouts, module downloads and other jobs, whereas
+> these failures hit only the short-deadline WebSocket reads and never
+> the lint, build, license-check or security-scan jobs in the same
+> run.
+
 Discovered in Phase 5 while confirming CI on this PR. Two consecutive
 CI runs failed on **different** tests with the same symptom, then a
 third passed unchanged:
@@ -1065,6 +1102,17 @@ unreliable merge gate and will resurface on unrelated PRs.
 
 **10. What should happen to the dead `KindDocument` guard in
 `lineAnnotator.Transform`?**
+
+> **Resolved 2026-08-19 — deferred, issue filed.** The author's rule
+> was: ignore if the 2026-08-17 GitHub outage explains it and it
+> cannot be shown to persist; otherwise defer and track.
+>
+> The outage cannot explain this one **at all** — it is a static
+> property of the code with no environmental component, reproducible
+> locally and deterministically. Re-verified on 2026-08-19: the
+> coverage profile still reports `lineannotator.go:29.38,31.4 1 0`,
+> and `(*ast.Document).Type()` still returns `TypeDocument`. Filed as
+> [#79](https://github.com/donaldgifford/mdp/issues/79).
 
 Found during the Phase 4 coverage audit. `pkg/parser/lineannotator.go`
 tests three conditions in order:
