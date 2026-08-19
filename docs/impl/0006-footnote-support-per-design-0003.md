@@ -341,13 +341,43 @@ regression in the feature, and the highest-value phase.
   fixes, so the harness is demonstrably sensitive and the zero above is
   a real negative
 
-- ⏳ **Awaiting author verification.** Manual check in Neovim covering
-  the remaining links in the chain. The server side is already covered
-  by `TestReadStdin_CursorMessage` (stdin cursor JSON → WebSocket
-  broadcast) and `wire_test.go` (wire-format baseline); the browser
-  side by the jsdom runs above. What no test in this repo reaches is
-  the Lua plugin emitting the right line number, and the browser
-  actually smooth-scrolling to the element `findScrollTarget` returns
+- ✅ **Live browser verification through the real server
+  (2026-08-19).** Driven with `POST /cursor` against
+  `mdp serve` on a purpose-built 176-line document
+  (`CURSOR LINE N` headings labelled with their own line numbers, a
+  mid-document definition on line 10, body content to line 174). The
+  correct element takes the `.scroll-target` outline; nothing inside
+  the endnote list is ever selected.
+
+  Line 174 is the diagnostic position, computed rather than guessed:
+  body annotations ascend to 174, then the footnote entries carry
+  `10, 10, 176, 176`, so a cursor at 174 is the first point where the
+  pre-fix selector reached the out-of-order values and picked the
+  `data-source-line="10"` endnote item. Cursor lines 174-181 are the
+  full diagnostic range; everything below behaves identically either
+  way.
+
+  Note the observable signal is the **1-second `.scroll-target`
+  outline**, not scroll distance. `scrollToLine` applies it to whatever
+  `findScrollTarget` returns, so the invariant is directly visible:
+  *no element inside `.footnotes` may ever be outlined.* Scroll
+  distance is a poor proxy — on a short document nothing moves, and
+  for a late cursor the right and wrong targets sit close together.
+
+- ⏳ **Remaining: the Lua link only.** The chain is
+  Lua → stdin → server → WebSocket → browser. The last three links are
+  now covered — `TestReadStdin_CursorMessage` for stdin → WebSocket,
+  `wire_test.go` for the wire format, and the live run above for
+  WebSocket → correct element. What is untested is
+  `lua/mdp/init.lua` emitting the right line number, which this PR does
+  not modify and which predates footnotes. Worth one confirmation in
+  Neovim, but no footnote-specific risk remains in it.
+
+  **Gotcha worth recording:** `mdp serve <file>` standalone has no
+  cursor source — the watcher drives live reload only. Scroll sync
+  needs either the Neovim plugin (stdin) or `POST /cursor`. Running
+  the server by hand and expecting the plugin to drive it starts two
+  independent processes and looks like scroll sync being broken
 
 The two manual checks exercise the full Neovim → stdin → server → WS →
 browser path and cannot be run headlessly in this environment. The
