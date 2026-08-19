@@ -452,7 +452,8 @@ custom properties all 13 themes already define (verified).
   global `0.25em` bar to a visible hairline, `--color-fg-muted` and
   the `0.875em` size resolving, the in-definition link rendering as a
   link, and the backlink glyph in text presentation rather than emoji.
-  **Still needed: one more dark theme and two light themes.** Visually
+  **Two light themes since confirmed** (rose-pine-dawn,
+  catppuccin-latte). **Still needed: `tokyo-night`.** Visually
   verify two dark themes (`github` in dark mode, `tokyo-night`) and two
   light themes (`rose-pine-dawn`, `catppuccin-latte`). The structural
   half is automated by
@@ -461,16 +462,16 @@ custom properties all 13 themes already define (verified).
   no theme can render footnotes with an invisible hairline or
   default-coloured note text. What remains is whether the palette
   *reads* well, which no test can judge
-- [ ] 5. ⏳ **Awaiting author — visual half only.** Click a
-  `.footnote-ref` — confirm it jumps to the definition and `:target`
-  highlighting fires. The *navigational* half is now automated by
-  `TestRender_FootnoteAnchorsResolve`, which proves the `href` resolves
-  to a real, non-duplicated `id`; what a browser adds is the highlight
-  and the smooth scroll
-- [ ] 6. ⏳ **Awaiting author — visual half only.** Click a `↩︎`
-  backlink — confirm it returns to the reference. The round trip itself
-  is now automated by `TestRender_FootnoteBacklinksRoundTrip`, including
-  the one-to-many repeated-reference case
+- [x] 5. **Verified by author screenshots (2026-08-18).** Clicking a
+  `.footnote-ref` jumps to the definition and `:target` highlighting
+  fires — confirmed on rose-pine-dawn and catppuccin-latte, both
+  showing the `<li>` background band on item 1
+- [x] 6. **Verified by author screenshot (2026-08-18).** Hovering
+  footnote 1's *second* backlink shows `#fnref1:1` in the browser
+  status bar — the second reference, not the first. That confirms
+  goldmark's one-to-many `fnref:1` / `fnref1:1` scheme resolves live in
+  a browser, which is the case
+  `TestRender_FootnoteBacklinksRoundTrip` asserts statically
 
 **Static pre-check for tasks 4-6.** The dominant failure mode in a
 visual check is a selector that matches nothing, which looks identical
