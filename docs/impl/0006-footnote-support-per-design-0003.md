@@ -929,6 +929,19 @@ third passed unchanged:
 | 1 | `TestWireFormat_WSContentMatchesPriorBaseline` | `wire_test.go:25` — `read tcp …: i/o timeout` |
 | 2 | `TestReadStdin_ContentMessage` | `stdin_test.go:78` — `read tcp …: i/o timeout` |
 | 3 | — | passed, no code change |
+| 4 | `TestWireFormat_WSContentMatchesPriorBaseline` | recurrence on a later commit — `i/o timeout` again |
+| 5 | — | passed on re-run, no code change |
+
+**Frequency, measured rather than guessed.** Across this branch's CI
+history the failure hit 3 of roughly 30 runs — call it ~10%, always on
+one of the six 2-second WebSocket reads, always cleared by a re-run.
+`TestWireFormat_WSContentMatchesPriorBaseline` accounts for two of the
+three, which fits: it is the test that waits on a full content
+broadcast rather than a short cursor message.
+
+At a ~10% per-run failure rate, roughly one PR in ten needs a manual
+re-run for reasons unrelated to its own changes. That is the cost of
+option (c).
 
 Cause: six WebSocket reads across four test files share a hardcoded
 **2-second** deadline.
