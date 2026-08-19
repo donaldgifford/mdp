@@ -220,3 +220,53 @@ func TestRender_FootnoteBacklinksRoundTrip(t *testing.T) {
 		})
 	}
 }
+
+// TestFootnoteTestRegexesDoNotUnderMatch keeps the tests above honest.
+//
+// They locate elements with regexes that assume goldmark's exact
+// attribute order and spacing -- fnRefPairRe, for instance, requires
+// <a> to follow <sup> with no whitespace between them. If goldmark
+// ever reorders an attribute or adds one, such a regex stops matching
+// some elements and the tests above quietly verify less than they
+// claim, while still passing.
+//
+// That is not hypothetical: footnoteItems previously used a non-greedy
+// `(.*?)</li>` that truncated the backlink out of any definition
+// containing a nested list.
+//
+// Cross-checking each regex against a direct substring count turns
+// that silent weakening into a failure.
+func TestFootnoteTestRegexesDoNotUnderMatch(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range footnoteAnchorDocs(t) {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			html, err := parser.New().Render([]byte(tc.md))
+			if err != nil {
+				t.Fatalf("render: %v", err)
+			}
+			got := string(html)
+
+			refs := strings.Count(got, `class="footnote-ref"`)
+			backrefs := strings.Count(got, `class="footnote-backref"`)
+			defs := strings.Count(got, `<li id="fn:`)
+
+			if n := len(fnAnchorRe.FindAllStringSubmatch(got, -1)); n != refs+backrefs {
+				t.Errorf("fnAnchorRe matched %d anchors, but the output has %d "+
+					"(%d refs + %d backrefs); the anchor test is checking "+
+					"fewer links than it appears to", n, refs+backrefs, refs, backrefs)
+			}
+			if n := len(fnRefPairRe.FindAllStringSubmatch(got, -1)); n != refs {
+				t.Errorf("fnRefPairRe matched %d reference pairs, but the output "+
+					"has %d footnote-refs; the round-trip test is skipping "+
+					"references", n, refs)
+			}
+			if n := len(footnoteItems(got)); n != defs {
+				t.Errorf("footnoteItems extracted %d definitions, but the output "+
+					"has %d; the round-trip test is skipping definitions", n, defs)
+			}
+		})
+	}
+}

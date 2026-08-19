@@ -695,6 +695,10 @@ holds.
   automatically
 - [x] Anchors: `TestRender_FootnoteAnchorsResolve` — every footnote
   `href` resolves to a real id, and no id is duplicated
+- [x] Meta: `TestFootnoteTestRegexesDoNotUnderMatch` — cross-checks each
+  locator regex against a direct substring count, so a goldmark
+  attribute-order or spacing change cannot quietly shrink what the
+  anchor and round-trip tests cover while they keep passing
 - [x] Anchors: `TestRender_FootnoteBacklinksRoundTrip` — reference →
   definition → back to the *same* reference, including the one-to-many
   repeated-reference case and a definition containing a **nested
