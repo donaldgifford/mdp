@@ -878,16 +878,17 @@ question.
 
 **8. How should the golangci-lint version drift be resolved?**
 
-> **Resolved 2026-08-19 — variant of (a).** The author bumped
-> `.github/workflows/ci.yml` to `v2.12.2` manually to match the
-> `mise.toml` pin.
+> **Resolved 2026-08-19 — (a), deferred to its own issue
+> ([#80](https://github.com/donaldgifford/mdp/issues/80)).** The author
+> trialled the bump locally, then reverted it so this PR could merge
+> clean.
 >
-> ⚠️ **The bump alone turns CI red.** The 6 findings below are
-> genuine errors at 2.12.2 and currently appear only locally because
-> CI still ran 2.11.4. Aligning the versions without also clearing
-> them moves the failure into CI. The fix and the findings have to
-> land together — which is what option (a) meant by "bump the version
-> **and** clear the 6 findings there". Tracked separately from #76.
+> That trial established the key constraint, which #80 records: **the
+> bump alone turns CI red.** The 6 findings appear only locally
+> *because* CI runs 2.11.4; aligning the versions without clearing them
+> moves the failure into CI. The bump and the fixes are one unit of
+> work. #80 also proposes the root-cause fix — putting the CI workflow
+> under Renovate so the two pins cannot drift again.
 
 Discovered in Phase 1. `make lint` exits non-zero on a clean checkout
 of `main`, with 6 findings unrelated to footnotes:
