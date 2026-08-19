@@ -444,7 +444,15 @@ custom properties all 13 themes already define (verified).
   bundled JS. Note the binary is `./mdp` and the subcommand is
   `mdp serve <file>` — not `./bin/mdp --file` as earlier drafts of
   this doc said
-- [ ] 4. ⏳ **Awaiting author — aesthetic judgment only.** Visually
+- [ ] 4. 🔶 **Partially verified — one dark theme confirmed by author
+  screenshot (2026-08-18).** The endnote list renders correctly:
+  definitions relocated to the end despite `[^one]` being defined
+  mid-document, numbering by first reference, two backlinks on each
+  item matching its two references, `.footnotes hr` overriding the
+  global `0.25em` bar to a visible hairline, `--color-fg-muted` and
+  the `0.875em` size resolving, the in-definition link rendering as a
+  link, and the backlink glyph in text presentation rather than emoji.
+  **Still needed: one more dark theme and two light themes.** Visually
   verify two dark themes (`github` in dark mode, `tokyo-night`) and two
   light themes (`rose-pine-dawn`, `catppuccin-latte`). The structural
   half is automated by
