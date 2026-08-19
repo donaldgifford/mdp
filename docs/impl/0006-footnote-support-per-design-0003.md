@@ -697,7 +697,13 @@ holds.
   `href` resolves to a real id, and no id is duplicated
 - [x] Anchors: `TestRender_FootnoteBacklinksRoundTrip` — reference →
   definition → back to the *same* reference, including the one-to-many
-  repeated-reference case
+  repeated-reference case and a definition containing a **nested
+  list**. That last case was added after a self-review found the test
+  itself was wrong: it extracted each `<li>` body with a non-greedy
+  `(.*?)</li>`, and goldmark attaches the backlink *after* the inner
+  `</li>` tags of a nested list, so the capture truncated the backlink
+  away and reported a broken round trip for correct markup. Replaced
+  with depth-aware extraction (`footnoteItems`/`closingLIIndex`)
 - [x] Performance: `BenchmarkFootnoteOverhead` — enabling footnotes
   costs nothing measurable on footnote-free input (0.06% of mean, ~60x
   below the noise floor; identical allocations). See [Performance](#performance)

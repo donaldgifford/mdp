@@ -23,10 +23,72 @@ var (
 	// checkable.
 	fnRefPairRe = regexp.MustCompile(`<sup id="([^"]+)"><a href="#([^"]+)" class="footnote-ref"`)
 
-	// fnItemRe matches one <li> of the endnote list, non-greedily so
-	// consecutive items do not merge.
-	fnItemRe = regexp.MustCompile(`(?s)<li id="([^"]+)"[^>]*>(.*?)</li>`)
+	// fnItemStartRe matches the opening tag of one endnote list item.
+	// Finding its matching close needs depth tracking, not a regex --
+	// see footnoteItems.
+	fnItemStartRe = regexp.MustCompile(`<li id="([^"]+)"[^>]*>`)
 )
+
+// footnoteItems maps each endnote list item's id to its full inner
+// HTML.
+//
+// A non-greedy `(.*?)</li>` is wrong here. A definition may contain a
+// nested list, and goldmark attaches the backlink after the inner
+// </li> tags, so a non-greedy capture stops at the first close and
+// truncates the backlink away -- reporting a broken round trip for
+// markup that is perfectly correct. Depth has to be tracked.
+func footnoteItems(html string) map[string]string {
+	items := make(map[string]string)
+
+	for rest := html; ; {
+		loc := fnItemStartRe.FindStringSubmatchIndex(rest)
+		if loc == nil {
+			return items
+		}
+
+		id := rest[loc[2]:loc[3]]
+		body := rest[loc[1]:]
+
+		end := closingLIIndex(body)
+		if end < 0 {
+			// Unbalanced markup: record what is there rather than
+			// silently dropping the item.
+			items[id] = body
+			return items
+		}
+
+		items[id] = body[:end]
+		rest = body[end:]
+	}
+}
+
+// closingLIIndex returns the offset of the </li> that closes the item
+// whose body starts at s, or -1 if the markup is unbalanced.
+func closingLIIndex(s string) int {
+	depth, i := 0, 0
+
+	for i < len(s) {
+		open := strings.Index(s[i:], "<li")
+		closing := strings.Index(s[i:], "</li>")
+		if closing < 0 {
+			return -1
+		}
+
+		if open >= 0 && open < closing {
+			depth++
+			i += open + len("<li")
+			continue
+		}
+
+		if depth == 0 {
+			return i + closing
+		}
+		depth--
+		i += closing + len("</li>")
+	}
+
+	return -1
+}
 
 // footnoteAnchorDocs are the shapes whose id/href wiring is least
 // obvious, so they are shared by the anchor tests below.
@@ -56,6 +118,13 @@ func footnoteAnchorDocs(t *testing.T) []struct{ name, md string } {
 		{
 			name: "definition placed mid-document",
 			md:   "# T\n\nIntro.[^a]\n\n[^a]: Note.\n\n## S\n\nBody.\n",
+		},
+		{
+			// A nested list inside a definition puts the backlink
+			// after the inner </li>, which a non-greedy capture
+			// would truncate away.
+			name: "definition containing a nested list",
+			md:   "Text.[^a]\n\n[^a]: Note with a list:\n\n    - one\n    - two\n",
 		},
 		{
 			name: "testdata/fixture.md",
@@ -126,10 +195,7 @@ func TestRender_FootnoteBacklinksRoundTrip(t *testing.T) {
 			}
 			got := string(html)
 
-			items := make(map[string]string)
-			for _, m := range fnItemRe.FindAllStringSubmatch(got, -1) {
-				items[m[1]] = m[2]
-			}
+			items := footnoteItems(got)
 
 			pairs := fnRefPairRe.FindAllStringSubmatch(got, -1)
 			if len(pairs) == 0 {
