@@ -59,7 +59,7 @@ func TestLiveReload_WebSocketReceivesUpdates(t *testing.T) {
 	}
 
 	// Read the message from WebSocket.
-	if err := conn.SetReadDeadline(time.Now().Add(2 * time.Second)); err != nil {
+	if err := conn.SetReadDeadline(time.Now().Add(wsReadTimeout)); err != nil {
 		t.Fatalf("setting read deadline: %v", err)
 	}
 	_, msg, err := conn.ReadMessage()

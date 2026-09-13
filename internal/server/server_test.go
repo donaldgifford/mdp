@@ -348,6 +348,13 @@ func TestServer_AllBuiltinThemes(t *testing.T) {
 	}
 }
 
+// wsReadTimeout bounds WebSocket reads in tests. It is generous on purpose:
+// under -race with the full parallel suite on shared CI runners, scheduling
+// delays can exceed a tight deadline even though the message always arrives
+// in milliseconds locally. The assertions after the read still fail the test
+// on a genuinely missing or malformed message.
+const wsReadTimeout = 10 * time.Second
+
 // waitForServer polls the URL until it responds or 2 seconds elapse.
 func waitForServer(t *testing.T, url string) {
 	t.Helper()

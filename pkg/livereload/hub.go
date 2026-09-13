@@ -192,7 +192,6 @@ func (h *Hub) HandleSSE(w http.ResponseWriter, r *http.Request) {
 	}
 	defer h.removeSSE(ch)
 
-	//nolint:gosec // G706: r.RemoteAddr is a structured slog field, not a format string.
 	slog.Debug("livereload: SSE client connected", "addr", r.RemoteAddr)
 
 	for {

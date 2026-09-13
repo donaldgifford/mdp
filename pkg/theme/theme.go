@@ -40,6 +40,17 @@ func (t Theme) IsAuto() bool {
 // themeAuto is the sentinel name for the browser-driven auto theme.
 const themeAuto = "auto"
 
+// mermaidBase is the Mermaid theme passed to mermaid.initialize() for all
+// named themes; per-theme CSS variables do the actual styling.
+const mermaidBase = "base"
+
+// GitHub theme names share a single CSS file with multiple [data-theme] blocks.
+const (
+	themeGitHubLight  = "github-light"
+	themeGitHubDark   = "github-dark"
+	themeGitHubDimmed = "github-dimmed"
+)
+
 // NOTE: Theme files are embedded via the assets.FS from the assets package.
 
 // builtinThemes maps theme names to their Theme configurations.
@@ -54,22 +65,22 @@ var builtinThemes = map[string]Theme{
 	},
 
 	// GitHub theme family - all use shared github.css file
-	"github-light": {
+	themeGitHubLight: {
 		CSS:           mustReadThemeCSS("github.css"),
 		HljsVendorCSS: "/vendor/hljs/github.min.css",
-		MermaidTheme:  "base",
+		MermaidTheme:  mermaidBase,
 		isAuto:        false,
 	},
-	"github-dark": {
+	themeGitHubDark: {
 		CSS:           mustReadThemeCSS("github.css"),
 		HljsVendorCSS: "/vendor/hljs/github-dark.min.css",
-		MermaidTheme:  "base",
+		MermaidTheme:  mermaidBase,
 		isAuto:        false,
 	},
-	"github-dimmed": {
+	themeGitHubDimmed: {
 		CSS:           mustReadThemeCSS("github.css"),
 		HljsVendorCSS: "",
-		MermaidTheme:  "base",
+		MermaidTheme:  mermaidBase,
 		isAuto:        false,
 	},
 
@@ -77,25 +88,25 @@ var builtinThemes = map[string]Theme{
 	"tokyo-night": {
 		CSS:           mustReadThemeCSS("tokyo-night.css"),
 		HljsVendorCSS: "",
-		MermaidTheme:  "base",
+		MermaidTheme:  mermaidBase,
 		isAuto:        false,
 	},
 	"tokyo-night-moon": {
 		CSS:           mustReadThemeCSS("tokyo-night-moon.css"),
 		HljsVendorCSS: "",
-		MermaidTheme:  "base",
+		MermaidTheme:  mermaidBase,
 		isAuto:        false,
 	},
 	"tokyo-night-storm": {
 		CSS:           mustReadThemeCSS("tokyo-night-storm.css"),
 		HljsVendorCSS: "",
-		MermaidTheme:  "base",
+		MermaidTheme:  mermaidBase,
 		isAuto:        false,
 	},
 	"tokyo-night-day": {
 		CSS:           mustReadThemeCSS("tokyo-night-day.css"),
 		HljsVendorCSS: "",
-		MermaidTheme:  "base",
+		MermaidTheme:  mermaidBase,
 		isAuto:        false,
 	},
 
@@ -103,19 +114,19 @@ var builtinThemes = map[string]Theme{
 	"rose-pine": {
 		CSS:           mustReadThemeCSS("rose-pine.css"),
 		HljsVendorCSS: "",
-		MermaidTheme:  "base",
+		MermaidTheme:  mermaidBase,
 		isAuto:        false,
 	},
 	"rose-pine-moon": {
 		CSS:           mustReadThemeCSS("rose-pine-moon.css"),
 		HljsVendorCSS: "",
-		MermaidTheme:  "base",
+		MermaidTheme:  mermaidBase,
 		isAuto:        false,
 	},
 	"rose-pine-dawn": {
 		CSS:           mustReadThemeCSS("rose-pine-dawn.css"),
 		HljsVendorCSS: "",
-		MermaidTheme:  "base",
+		MermaidTheme:  mermaidBase,
 		isAuto:        false,
 	},
 
@@ -123,7 +134,7 @@ var builtinThemes = map[string]Theme{
 	"donald": {
 		CSS:           mustReadThemeCSS("donald.css"),
 		HljsVendorCSS: "",
-		MermaidTheme:  "base",
+		MermaidTheme:  mermaidBase,
 		isAuto:        false,
 	},
 
@@ -131,25 +142,25 @@ var builtinThemes = map[string]Theme{
 	"catppuccin-latte": {
 		CSS:           mustReadThemeCSS("catppuccin-latte.css"),
 		HljsVendorCSS: "",
-		MermaidTheme:  "base",
+		MermaidTheme:  mermaidBase,
 		isAuto:        false,
 	},
 	"catppuccin-frappe": {
 		CSS:           mustReadThemeCSS("catppuccin-frappe.css"),
 		HljsVendorCSS: "",
-		MermaidTheme:  "base",
+		MermaidTheme:  mermaidBase,
 		isAuto:        false,
 	},
 	"catppuccin-macchiato": {
 		CSS:           mustReadThemeCSS("catppuccin-macchiato.css"),
 		HljsVendorCSS: "",
-		MermaidTheme:  "base",
+		MermaidTheme:  mermaidBase,
 		isAuto:        false,
 	},
 	"catppuccin-mocha": {
 		CSS:           mustReadThemeCSS("catppuccin-mocha.css"),
 		HljsVendorCSS: "",
-		MermaidTheme:  "base",
+		MermaidTheme:  mermaidBase,
 		isAuto:        false,
 	},
 }
@@ -190,7 +201,7 @@ func Resolve(name string) (Theme, error) {
 		}
 		return Theme{
 			CSS:          css,
-			MermaidTheme: "base",
+			MermaidTheme: mermaidBase,
 		}, nil
 	}
 

@@ -70,7 +70,7 @@ func TestReadStdin_ContentMessage(t *testing.T) {
 	}
 
 	// Read the broadcast from WebSocket.
-	if err := conn.SetReadDeadline(time.Now().Add(2 * time.Second)); err != nil {
+	if err := conn.SetReadDeadline(time.Now().Add(wsReadTimeout)); err != nil {
 		t.Fatalf("setting read deadline: %v", err)
 	}
 	_, wsMsg, err := conn.ReadMessage()
@@ -152,7 +152,7 @@ func TestReadStdin_CursorMessage(t *testing.T) {
 	}
 
 	// Read the cursor message from WebSocket.
-	if err := conn.SetReadDeadline(time.Now().Add(2 * time.Second)); err != nil {
+	if err := conn.SetReadDeadline(time.Now().Add(wsReadTimeout)); err != nil {
 		t.Fatalf("setting read deadline: %v", err)
 	}
 	_, wsMsg, err := conn.ReadMessage()

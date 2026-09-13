@@ -77,7 +77,7 @@ func captureBroadcast(t *testing.T, broadcast func(*server.Server) error) []byte
 		t.Fatalf("broadcast: %v", err)
 	}
 
-	if err := conn.SetReadDeadline(time.Now().Add(2 * time.Second)); err != nil {
+	if err := conn.SetReadDeadline(time.Now().Add(wsReadTimeout)); err != nil {
 		t.Fatalf("set read deadline: %v", err)
 	}
 	_, msg, err := conn.ReadMessage()
