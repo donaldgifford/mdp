@@ -21,6 +21,7 @@ func newServeCmd() *cobra.Command {
 		theme         string
 		hljsTheme     string
 		scrollSync    bool
+		dagre         bool
 		stdin         bool
 		customCSS     string
 		openToNetwork bool
@@ -58,6 +59,7 @@ func newServeCmd() *cobra.Command {
 				Theme:         theme,
 				HljsTheme:     hljsTheme,
 				ScrollSync:    scrollSync,
+				Dagre:         dagre,
 				CustomCSS:     customCSS,
 				OpenToNetwork: openToNetwork,
 				IdleTimeout:   idleTimeout,
@@ -90,6 +92,8 @@ func newServeCmd() *cobra.Command {
 	cmd.Flags().StringVar(&hljsTheme, "hljs-theme", "",
 		`Vendored hljs stylesheet for custom theme files (github, github-dark). Only valid with --theme=<file>.`)
 	cmd.Flags().BoolVar(&scrollSync, "scroll-sync", true, "Enable scroll sync with cursor position")
+	cmd.Flags().BoolVar(&dagre, "dagre", false,
+		"Pin Mermaid diagrams to the dagre layout instead of the Mermaid v12 ELK default")
 	cmd.Flags().BoolVar(&stdin, "stdin", false, "Read content/cursor updates from stdin (for editor plugins)")
 	cmd.Flags().StringVar(&customCSS, "css", "", "Path to custom CSS file to inject after default styles")
 	cmd.Flags().BoolVar(&openToNetwork, "open-to-network", false, "Listen on 0.0.0.0 instead of localhost")

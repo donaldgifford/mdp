@@ -33,6 +33,7 @@ type Config struct {
 	Theme         string        // built-in theme name, file path, or "auto".
 	HljsTheme     string        // vendored hljs sheet for custom theme files (github, github-dark).
 	ScrollSync    bool          // Enable scroll sync via /cursor endpoint.
+	Dagre         bool          // Pin Mermaid diagrams to dagre instead of the v12 ELK default.
 	CustomCSS     string        // Path to custom CSS file to inject after default styles.
 	OpenToNetwork bool          // Listen on 0.0.0.0 instead of localhost.
 	IdleTimeout   time.Duration // Shut down when no clients connected for this long (0 = disabled).
@@ -209,6 +210,7 @@ type pageData struct {
 	HljsVendorCSS string
 	IsAuto        bool
 	MermaidTheme  string
+	MermaidLayout string // "dagre" when Config.Dagre, else "" (Mermaid v12 ELK default).
 	CustomCSS     template.CSS
 	JS            template.JS
 	Body          template.HTML
@@ -357,6 +359,12 @@ func (s *Server) handleIndex(w http.ResponseWriter, _ *http.Request) {
 		}
 	}
 
+	// Dagre pins the Mermaid layout; empty selects the Mermaid v12 ELK default.
+	mermaidLayout := ""
+	if s.cfg.Dagre {
+		mermaidLayout = "dagre"
+	}
+
 	//nolint:gosec // ThemeCSS is from our embedded assets or a user-provided file validated at startup.
 	data := pageData{
 		Title:         s.cfg.File,
@@ -366,6 +374,7 @@ func (s *Server) handleIndex(w http.ResponseWriter, _ *http.Request) {
 		HljsVendorCSS: s.theme.HljsVendorCSS,
 		IsAuto:        s.theme.IsAuto(),
 		MermaidTheme:  s.theme.MermaidTheme,
+		MermaidLayout: mermaidLayout,
 		CustomCSS:     customCSS,
 		JS:            s.js,
 		Body:          template.HTML(html), //nolint:gosec // Output of our own markdown renderer.

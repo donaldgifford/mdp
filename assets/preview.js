@@ -12,6 +12,12 @@
   if (typeof mermaid !== "undefined") {
     var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     var mermaidTheme = document.body.dataset.mermaidTheme;
+    // "dagre" when the dagre escape hatch is set, else "" for the Mermaid v12 ELK default.
+    var mermaidLayout = document.body.dataset.mermaidLayout;
+    var mermaidInit = { startOnLoad: false };
+    if (mermaidLayout) {
+      mermaidInit.layout = mermaidLayout;
+    }
     if (mermaidTheme === "base") {
       // Named built-in theme: read --mermaid-* CSS custom properties that the
       // theme stylesheet defines on [data-theme] / body.
@@ -30,10 +36,13 @@
         actorBkg:            bodyStyle.getPropertyValue("--mermaid-actorBkg").trim(),
         actorTextColor:      bodyStyle.getPropertyValue("--mermaid-actorTextColor").trim(),
       };
-      mermaid.initialize({ startOnLoad: false, theme: "base", themeVariables: themeVariables });
+      mermaidInit.theme = "base";
+      mermaidInit.themeVariables = themeVariables;
+      mermaid.initialize(mermaidInit);
     } else {
       // auto: fall back to prefers-color-scheme for Mermaid theme selection.
-      mermaid.initialize({ startOnLoad: false, theme: prefersDark ? "dark" : "default" });
+      mermaidInit.theme = prefersDark ? "dark" : "default";
+      mermaid.initialize(mermaidInit);
     }
   }
 

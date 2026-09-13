@@ -38,6 +38,7 @@ With custom options:
     browser = true,         -- Open browser on start
     theme = "",             -- "" = auto-detect from vim.o.background, or any built-in name
     scroll_sync = true,     -- Sync preview scroll with cursor
+    dagre = false,          -- Pin Mermaid diagrams to dagre (false = Mermaid v12 ELK default)
     idle_timeout_secs = 30, -- Shut down after N seconds with no open tab (0 = disabled)
     log_file = vim.fn.stdpath("log") .. "/mdp.log", -- "" to disable
   },
@@ -52,6 +53,13 @@ When `theme` is empty (the default), the plugin resolves the theme from
 On install/update, `build.lua` downloads a pre-built binary from GitHub
 releases. If no release is available (e.g., testing a branch), it falls back to
 building from source with `go build`.
+
+### Mermaid Layout
+
+Mermaid v12 lays out flowchart, state, class, ER, requirement, and use-case
+diagrams with ELK by default, which renders differently than the dagre layout
+of Mermaid v11. If you prefer the old layout, set `dagre = true` in `opts`
+(or pass `--dagre` to `mdp serve`).
 
 ### Commands
 
@@ -110,6 +118,7 @@ mdp serve [flags] <file>
 | `--theme`           | `auto`  | Built-in theme name, `auto`, or path to CSS file          |
 | `--hljs-theme`      | `""`    | Path to custom hljs CSS (only with `--theme=<file>`)      |
 | `--scroll-sync`     | `true`  | Enable scroll sync via cursor tracking                    |
+| `--dagre`           | `false` | Pin Mermaid diagrams to dagre (default is Mermaid v12 ELK) |
 | `--stdin`           | `false` | Read content/cursor updates from stdin                    |
 | `--css`             | `""`    | Path to custom CSS file appended after theme CSS          |
 | `--open-to-network` | `false` | Listen on `0.0.0.0` instead of `localhost`                |

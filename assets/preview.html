@@ -15,7 +15,7 @@
   {{end}}
   {{if .CustomCSS}}<style>{{.CustomCSS}}</style>{{end}}
 </head>
-<body data-theme="{{.Theme}}" data-mermaid-theme="{{.MermaidTheme}}">
+<body data-theme="{{.Theme}}" data-mermaid-theme="{{.MermaidTheme}}" data-mermaid-layout="{{.MermaidLayout}}">
   <div id="connection-status"></div>
   <div id="content">{{.Body}}</div>
   <script src="/vendor/mermaid.min.js"></script>

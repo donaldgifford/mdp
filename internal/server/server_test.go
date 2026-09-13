@@ -179,6 +179,35 @@ func TestServer_MermaidThemeAttribute(t *testing.T) {
 	}
 }
 
+func TestServer_MermaidLayoutAttribute(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		dagre    bool
+		wantAttr string
+	}{
+		{"default is ELK (empty layout)", false, `data-mermaid-layout=""`},
+		{"dagre pins dagre layout", true, `data-mermaid-layout="dagre"`},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			body := fetchBody(t, &server.Config{
+				File:        tempMDFile(t),
+				Port:        0,
+				OpenBrowser: false,
+				Theme:       "github-dark",
+				Dagre:       tt.dagre,
+			})
+			if !strings.Contains(body, tt.wantAttr) {
+				t.Errorf("response body missing %q", tt.wantAttr)
+			}
+		})
+	}
+}
+
 func TestServer_ThemeCSS_Injection(t *testing.T) {
 	t.Parallel()
 
