@@ -15,6 +15,7 @@ local defaults = {
              -- rose-pine{,-moon,-dawn}, catppuccin-{latte,frappe,macchiato,mocha}
              -- Or a file path ("/path/to/my-theme.css") for a custom theme.
   scroll_sync = true,
+  dagre = false, -- Pin Mermaid diagrams to the dagre layout (false = Mermaid v12 ELK default).
   idle_timeout_secs = 30, -- Shut down after this many seconds with no browser tab open (0 = disabled).
   log_file = default_log_file, -- Server log output. Empty string disables logging.
   binary = "", -- Empty means auto-detect via exepath.
@@ -316,6 +317,7 @@ function M.start()
     binary, "serve",
     "--stdin",
     "--scroll-sync=" .. tostring(config.scroll_sync),
+    "--dagre=" .. tostring(config.dagre),
     "--theme=" .. theme,
     "--idle-timeout=" .. tostring(config.idle_timeout_secs) .. "s",
   }

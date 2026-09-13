@@ -88,7 +88,7 @@ license-check: ## Check dependency licenses against allowed list
 
 update-vendor: ## Update vendored JS/CSS libraries from CDN
 	@ $(MAKE) --no-print-directory log-$@
-	@curl -sL -o $(VENDOR)/mermaid.min.js "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"
+	@curl -sL -o $(VENDOR)/mermaid.min.js "https://cdn.jsdelivr.net/npm/mermaid@12/dist/mermaid.min.js"
 	@curl -sL -o $(VENDOR)/katex/katex.min.js "https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"
 	@curl -sL -o $(VENDOR)/katex/katex.min.css "https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css"
 	@curl -sL -o $(VENDOR)/katex/auto-render.min.js "https://cdn.jsdelivr.net/npm/katex@0.16/dist/contrib/auto-render.min.js"
