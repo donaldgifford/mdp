@@ -2,11 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1] - 2026-09-13
+
+### Miscellaneous Tasks
+
+- Combine all open Renovate and Dependabot dependency bumps (#81)
+
 ## [0.3.0] - 2026-08-19
 
 ### Features
 
 - **parser**: Footnote support per DESIGN-0003 (IMPL-0006) (#76)
+
+### Miscellaneous Tasks
+
+- **release**: Update CHANGELOG.md for v0.3.0
 
 ## [0.2.2] - 2026-08-18
 
@@ -208,6 +218,7 @@ All notable changes to this project will be documented in this file.
 - Update CLAUDE.md with current architecture and commands
 - Add Homebrew formula template for tap distribution
 
+[0.3.1]: https://github.com/donaldgifford/mdp/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/donaldgifford/mdp/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/donaldgifford/mdp/compare/v0.2.1...v0.2.2
 [0.2.1]: https://github.com/donaldgifford/mdp/compare/v0.2.0...v0.2.1
