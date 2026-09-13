@@ -2,11 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2026-09-13
+
+### Features
+
+- Register Iconify packs for architecture icons, add docs/examples (#83)
+
 ## [0.4.0] - 2026-09-13
 
 ### Features
 
 - Upgrade vendored Mermaid to v12 with dagre opt-out (#82)
+
+### Miscellaneous Tasks
+
+- **release**: Update CHANGELOG.md for v0.4.0
 
 ## [0.3.1] - 2026-09-13
 
@@ -225,6 +235,7 @@ All notable changes to this project will be documented in this file.
 - Update CLAUDE.md with current architecture and commands
 - Add Homebrew formula template for tap distribution
 
+[0.5.0]: https://github.com/donaldgifford/mdp/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/donaldgifford/mdp/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/donaldgifford/mdp/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/donaldgifford/mdp/compare/v0.2.2...v0.3.0
