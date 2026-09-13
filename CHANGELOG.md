@@ -2,11 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.0] - 2026-09-13
+
+### Features
+
+- Upgrade vendored Mermaid to v12 with dagre opt-out (#82)
+
 ## [0.3.1] - 2026-09-13
 
 ### Miscellaneous Tasks
 
 - Combine all open Renovate and Dependabot dependency bumps (#81)
+- **release**: Update CHANGELOG.md for v0.3.1
 
 ## [0.3.0] - 2026-08-19
 
@@ -218,6 +225,7 @@ All notable changes to this project will be documented in this file.
 - Update CLAUDE.md with current architecture and commands
 - Add Homebrew formula template for tap distribution
 
+[0.4.0]: https://github.com/donaldgifford/mdp/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/donaldgifford/mdp/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/donaldgifford/mdp/compare/v0.2.2...v0.3.0
 [0.2.2]: https://github.com/donaldgifford/mdp/compare/v0.2.1...v0.2.2
