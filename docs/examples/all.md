@@ -192,6 +192,22 @@ registry:R --> L:pods
 pods:B --> T:db
 ```
 
+## AWS EKS (official Kubernetes `k8s:` icons, needs network)
+
+```mermaid
+architecture-beta
+group cluster(cloud)[EKS Cluster]
+service deploy(k8s:deployment)[API Deployment] in cluster
+service pods(k8s:pod)[API Pods] in cluster
+service svc(k8s:service)[ClusterIP] in cluster
+service secrets(k8s:secret)[App Secrets] in cluster
+service ingress(k8s:ingress)[Ingress] in cluster
+ingress:B --> T:svc
+svc:R --> L:deploy
+deploy:R --> L:pods
+deploy:B --> T:secrets
+```
+
 ## ER — e-commerce Postgres
 
 ```mermaid

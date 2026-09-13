@@ -26,6 +26,11 @@
             loader: () =>
               fetch("https://cdn.jsdelivr.net/npm/@iconify-json/devicon@1/icons.json").then((res) => res.json()),
           },
+          {
+            name: "k8s",
+            loader: () =>
+              fetch("https://cdn.jsdelivr.net/npm/@iconify-json/k8s@1/icons.json").then((res) => res.json()),
+          },
         ]);
       } catch (e) {
         console.warn("mermaid icon pack registration failed:", e);
