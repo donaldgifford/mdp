@@ -74,7 +74,7 @@ func TestScrollSync_CursorEndpointBroadcasts(t *testing.T) {
 	}
 
 	// Read the cursor message from WebSocket.
-	if err := conn.SetReadDeadline(time.Now().Add(2 * time.Second)); err != nil {
+	if err := conn.SetReadDeadline(time.Now().Add(wsReadTimeout)); err != nil {
 		t.Fatalf("setting read deadline: %v", err)
 	}
 	_, msg, err := conn.ReadMessage()
@@ -188,7 +188,7 @@ func TestScrollSync_SendCursorMethod(t *testing.T) {
 		t.Fatalf("SendCursor: %v", err)
 	}
 
-	if err := conn.SetReadDeadline(time.Now().Add(2 * time.Second)); err != nil {
+	if err := conn.SetReadDeadline(time.Now().Add(wsReadTimeout)); err != nil {
 		t.Fatalf("setting read deadline: %v", err)
 	}
 	_, msg, err := conn.ReadMessage()
