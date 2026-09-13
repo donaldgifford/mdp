@@ -155,7 +155,6 @@ func (r *injectingRecorder) Flush() {
 	if isHTML(ct) {
 		idx := bytes.Index(body, []byte(r.injectionPoint))
 		if idx == -1 {
-			//nolint:gosec // G706: marker and path are structured slog fields, not interpolated into a format string.
 			slog.Warn("livereload: injection point not found, response unchanged",
 				"marker", r.injectionPoint, "path", r.path)
 		} else {
