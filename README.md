@@ -61,6 +61,16 @@ diagrams with ELK by default, which renders differently than the dagre layout
 of Mermaid v11. If you prefer the old layout, set `dagre = true` in `opts`
 (or pass `--dagre` to `mdp serve`).
 
+### Mermaid Icon Packs
+
+Architecture diagrams support `pack:icon` references (e.g.
+`service api(logos:aws-ecs)[API]`). mdp registers the Iconify `logos` and
+`devicon` packs with CDN loaders by default — packs download lazily in the
+browser on first use, so icon diagrams need network at view time and fall
+back to generic glyphs offline. Browse available icons at
+[icones.js.org](https://icones.js.org/). See `docs/examples/` for working
+samples, including AWS/EKS topologies.
+
 ### Commands
 
 | Command        | Description                                             |

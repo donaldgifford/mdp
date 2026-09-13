@@ -10,6 +10,27 @@
 
   // Initialize Mermaid with theme detection.
   if (typeof mermaid !== "undefined") {
+    // Register Iconify icon packs for `pack:icon` references in architecture
+    // diagrams. Packs download lazily on first use only; offline diagrams
+    // render with a fallback glyph.
+    if (typeof mermaid.registerIconPacks === "function") {
+      try {
+        mermaid.registerIconPacks([
+          {
+            name: "logos",
+            loader: () =>
+              fetch("https://cdn.jsdelivr.net/npm/@iconify-json/logos@1/icons.json").then((res) => res.json()),
+          },
+          {
+            name: "devicon",
+            loader: () =>
+              fetch("https://cdn.jsdelivr.net/npm/@iconify-json/devicon@1/icons.json").then((res) => res.json()),
+          },
+        ]);
+      } catch (e) {
+        console.warn("mermaid icon pack registration failed:", e);
+      }
+    }
     var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     var mermaidTheme = document.body.dataset.mermaidTheme;
     // "dagre" when the dagre escape hatch is set, else "" for the Mermaid v12 ELK default.
