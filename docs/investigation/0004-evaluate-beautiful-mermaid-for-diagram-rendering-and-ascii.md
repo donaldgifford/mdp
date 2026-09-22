@@ -1,7 +1,7 @@
 ---
 id: INV-0004
 title: "Evaluate beautiful-mermaid for diagram rendering and ASCII output"
-status: In Progress
+status: Concluded
 author: Donald Gifford
 created: 2026-09-21
 ---
@@ -25,8 +25,10 @@ created: 2026-09-21
   - [Observation 6: ASCII rendering, client-side and server-side](#observation-6-ascii-rendering-client-side-and-server-side)
   - [Observation 7: What a switch would orphan](#observation-7-what-a-switch-would-orphan)
   - [Observation 8: Where it plugs into mdp's pipeline](#observation-8-where-it-plugs-into-mdps-pipeline)
+  - [Observation 9: Mermaid v12's own styling surface](#observation-9-mermaid-v12s-own-styling-surface)
 - [Conclusion](#conclusion)
 - [Recommendation](#recommendation)
+- [Decisions](#decisions)
 - [Open Questions](#open-questions)
 - [References](#references)
 <!--toc:end-->
@@ -352,162 +354,215 @@ published module is ESM, `preview.html` would load it with
 and `data-source-line` annotations on the `<pre>` wrapper are untouched,
 so scroll sync is unaffected.
 
+### Observation 9: Mermaid v12's own styling surface
+
+Added 2026-09-22 after the decision to pursue the theme route first
+(see [Decisions](#decisions)).
+
+**What mdp renders today.** `preview.js` calls
+`mermaid.initialize({ theme: "base", themeVariables: {…} })` with twelve
+color variables and sets nothing else. Mermaid 12 introduced a `look`
+setting (`classic`, `handDrawn`, `neo`) and six new themes (`neo`,
+`neo-dark`, `redux`, `redux-dark`, `redux-color`, `redux-dark-color`), and
+lets both be set per diagram type. Resolution order, highest first:
+diagram front matter, `initialize()`, the diagram type's own default, the
+global default. The vendored bundle's per-type defaults are
+`theme: "redux-color", look: "neo"` for flowchart, sequence, class, state,
+ER, requirement, use case, agentflow, and swimlane. Consequences:
+
+- `theme: "base"` from `initialize()` outranks the per-type
+  `redux-color`, so colors do come from the `--mermaid-*` variables.
+- `look` is never set, so those diagram types render with the **neo
+  look**, not classic.
+- Under neo, base's `useGradient: true` paints node strokes with a
+  gradient (turned off only by setting `nodeBorder` or
+  `useGradient: false`), and base's `dropShadow` applies. Neo also pads
+  rectangles 28×24 px versus classic's `flowchart.padding` of 15.
+- Typography is untouched: base's `fontFamily` is
+  `"trebuchet ms", verdana, arial` at `16px`, and sequence diagrams add
+  their own `actorFontFamily` (`"Open Sans"`) and `messageFontFamily`
+  defaults. None of the twelve variables mdp sets is a font.
+
+The gradient strokes, the shadow, and Trebuchet at 16 px are the bulk of
+what reads as "stock Mermaid". Each is a single-variable fix.
+
+**Trait-by-trait mapping.** beautiful-mermaid's `src/styles.ts` pins the
+numbers behind the Craft look. Each has a mermaid.js counterpart:
+
+| Trait | beautiful-mermaid | mermaid.js control (current mdp value) |
+| ----- | ----------------- | -------------------------------------- |
+| Font | Inter; 13 px node labels (weight 500), 11 px edge labels, 12 px group headers (600); JetBrains Mono for class members | `fontFamily`, `fontSize`, `fontWeight` theme variables (Trebuchet, 16 px); sequence `actorFontFamily` / `messageFontFamily` / `noteFontFamily` config |
+| Strokes | 1 px outer box, 0.75 px inner, 1 px connectors, flat color | `strokeWidth` (base: 1); `useGradient: false` or set `nodeBorder` (gradient on today) |
+| Corners | rounded | `radius` (base 5, neo theme 3, redux 12) |
+| Shadow | none | `dropShadow` (base sets one; verify `none` under the neo look, whose stylesheet references a shadow filter) |
+| Node fill / border | `surface` tint, `border` stroke | `nodeBkg`, `mainBkg`, `nodeBorder`, `clusterBkg`, `clusterBorder` |
+| Edges | 1 px `line`, 8×5 px arrowheads in `accent` | `lineColor`, `defaultLinkColor`, `arrowheadColor`; marker geometry is not a variable, so size needs `themeCSS` |
+| Edge labels | `muted`, background = canvas | `edgeLabelBackground`, `textColor`; sequence `signalColor`, `signalTextColor`, `labelBoxBkgColor` |
+| Spacing | node padding 20×10, `nodeSpacing` 24, `layerSpacing` 40 | `flowchart.padding` (15), `flowchart.nodeSpacing` (50), `flowchart.rankSpacing` (50), `flowchart.diagramPadding` (8) |
+| Layout | ELK | ELK already the default since #82 |
+
+The base theme accepts 224 variables in total (`themes/theme-base.js`),
+with dedicated slots for sequence (`actorBkg`, `actorBorder`,
+`actorLineColor`, `signalColor`, `activationBkgColor`, …), class
+(`classText`), state (`transitionColor`, `stateBkg`,
+`compositeBackground`, …), ER (`attributeBackgroundColorOdd` / `Even`),
+requirement (`requirementBackground`, `relationColor`), git graph, and
+more. Anything a variable does not reach goes through `config.themeCSS`,
+which mermaid injects inside its own id-scoped `<style>` block
+(`mermaidAPI.ts`, `createUserStyles`), so it wins where page CSS in
+`preview.css` cannot.
+
+**Foundation choice.** The new `neo` / `neo-dark` themes default to
+`strokeWidth` 2 / 1, `radius` 3, Arial 14 px, with gradient and shadow
+on, so they sit further from the target than `base` does. Keeping
+`theme: "base"` and adding variables is the shorter path.
+
+**Zero-code spike.** Mermaid reads a `config:` front-matter block inside
+the diagram text at the highest-priority layer, and only six keys
+(`secure`, `securityLevel`, `startOnLoad`, `maxTextSize`,
+`suppressErrorRendering`, `maxEdges`) are blocked from diagram-level
+config. Verified that `pkg/parser` passes the fence body through
+verbatim, front matter included, so all of this can be tried in a
+markdown file with the current binary:
+
+````markdown
+```mermaid
+---
+config:
+  look: classic
+  theme: base
+  themeVariables:
+    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+    fontSize: 14px
+    useGradient: false
+    dropShadow: none
+    radius: 6
+  flowchart:
+    nodeSpacing: 24
+    rankSpacing: 40
+---
+flowchart LR
+  A[Start] --> B{Decision}
+  B -->|yes| C[Done]
+  B -->|no| D[Retry]
+```
+````
+
+**Coverage.** Because this is still mermaid.js, the skin applies to all
+twelve diagram types in `docs/examples`, including `architecture-beta`,
+and leaves #82 and #83 untouched.
+
 ## Conclusion
 
-**Answer:** Yes, with limits.
+**Answer:** Yes, with limits — and it is not the cheapest way to get the
+look.
 
 - Adopting beautiful-mermaid as **the** renderer is not viable: it covers
   five of the twelve diagram types in `docs/examples` and none of the
   `architecture-beta` diagrams #83 was built for.
-- Adopting it as the **first-choice renderer for the types it supports,
-  with mermaid.js as the fallback**, is viable, low-risk to the Go side,
-  and gives the Craft-style look for flowcharts, sequence, class, state,
-  and ER diagrams. Theme matching is a small per-theme palette addition
-  in the existing theme-CSS convention; seven themes have upstream
-  palettes to copy.
-- **ASCII output is viable client-side today** via `renderMermaidASCII`
-  for five types, with HTML-colored output that fits a `<pre>`. A
-  Go-native server-side path also exists (importing `mermaid-ascii`
-  packages) but is undocumented, narrower, and adds seven dependencies.
-- The payload win is real but modest (~1.8 MB vs 5.4 MB); in a hybrid
-  both engines ship, so the binary grows unless the fallback loads
-  lazily.
-- The package needs a bundling step to vendor; the current curl-only
-  `update-vendor` cannot produce a self-contained file.
+- Adopting it as a **first-choice renderer with mermaid.js fallback** is
+  viable but expensive: a bundling step the repo does not have, two
+  engines in the binary (~7.3 MB of JS instead of 5.4 MB), a theme
+  mapping layer, and a fallback path to maintain.
+- **The look itself is reachable with mermaid.js alone.** mdp currently
+  renders in Mermaid 12's `neo` look with gradient strokes, a drop
+  shadow, and Trebuchet at 16 px because it sets only color variables
+  (Observation 9). Font, stroke, radius, shadow, spacing, and the missing
+  color slots are all theme variables or config, and `themeCSS` covers
+  the rest. That path applies to all twelve diagram types and needs no
+  new dependency.
+- **ASCII output is the one thing only beautiful-mermaid offers**, and it
+  is feasible client-side later (Observation 6) without the SVG path.
 
 ## Recommendation
 
-1. Resolve the open questions below, then write a DESIGN doc for a hybrid
-   client-side renderer (beautiful-mermaid first, mermaid.js fallback)
-   with an ASCII view mode.
-2. Before the design is finalised, run a visual spike: bundle
-   beautiful-mermaid with esbuild, render `docs/examples/flowchart.md`,
-   `sequence.md`, and `class.md` side by side under tokyo-night,
-   github-dark, catppuccin-mocha, and rose-pine, and confirm (a) the
-   fallback catches every unsupported example and (b) label widths look
-   right with mdp's font stack.
-3. Keep #82 and #83 behaviour intact; document that `--dagre` and the
-   Iconify packs apply to the fallback path.
-4. Leave `pkg/parser` unchanged unless the server-side ASCII option is
-   chosen.
+1. **Run the zero-code spike** from Observation 9 on
+   `docs/examples/flowchart.md`, `sequence.md`, and `class.md` under
+   tokyo-night and github-light, comparing `look: classic` against
+   `look: neo` with the gradient and shadow off. Screenshots settle open
+   question 1.
+2. **Write a DESIGN doc for a Mermaid diagram skin through theme
+   variables:** `preview.js` sets the skin-wide config (`look`,
+   `fontFamily` read from the computed body style, `fontSize`, spacing,
+   `useGradient: false`, `dropShadow`, `themeCSS`); each theme CSS file
+   gains the extra `--mermaid-*` color slots that map beautiful-mermaid's
+   `surface` / `border` / `line` / `accent` / `muted` model, seeded from
+   its `THEMES` values for the seven overlapping themes; the Theme CSS
+   Format section of `CLAUDE.md` is updated; verification is
+   `docs/examples/all.md` screenshots across four themes.
+3. **Keep #82 and #83 behaviour intact.** Nothing in the theme route
+   touches `--dagre` or the Iconify packs.
+4. **Defer beautiful-mermaid entirely.** Track the ASCII idea in a GitHub
+   issue that links Observations 3 and 6 so the research is not lost.
+
+## Decisions
+
+- **2026-09-22 — Theme route first.** Restyle mermaid.js through theme
+  variables and config rather than adopting beautiful-mermaid. Cheaper,
+  covers all twelve diagram types, no bundling step, no second engine.
+- **2026-09-22 — ASCII output deferred.** Not in scope for the theme
+  work. The original nine open questions (adoption shape, ASCII
+  placement and selection, theme wiring, vendoring, `--dagre`, font,
+  keeping mermaid.js, ASCII outside the preview) are superseded by these
+  two decisions and preserved in git history at commit `8bc4f92`.
 
 ## Open Questions
 
-Each question lists **a** as my recommendation and **b…** as
-alternatives. Write your choice (or "other: …") next to each.
+These are inputs to the DESIGN doc. Each lists **a** as my
+recommendation and **b…** as alternatives. Write your choice (or
+"other: …") next to each.
 
-**1. Adoption shape — how should beautiful-mermaid coexist with mermaid.js?**
+**1. Which `look` is the starting point?**
 
-- **a.** Hybrid, always on: try beautiful-mermaid for every `mermaid`
-  block, fall back to mermaid.js when its parser throws. No new flag;
-  every supported diagram gets the new look immediately.
-- **b.** Opt-in: keep mermaid.js as default, enable beautiful-mermaid via
-  a CLI flag / Neovim option (`--mermaid-engine beautiful`). Safer for
-  existing users, but most people never find the flag.
-- **c.** Full replacement: drop mermaid.js and the seven unsupported
-  types. Rejected by the evidence in Observation 2 — breaks
-  `docs/examples` and #83.
+- **a.** `classic` with `theme: base`. Its geometry is flat 1 px strokes
+  with no gradient or shadow definitions, which is what the Craft look
+  is made of; padding is tuned with `flowchart.padding`.
+- **b.** `neo` with `useGradient: false` and `dropShadow: none`. Keeps
+  v12's larger node padding and the per-type defaults, at the cost of
+  overriding the two effects on every theme and verifying the shadow
+  filter really goes away.
 - Other:
 
-**2. Where does ASCII rendering run?**
+**2. Where do the non-color settings live?**
 
-- **a.** Client-side, `renderMermaidASCII` in `preview.js` with
-  `colorMode: 'html'` into a `<pre>`. Same engine as the SVG path, five
-  types, no Go dependencies, no subprocess, themed via the same slots.
-- **b.** Server-side in Go by importing `mermaid-ascii/pkg/render` and
-  adding a `NodeRenderer` for `mermaid.Kind` (new
-  `parser.WithMermaidASCII(bool)`). Benefits library consumers of
-  `pkg/parser` and any future static-export path, but adds seven deps on
-  a pseudo-versioned, undocumented API and covers fewer types.
-- **c.** Both: server-side for `pkg/parser` consumers, client-side for the
-  live preview. Two engines with slightly different output to keep in
-  sync.
+- **a.** In `preview.js`, once, for all themes: `look`, `fontFamily` read
+  from the computed body style so it tracks `preview.css`, `fontSize`,
+  spacing, gradient and shadow off, `themeCSS`. Typography and geometry
+  are properties of the skin, not the palette, and theme CSS files stay
+  color-only as the Theme CSS Format describes.
+- **b.** As additional `--mermaid-*` custom properties per theme file so
+  themes can differ in geometry too. More flexible, fifteen files to
+  keep in sync.
 - Other:
 
-**3. How is ASCII mode selected?**
+**3. How far does the per-theme color set grow?**
 
-- **a.** A document-level view mode: CLI flag
-  `--mermaid-render svg|ascii`, matching Neovim `opts` key, and a runtime
-  toggle in the preview (keyboard shortcut or small toolbar) so you can
-  flip without restarting. ASCII is a way of *viewing* a diagram, not a
-  property of the diagram.
-- **b.** Per-block, in the fence info string (```` ```mermaid ascii ````).
-  Author-controlled and survives to other renderers as a normal mermaid
-  fence, but there is no way to see everything as ASCII at once.
-- **c.** Both — global mode plus per-block override.
+- **a.** Add the slots that map beautiful-mermaid's seven-color model
+  onto mermaid variables — `nodeBkg` / `mainBkg` (surface), `nodeBorder`
+  / `clusterBorder` (border), `lineColor` / `defaultLinkColor` /
+  `signalColor` (line), `arrowheadColor` (accent), edge-label and muted
+  text — seeded verbatim from `THEMES` for the seven overlapping themes
+  and derived from `--color-*` for the other eight. This is what makes
+  tokyo-night match the Craft page.
+- **b.** Keep the current twelve colors; fix only typography, gradient,
+  shadow, radius, and spacing. Smallest change, but tokyo-night keeps
+  its current edge and node colors rather than upstream's.
 - Other:
 
-**4. How are diagram colors wired to themes?**
+**4. Which font family does the SVG use?**
 
-- **a.** Add seven `--diagram-*` properties (`bg fg line accent muted
-  surface border`) to each theme CSS file next to the existing
-  `--mermaid-*` block; seed the seven overlapping themes from upstream's
-  `THEMES` values verbatim and derive the other eight from `--color-*`.
-  JS passes `var(--diagram-…)` strings with `transparent: true`. One
-  mechanism, live theme switching, pixel-faithful Tokyo Night, and it
-  follows the existing theme-file convention.
-- **b.** No new properties: pass `var(--color-canvas-default)` etc.
-  directly. Zero CSS work, but `accent` / `line` / `muted` drift from
-  upstream on tokyo-night, github-dark, and catppuccin-mocha
-  (Observation 4).
-- **c.** Look up `THEMES[name]` at runtime by theme name for the seven
-  matches and derive for the rest. Couples `preview.js` to theme names
-  and needs a name map for `tokyo-night-day`.
+- **a.** The preview's own stacks: the body stack for labels and the code
+  stack for class members, read at runtime. Diagrams match the prose on
+  every platform and nothing new is vendored.
+- **b.** Vendor Inter and JetBrains Mono and pin them for diagrams only,
+  to reproduce the Craft page exactly.
 - Other:
 
-**5. How is the JavaScript vendored?**
+**5. How is the deferred ASCII work tracked?**
 
-- **a.** Add a bundling step: pin `esbuild` in `mise.toml`, and have
-  `make update-vendor` run
-  `esbuild --bundle --minify --format=iife` (or `esm`) to emit one
-  self-contained `assets/vendor/beautiful-mermaid.min.js`, committed like
-  `mermaid.min.js`. First JS toolchain in the repo, but reproducible and
-  offline-safe.
-- **b.** Vendor jsDelivr's three `+esm` files (`beautiful-mermaid`,
-  `elkjs`, `entities`) with curl and `sed` the `/npm/…` import
-  specifiers to local paths. No toolchain, but brittle and dependent on
-  jsDelivr's bundling output.
-- **c.** Load from the CDN at runtime. Rejected — mdp is offline-first and
-  embeds every asset.
-- Other:
-
-**6. What happens to `--dagre` and the Iconify packs?**
-
-- **a.** Keep both unchanged; they only affect the mermaid.js fallback
-  path. Note that in the README and flag help.
-- **b.** Remove `--dagre` now on the grounds that the covered types no
-  longer use mermaid.js for layout. Still breaks anyone pinning dagre for
-  the seven fallback types.
-- Other:
-
-**7. Which font does the SVG declare?**
-
-- **a.** Pass `font` = the preview's body font stack so diagram text
-  matches prose, and verify label fit on `docs/examples` during the
-  spike. Accept the heuristic-width risk in Observation 5.
-- **b.** Vendor Inter (woff2) and use it for diagrams only, matching the
-  measurement table exactly. Extra asset, and diagrams stop matching the
-  page font.
-- Other:
-
-**8. Should mermaid.js stay long-term?**
-
-- **a.** Keep it indefinitely as the fallback; revisit only if upstream
-  adds the missing types. Cost is the extra ~1.8 MB in the binary.
-- **b.** Time-box it: open a tracking issue to re-evaluate dropping it
-  when beautiful-mermaid covers `architecture-beta` and the other
-  types used in `docs/examples`.
-- Other:
-
-**9. Should ASCII output be reachable outside the preview?**
-
-For example a `:MdpAscii` command that inserts the rendered text into
-the buffer, or `mdp ascii file.md` on the CLI.
-
-- **a.** Out of scope for this investigation; capture as a separate
-  GitHub issue once the preview mode ships.
-- **b.** Include it in the DESIGN now, which would push the answer to
-  question 2 toward server-side (b or c).
+- **a.** Open a GitHub issue now that links Observations 3 and 6 and the
+  beautiful-mermaid API, so the research is not lost.
+- **b.** Leave it in this document only.
 - Other:
 
 ## References
@@ -524,6 +579,16 @@ the buffer, or `mdp ascii file.md` on the CLI.
   (`pkg/render`, `pkg/diagram`)
 - goldmark-mermaid v0.6.0: `ast.go` (`Kind`, `Block`),
   `server_render.go` (`Compiler`, `CompileRequest`, `CompileResponse`)
+- Mermaid 12.0.0 release notes (per-type `theme` / `look`, resolution
+  order, gradient note):
+  <https://github.com/mermaid-js/mermaid/releases/tag/mermaid%4012.0.0>
+- Mermaid source (`packages/mermaid/src`): `themes/theme-base.js`,
+  `themes/theme-neo.js`, `themes/theme-neo-dark.js`,
+  `themes/theme-redux-dark.js`, `schemas/config.schema.yaml`,
+  `mermaidAPI.ts` (`createUserStyles`, `themeCSS`),
+  `rendering-util/insertLookDefs.ts`
+- Mermaid front-matter config:
+  <https://mermaid.js.org/config/configuration.html#frontmatter-config>
 - PR #82 — Mermaid v12 with ELK default and `--dagre`
 - PR #83 — Iconify packs and `docs/examples/`
 - `assets/preview.js` (Mermaid init / `renderClientSide`),
