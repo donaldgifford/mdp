@@ -471,10 +471,10 @@ Carried over from INV-0004 (2026-09-22):
 
 Decided in this document (2026-09-22):
 
-6. Latin and latin-ext subsets ship for both faces (Open Question 1a).
-7. Custom theme files without the seven slots get the derived palette;
-   the legacy twelve names are ignored (Open Question 3a).
-8. Starting corner radius is 6 (Open Question 4a).
+- Latin and latin-ext subsets ship for both faces (Open Question 1a).
+- Custom theme files without the seven slots get the derived palette;
+  the legacy twelve names are ignored (Open Question 3a).
+- Starting corner radius is 6 (Open Question 4a).
 
 ## References
 
