@@ -1,7 +1,7 @@
 ---
 id: DESIGN-0004
 title: "Mermaid diagram skin via theme variables"
-status: Draft
+status: Approved
 author: Donald Gifford
 created: 2026-09-22
 ---
@@ -10,7 +10,7 @@ created: 2026-09-22
 
 # DESIGN-0004: Mermaid diagram skin via theme variables
 
-**Status:** Draft
+**Status:** Approved
 **Author:** Donald Gifford
 **Date:** 2026-09-22
 
@@ -410,8 +410,7 @@ Rollback at any step is a revert; nothing persists outside the binary.
 ## Open Questions
 
 Each lists **a** as my recommendation and **b…** as alternatives.
-Questions 1, 3, and 4 were decided on 2026-09-22 and stay for the
-record; question 2 is open pending clarification of scope.
+All four were decided on 2026-09-22 and stay for the record.
 
 **1. Which font subsets ship?** — **Decided: a** (2026-09-22)
 
@@ -422,7 +421,7 @@ record; question 2 is open pending clarification of scope.
   `ș` fall back to the system font mid-diagram.
 - Other:
 
-**2. How far outside the diagrams do the vendored fonts reach?** — open
+**2. How far outside the diagrams do the vendored fonts reach?** — **Decided: a** (2026-09-22)
 
 To be precise about what each option changes: today the page prose uses
 the system stack and page `code` / `pre` blocks use the `ui-monospace`
@@ -472,6 +471,8 @@ Carried over from INV-0004 (2026-09-22):
 Decided in this document (2026-09-22):
 
 - Latin and latin-ext subsets ship for both faces (Open Question 1a).
+- The vendored fonts are used inside diagrams only; page prose and
+  code blocks keep their current stacks (Open Question 2a).
 - Custom theme files without the seven slots get the derived palette;
   the legacy twelve names are ignored (Open Question 3a).
 - Starting corner radius is 6 (Open Question 4a).
