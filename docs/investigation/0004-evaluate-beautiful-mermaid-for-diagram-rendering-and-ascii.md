@@ -505,14 +505,22 @@ look.
   placement and selection, theme wiring, vendoring, `--dagre`, font,
   keeping mermaid.js, ASCII outside the preview) are superseded by these
   two decisions and preserved in git history at commit `8bc4f92`.
+- **2026-09-22 — Open questions 1–3 answered.** `look: neo` with
+  `useGradient: false` and `dropShadow: none` (1b); non-color settings
+  live once in `preview.js` (2a); per-theme colors grow to the seven-slot
+  model seeded from beautiful-mermaid's palettes (3a).
+- **2026-09-22 — ASCII dropped, not deferred.** ASCII output is a
+  beautiful-mermaid feature, not a mermaid.js one. With the theme route
+  reproducing the Craft SVG look, there is nothing to track and no issue
+  is filed (5).
 
 ## Open Questions
 
 These are inputs to the DESIGN doc. Each lists **a** as my
-recommendation and **b…** as alternatives. Write your choice (or
-"other: …") next to each.
+recommendation and **b…** as alternatives. Decided items carry a
+**Decided:** line and stay for the record; question 4 is still open.
 
-**1. Which `look` is the starting point?**
+**1. Which `look` is the starting point?** — **Decided: b** (2026-09-22)
 
 - **a.** `classic` with `theme: base`. Its geometry is flat 1 px strokes
   with no gradient or shadow definitions, which is what the Craft look
@@ -523,7 +531,7 @@ recommendation and **b…** as alternatives. Write your choice (or
   filter really goes away.
 - Other:
 
-**2. Where do the non-color settings live?**
+**2. Where do the non-color settings live?** — **Decided: a** (2026-09-22)
 
 - **a.** In `preview.js`, once, for all themes: `look`, `fontFamily` read
   from the computed body style so it tracks `preview.css`, `fontSize`,
@@ -535,7 +543,7 @@ recommendation and **b…** as alternatives. Write your choice (or
   keep in sync.
 - Other:
 
-**3. How far does the per-theme color set grow?**
+**3. How far does the per-theme color set grow?** — **Decided: a** (2026-09-22)
 
 - **a.** Add the slots that map beautiful-mermaid's seven-color model
   onto mermaid variables — `nodeBkg` / `mainBkg` (surface), `nodeBorder`
@@ -549,7 +557,20 @@ recommendation and **b…** as alternatives. Write your choice (or
   its current edge and node colors rather than upstream's.
 - Other:
 
-**4. Which font family does the SVG use?**
+**4. Which font family does the SVG use?** — open
+
+For reference, nothing in `preview.js` sets a font today, so diagrams use
+mermaid's own defaults while the prose around them uses the preview's:
+
+| Text | Font today | Size |
+| ---- | ---------- | ---- |
+| Diagram labels (base theme default) | `"trebuchet ms", verdana, arial, sans-serif` | 16 px |
+| Sequence actors (sequence config default) | `"Open Sans", sans-serif` | 14 px |
+| Preview prose (`preview.css`) | `-apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif` | 1 rem |
+| Preview code (`preview.css`) | `ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace` | — |
+
+On macOS that means diagrams render in Trebuchet MS while the page
+renders in San Francisco.
 
 - **a.** The preview's own stacks: the body stack for labels and the code
   stack for class members, read at runtime. Diagrams match the prose on
@@ -558,7 +579,7 @@ recommendation and **b…** as alternatives. Write your choice (or
   to reproduce the Craft page exactly.
 - Other:
 
-**5. How is the deferred ASCII work tracked?**
+**5. How is the deferred ASCII work tracked?** — **Decided: dropped** (2026-09-22, see Decisions)
 
 - **a.** Open a GitHub issue now that links Observations 3 and 6 and the
   beautiful-mermaid API, so the research is not lost.
