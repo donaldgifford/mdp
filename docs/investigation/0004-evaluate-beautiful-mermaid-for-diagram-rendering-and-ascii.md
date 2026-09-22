@@ -492,8 +492,9 @@ look.
    `docs/examples/all.md` screenshots across four themes.
 3. **Keep #82 and #83 behaviour intact.** Nothing in the theme route
    touches `--dagre` or the Iconify packs.
-4. **Defer beautiful-mermaid entirely.** Track the ASCII idea in a GitHub
-   issue that links Observations 3 and 6 so the research is not lost.
+4. **Defer beautiful-mermaid entirely.** The ASCII idea is tracked in
+   [#89](https://github.com/donaldgifford/mdp/issues/89), which links
+   Observations 3 and 6.
 
 ## Decisions
 
@@ -509,16 +510,20 @@ look.
   `useGradient: false` and `dropShadow: none` (1b); non-color settings
   live once in `preview.js` (2a); per-theme colors grow to the seven-slot
   model seeded from beautiful-mermaid's palettes (3a).
-- **2026-09-22 — ASCII dropped, not deferred.** ASCII output is a
-  beautiful-mermaid feature, not a mermaid.js one. With the theme route
-  reproducing the Craft SVG look, there is nothing to track and no issue
-  is filed (5).
+- **2026-09-22 — ASCII deferred to issue #89.** ASCII output is a
+  beautiful-mermaid / mermaid-ascii feature, not a mermaid.js one, so
+  the theme route cannot provide it. The research from Observations 3
+  and 6 and the link to <https://github.com/AlexanderGrooff/mermaid-ascii>
+  live in [#89](https://github.com/donaldgifford/mdp/issues/89) (5).
+- **2026-09-22 — Fonts vendored (4b).** Inter for diagram labels and
+  JetBrains Mono for class members, embedded like the KaTeX fonts, to
+  reproduce the Craft page exactly. Next step: DESIGN doc.
 
 ## Open Questions
 
 These are inputs to the DESIGN doc. Each lists **a** as my
 recommendation and **b…** as alternatives. Decided items carry a
-**Decided:** line and stay for the record; question 4 is still open.
+**Decided:** line and stay for the record. All five are decided.
 
 **1. Which `look` is the starting point?** — **Decided: b** (2026-09-22)
 
@@ -557,7 +562,7 @@ recommendation and **b…** as alternatives. Decided items carry a
   its current edge and node colors rather than upstream's.
 - Other:
 
-**4. Which font family does the SVG use?** — open
+**4. Which font family does the SVG use?** — **Decided: b** (2026-09-22)
 
 For reference, nothing in `preview.js` sets a font today, so diagrams use
 mermaid's own defaults while the prose around them uses the preview's:
@@ -579,7 +584,7 @@ renders in San Francisco.
   to reproduce the Craft page exactly.
 - Other:
 
-**5. How is the deferred ASCII work tracked?** — **Decided: dropped** (2026-09-22, see Decisions)
+**5. How is the deferred ASCII work tracked?** — **Decided: a**, issue #89 (2026-09-22)
 
 - **a.** Open a GitHub issue now that links Observations 3 and 6 and the
   beautiful-mermaid API, so the research is not lost.
