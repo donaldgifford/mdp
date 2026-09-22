@@ -410,8 +410,10 @@ Rollback at any step is a revert; nothing persists outside the binary.
 ## Open Questions
 
 Each lists **a** as my recommendation and **b…** as alternatives.
+Questions 1, 3, and 4 were decided on 2026-09-22 and stay for the
+record; question 2 is open pending clarification of scope.
 
-**1. Which font subsets ship?**
+**1. Which font subsets ship?** — **Decided: a** (2026-09-22)
 
 - **a.** Latin and latin-ext for both faces (≈ 185 KB of woff2). Covers
   Western European diacritics in labels; `unicode-range` means the
@@ -420,15 +422,25 @@ Each lists **a** as my recommendation and **b…** as alternatives.
   `ș` fall back to the system font mid-diagram.
 - Other:
 
-**2. Should the page prose switch to Inter as well?**
+**2. How far outside the diagrams do the vendored fonts reach?** — open
 
-- **a.** No. Diagrams only, per INV-0004 decision 4b. The page keeps the
-  system stack and a possible prose-font change is its own decision.
-- **b.** Yes, set `body { font-family: "Inter", … }` in the same change so
-  diagrams and prose share a face, as the Craft page does.
+To be precise about what each option changes: today the page prose uses
+the system stack and page `code` / `pre` blocks use the `ui-monospace`
+stack (`preview.css:64`, `:202`). Inside diagrams, this design applies
+Inter to labels and JetBrains Mono to class-diagram member text only.
+
+- **a.** Diagrams only. Page prose and page `code` / `pre` blocks are
+  unchanged; JetBrains Mono appears solely in class-diagram members.
+  Smallest scope and exactly INV-0004 decision 4b.
+- **b.** Diagrams plus page code: also set `code, pre { font-family:
+  "JetBrains Mono", … }` so fenced code blocks, inline code, and class
+  members share one mono face. One CSS rule; prose stays on the system
+  stack. Changes the look of every code block on every theme.
+- **c.** Full Craft: **b** plus `body { font-family: "Inter", … }` so
+  prose matches the diagram labels too.
 - Other:
 
-**3. What happens to the legacy twelve `--mermaid-*` names in custom theme files?**
+**3. What happens to the legacy twelve `--mermaid-*` names in custom theme files?** — **Decided: a** (2026-09-22)
 
 - **a.** Ignore them. A custom theme without the seven slots gets the
   derived palette from its `--color-*` properties, which every documented
@@ -439,7 +451,7 @@ Each lists **a** as my recommendation and **b…** as alternatives.
   palettes for a release at the cost of a second code path.
 - Other:
 
-**4. Starting corner radius?**
+**4. Starting corner radius?** — **Decided: a** (2026-09-22)
 
 - **a.** `radius: 6`. Slightly rounder than base's 5; adjusted in the
   screenshot pass.
@@ -456,6 +468,13 @@ Carried over from INV-0004 (2026-09-22):
    beautiful-mermaid's palettes (3a).
 4. Inter and JetBrains Mono are vendored (4b).
 5. ASCII output is deferred to #89.
+
+Decided in this document (2026-09-22):
+
+6. Latin and latin-ext subsets ship for both faces (Open Question 1a).
+7. Custom theme files without the seven slots get the derived palette;
+   the legacy twelve names are ignored (Open Question 3a).
+8. Starting corner radius is 6 (Open Question 4a).
 
 ## References
 
