@@ -1,7 +1,7 @@
 ---
 id: IMPL-0007
 title: "Mermaid diagram skin per DESIGN-0004"
-status: Draft
+status: In Progress
 author: Donald Gifford
 created: 2026-09-22
 ---
@@ -10,7 +10,7 @@ created: 2026-09-22
 
 # IMPL-0007: Mermaid diagram skin per DESIGN-0004
 
-**Status:** Draft
+**Status:** In Progress
 **Author:** Donald Gifford
 **Date:** 2026-09-22
 
@@ -92,8 +92,8 @@ the upstream sources at `mermaid@12.0.0` / `develop`:
   choose.
 - Google Chrome is installed at
   `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`, so
-  `--headless=new --screenshot` and `--dump-dom` are available for
-  verification (Open Question 2).
+  `--headless=new --screenshot` and `--dump-dom` would be available;
+  Decision 2 chose author-captured screenshots instead.
 
 ### New findings not in DESIGN-0004
 
@@ -277,6 +277,7 @@ palette until Phase 3 (Open Question 1).
   .classGroup .nodeLabel, .classGroup .label { color: <fg>; font-family: <mono>; font-size: 12px; }
   .classTitle, .classTitleText { font-family: <font>; font-weight: 600; }
   .cluster-label text, .cluster-label span { font-size: 12px; font-weight: 600; }
+  .branchLabelBkg { filter: none !important; } /* gitGraph sets this inline under neo; Decision 6 */
   ```
 
   The class rules exist because of
@@ -304,8 +305,9 @@ palette until Phase 3 (Open Question 1).
   palette from the seven `--mermaid-*` slots or derived from
   `--color-*`, everything else constant.
 - [ ] 9. `make build`, serve `docs/examples/all.md` with
-  `--theme=tokyo-night` and `--theme=github-light`, and capture
-  screenshots plus `--dump-dom` output (Open Question 2). Confirm: no
+  `--theme=tokyo-night` and `--theme=github-light`, and pause for the
+  author's screenshots (Decision 2); use the browser's element
+  inspector for the selector check. Confirm: no
   gradient strokes, no shadow, Inter visible on labels, JetBrains Mono
   on class members, class text readable, edge labels muted, arrowheads
   in accent, all twelve diagram types rendered, `architecture-beta`
@@ -434,17 +436,19 @@ Verify the whole matrix, tune what looks wrong, and ship.
 
 #### Tasks
 
-- [ ] 1. Capture `docs/examples/all.md` under tokyo-night, github-light,
-  catppuccin-mocha, rose-pine-dawn, and auto in light and dark. Attach
-  the images to the PR.
+- [ ] 1. Author captures `docs/examples/all.md` under tokyo-night,
+  github-light, catppuccin-mocha, rose-pine-dawn, and auto in light and
+  dark (Decision 2). Attach the images to the PR.
 - [ ] 2. Check every item of the DESIGN-0004 manual matrix on each
   image: no gradient, no shadow, Inter labels, JetBrains Mono class
   members, muted edge labels, accent arrowheads, twelve types rendered,
   `architecture-beta` icons loaded, `--dagre` switch, custom theme
   fallback.
 - [ ] 3. Judge node padding against the Craft page (neo pins 28 × 24 px;
-  Craft uses 20 × 10 px). Apply the outcome of Open Question 3 and
-  record it under [Resolved Decisions](#resolved-decisions).
+  Craft uses 20 × 10 px). Decision 3 pre-authorises the switch to
+  `look: "classic"` with `flowchart.padding: 10` if nodes are
+  noticeably roomier; record the outcome under
+  [Resolved Decisions](#resolved-decisions) either way.
 - [ ] 4. Tune seed values or the expansion table where a theme reads
   wrong (typical candidates: `surface` / `border` on the derived
   themes, `line` on dark themes). Keep the JS derivation and the CSS
@@ -489,7 +493,6 @@ Verify the whole matrix, tune what looks wrong, and ship.
 | `pkg/theme/theme.go` | Modify | Comments only |
 | `CLAUDE.md`, `README.md`, `docs/examples/README.md` | Modify | Theme CSS Format, Themes section, corpus note |
 | `docs/design/0004-…md` | Modify | Tables updated to shipped values; status Implemented |
-| `scripts/screenshot.sh` | Create (if Open Question 2a) | Headless-Chrome capture and DOM dump for a served file |
 
 ## Testing Plan
 
@@ -502,10 +505,10 @@ Verify the whole matrix, tune what looks wrong, and ship.
   must stay green without edits.
 - **Go, `pkg/theme`:** no new tests; `TestAllBuiltins` and
   `TestEmbeddedThemeFilesExist` stay green.
-- **Browser (manual or scripted, Open Question 2):** the DESIGN-0004
-  matrix at the Phase 2, Phase 3, and Phase 5 gates, plus `--dump-dom`
-  once in Phase 2 to confirm the `themeCSS` selectors match real
-  classes.
+- **Browser (author screenshots, Decision 2):** the DESIGN-0004
+  matrix at the Phase 2, Phase 3, and Phase 5 gates, plus an element
+  inspector check once in Phase 2 to confirm the `themeCSS` selectors
+  match real classes.
 - **Race:** `go test -race ./...` once in Phase 5 (no new goroutines
   are introduced; this is a regression check).
 
@@ -524,15 +527,14 @@ grows by the six vendored files (≈ 195 KB, under 1 % of the current
 - `@fontsource-variable/inter` and `@fontsource-variable/jetbrains-mono`
   5.x files (SIL OFL 1.1), fetched by `curl` in `make update-vendor`;
   not an npm dependency of the repo.
-- Google Chrome (dev machine only) for headless screenshots and DOM
-  dumps, if Open Question 2a is chosen.
 
 ## Open Questions
 
-Each lists **a** as my recommendation and **b…** as alternatives. Write
-your choice (or "other: …") next to each.
+All six were decided by the author on 2026-09-22 — see
+[Resolved Decisions](#resolved-decisions). Each retains its options for
+the record; the decision is marked on the question line.
 
-**1. What feeds the palette in Phase 2, before the theme files migrate?**
+**1. What feeds the palette in Phase 2, before the theme files migrate?** — **Decided: a** (2026-09-22)
 
 - **a.** Implement `readPalette` with the `--color-*` fallback
   immediately. No theme defines the seven slots yet, so every theme
@@ -547,7 +549,7 @@ your choice (or "other: …") next to each.
   phase.
 - Other:
 
-**2. How are screenshots captured during implementation?**
+**2. How are screenshots captured during implementation?** — **Decided: b** (2026-09-22)
 
 - **a.** Add `scripts/screenshot.sh <theme> <file.md> <out.png>`: starts
   `mdp serve --browser=false --port <n> --theme <theme> <file>`, runs
@@ -562,7 +564,7 @@ your choice (or "other: …") next to each.
   you.
 - Other:
 
-**3. Who decides the neo-padding fallback in Phase 5?**
+**3. Who decides the neo-padding fallback in Phase 5?** — **Decided: a** (2026-09-22)
 
 - **a.** Pre-authorise it: if the Phase 5 pass shows rectangles
   noticeably roomier than the Craft page, switch to `look: "classic"`
@@ -572,7 +574,7 @@ your choice (or "other: …") next to each.
   changing the look.
 - Other:
 
-**4. Branch and PR shape?**
+**4. Branch and PR shape?** — **Decided: a** (2026-09-22)
 
 - **a.** One branch `feat/mermaid-skin` from `main`, one PR, one commit
   per task with conventional-commit messages, all five phases — the
@@ -583,7 +585,7 @@ your choice (or "other: …") next to each.
   to show for it until the second lands.
 - Other:
 
-**5. Where does the skin code live?**
+**5. Where does the skin code live?** — **Decided: a** (2026-09-22)
 
 - **a.** In `assets/preview.js`, next to the code it replaces. No new
   asset, no template change, no extra request; the functions are kept
@@ -595,7 +597,7 @@ your choice (or "other: …") next to each.
   `assets_test` to know about.
 - Other:
 
-**6. gitGraph branch labels keep their neo shadow via an inline style. Fix or accept?**
+**6. gitGraph branch labels keep their neo shadow via an inline style. Fix or accept?** — **Decided: a** (2026-09-22)
 
 - **a.** Add one `themeCSS` rule, `.branchLabelBkg { filter: none
   !important; }`. A stylesheet `!important` outranks an inline
@@ -609,9 +611,29 @@ your choice (or "other: …") next to each.
 
 ## Resolved Decisions
 
-None yet. Decisions from INV-0004 (1b, 2a, 3a, 4b, 5 → #89) and
-DESIGN-0004 (1a, 2a, 3a, 4a) are inputs to this document and are not
-repeated here.
+Decided by the author on 2026-09-22. Decisions from INV-0004 (1b, 2a,
+3a, 4b, 5 → #89) and DESIGN-0004 (1a, 2a, 3a, 4a) are inputs to this
+document and are not repeated here.
+
+1. **Phase 2 palette source (Q1 → a).** `readPalette` ships with the
+   `--color-*` derived fallback from the start; every theme is on the
+   final code path in Phase 2 and Phase 3 only adds CSS. No temporary
+   adapter.
+2. **Screenshots (Q2 → b).** Captured by hand by the author at the
+   Phase 2, Phase 3, and Phase 5 gates. No `scripts/screenshot.sh`;
+   the implementation pauses at those gates and requests captures.
+3. **Neo-padding fallback (Q3 → a).** Pre-authorised: if the Phase 5
+   pass shows rectangles noticeably roomier than the Craft page,
+   switch to `look: "classic"` with `flowchart.padding: 10`, record
+   it here and in DESIGN-0004, and include before/after images in the
+   PR.
+4. **Branch and PR (Q4 → a).** One branch `feat/mermaid-skin` from
+   `main`, one PR, one conventional commit per task, all five phases.
+5. **Code placement (Q5 → a).** All skin code lives in
+   `assets/preview.js` under one comment header, as pure functions.
+6. **gitGraph branch-label shadow (Q6 → a).** One `themeCSS` rule,
+   `.branchLabelBkg { filter: none !important; }`, commented as the
+   skin's only `!important`.
 
 ## References
 
