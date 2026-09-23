@@ -195,7 +195,7 @@ depends on.
   `Makefile` (after the hljs lines, before the `✓` echo) so the fonts
   refresh with everything else. Replace the trailing "update KaTeX
   fonts manually" note with one that covers both font sets.
-- [ ] 4. Add four `@font-face` rules at the top of `assets/preview.css`
+- [x] 4. Add four `@font-face` rules at the top of `assets/preview.css`
   (before `:root`), one per file, declaring `font-family: "Inter"` /
   `"JetBrains Mono"`, `font-style: normal`, `font-weight: 100 900`
   (Inter) / `100 800` (JetBrains Mono), `font-display: swap`,
