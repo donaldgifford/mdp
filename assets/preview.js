@@ -40,6 +40,28 @@
     return out;
   }
 
+  // readPalette returns the seven diagram colour slots from a computed
+  // style. A theme may define any subset of --mermaid-bg/-fg/-line/-accent/
+  // -muted/-surface/-border; each missing slot is derived from the required
+  // --color-* prose properties with the same mixes as the DESIGN-0004 seed
+  // table. The auto theme and custom theme files without slots therefore
+  // get a coherent palette with no extra CSS.
+  function readPalette(style) {
+    function prop(name) {
+      return style.getPropertyValue(name).trim();
+    }
+    var p = {
+      bg: prop("--mermaid-bg") || prop("--color-canvas-default"),
+      fg: prop("--mermaid-fg") || prop("--color-fg-default"),
+      muted: prop("--mermaid-muted") || prop("--color-fg-muted"),
+      accent: prop("--mermaid-accent") || prop("--color-accent-fg"),
+    };
+    p.line = prop("--mermaid-line") || mixHex(p.fg, p.bg, 50);
+    p.surface = prop("--mermaid-surface") || mixHex(p.fg, p.bg, 3);
+    p.border = prop("--mermaid-border") || mixHex(p.fg, p.bg, 20);
+    return p;
+  }
+
   // Initialize Mermaid with theme detection.
   if (typeof mermaid !== "undefined") {
     // Register Iconify icon packs for `pack:icon` references in architecture

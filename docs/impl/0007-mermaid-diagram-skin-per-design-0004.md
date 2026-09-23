@@ -256,7 +256,7 @@ palette until Phase 3 (Open Question 1).
 - [x] 2. Add `mixHex(fg, bg, pct)` — per-channel sRGB mix returning a
   six-digit lowercase hex, the same arithmetic as beautiful-mermaid's
   `color-mix(in srgb, fg pct%, bg)` and as the DESIGN-0004 seed table.
-- [ ] 3. Add `readPalette(style)`: read `--mermaid-bg`, `-fg`, `-line`,
+- [x] 3. Add `readPalette(style)`: read `--mermaid-bg`, `-fg`, `-line`,
   `-accent`, `-muted`, `-surface`, `-border` from
   `getComputedStyle(document.body)`. If `--mermaid-bg` is empty, derive
   from the required prose properties: `bg` ← `--color-canvas-default`,
