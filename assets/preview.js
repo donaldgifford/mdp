@@ -62,6 +62,85 @@
     return p;
   }
 
+  // expandPalette maps the seven slots onto Mermaid's base-theme variables
+  // (the DESIGN-0004 "Palette expansion" table) and adds the fixed
+  // geometry. useGradient and dropShadow are what the neo look reads to
+  // decide on gradient strokes and the drop-shadow filter.
+  function expandPalette(p) {
+    return {
+      // bg
+      background: p.bg,
+      edgeLabelBackground: p.bg,
+      labelBackgroundColor: p.bg,
+      // fg
+      primaryTextColor: p.fg,
+      textColor: p.fg,
+      nodeTextColor: p.fg,
+      titleColor: p.fg,
+      actorTextColor: p.fg,
+      signalTextColor: p.fg,
+      labelTextColor: p.fg,
+      loopTextColor: p.fg,
+      noteTextColor: p.fg,
+      classText: p.fg,
+      stateLabelColor: p.fg,
+      transitionLabelColor: p.fg,
+      // line
+      lineColor: p.line,
+      defaultLinkColor: p.line,
+      signalColor: p.line,
+      actorLineColor: p.line,
+      transitionColor: p.line,
+      relationColor: p.line,
+      archEdgeColor: p.line,
+      // accent
+      arrowheadColor: p.accent,
+      archEdgeArrowColor: p.accent,
+      activationBorderColor: p.accent,
+      specialStateColor: p.accent,
+      // muted
+      secondaryTextColor: p.muted,
+      tertiaryTextColor: p.muted,
+      sequenceNumberColor: p.muted,
+      // surface
+      primaryColor: p.surface,
+      secondaryColor: p.surface,
+      tertiaryColor: p.surface,
+      nodeBkg: p.surface,
+      mainBkg: p.surface,
+      actorBkg: p.surface,
+      noteBkgColor: p.surface,
+      labelBoxBkgColor: p.surface,
+      activationBkgColor: p.surface,
+      clusterBkg: p.surface,
+      stateBkg: p.surface,
+      compositeBackground: p.surface,
+      altBackground: p.surface,
+      attributeBackgroundColorOdd: p.surface,
+      attributeBackgroundColorEven: p.surface,
+      requirementBackground: p.surface,
+      // border
+      primaryBorderColor: p.border,
+      secondaryBorderColor: p.border,
+      tertiaryBorderColor: p.border,
+      nodeBorder: p.border,
+      clusterBorder: p.border,
+      actorBorder: p.border,
+      noteBorderColor: p.border,
+      labelBoxBorderColor: p.border,
+      compositeBorder: p.border,
+      requirementBorderColor: p.border,
+      archGroupBorderColor: p.border,
+      // fixed geometry and typography
+      useGradient: false,
+      dropShadow: "none",
+      strokeWidth: 1,
+      radius: 6,
+      fontFamily: SKIN.font,
+      fontSize: "13px",
+    };
+  }
+
   // Initialize Mermaid with theme detection.
   if (typeof mermaid !== "undefined") {
     // Register Iconify icon packs for `pack:icon` references in architecture

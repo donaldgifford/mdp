@@ -265,7 +265,7 @@ palette until Phase 3 (Open Question 1).
   `mixHex(fg, bg, 3)`, `border` ← `mixHex(fg, bg, 20)`. Any individual
   slot that is empty after reading is filled by the same derivation, so
   a custom theme may set only some slots.
-- [ ] 4. Add `expandPalette(p)` returning the `themeVariables` object:
+- [x] 4. Add `expandPalette(p)` returning the `themeVariables` object:
   the slot-to-variable table from DESIGN-0004 "Palette expansion"
   (61 variables) plus the fixed entries `useGradient: false`,
   `dropShadow: "none"`, `strokeWidth: 1`, `radius: 6`,
