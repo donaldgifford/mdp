@@ -378,27 +378,30 @@ values, remove the legacy twelve, and guard the contract with a test.
   vars", lines 43-45 `mermaidBase`) to describe the seven slots and
   that `preview.js` derives a palette when they are absent. No exported
   API change; `Theme.MermaidTheme` keeps its values.
-- [ ] 5. Screenshots of `docs/examples/all.md` for the seven seeded
+- [ ] 5. **Deferred - human required** (visual check in the browser, Decision 2). Screenshots of `docs/examples/all.md` for the seven seeded
   themes (tokyo-night, tokyo-night-storm, tokyo-night-day,
   github-light, github-dark, catppuccin-latte, catppuccin-mocha) —
   confirm the palette changed from the Phase 2 derived one to the
   upstream values (tokyo-night edges are now `#3d59a1`).
-- [ ] 6. Write a throwaway custom theme file containing only the nine
+- [ ] 6. **Deferred - human required** (visual check in the browser, Decision 2). Write a throwaway custom theme file containing only the nine
   `--color-*` properties, serve with `--theme=/path/to/it.css`, and
   confirm diagrams render with a derived palette (decision 3a).
-- [ ] 7. `make fmt && make lint && make test`.
+- [x] 7. `make fmt && make lint && make test`.
 
 #### Success Criteria
 
 - `grep -r -- '--mermaid-' assets/themes` lists only the seven slot
-  names, 105 occurrences (15 themes × 7).
+  names, 105 occurrences (15 themes × 7). — **met** (105; the only
+  other hit is the github.css header comment naming the slots)
 - `TestDiagramPaletteDefinedByEveryTheme` passes and fails when any one
-  slot is deleted from any theme (verify once by hand).
+  slot is deleted from any theme (verify once by hand). — **met**
+  (deleting `--mermaid-line` from rose-pine failed with "does not define
+  --mermaid-line"; file restored)
 - Seeded-theme screenshots match the upstream palette values; derived
-  themes are unchanged from Phase 2.
+  themes are unchanged from Phase 2. — **deferred - human required**
 - The custom theme file without slots renders diagrams with a derived
-  palette and no console errors.
-- `pkg/theme` tests and `internal/server` tests pass unchanged.
+  palette and no console errors. — **deferred - human required**
+- `pkg/theme` tests and `internal/server` tests pass unchanged. — **met**
 
 ---
 
