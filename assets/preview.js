@@ -165,6 +165,34 @@
     ].join("\n");
   }
 
+  // buildMermaidInit assembles the whole mermaid.initialize() config. The
+  // neo look is kept (INV-0004 decision 1b) with its gradient and shadow
+  // switched off through expandPalette. layout is set only when the
+  // --dagre escape hatch is on; otherwise Mermaid v12's ELK default holds.
+  function buildMermaidInit(palette, layout) {
+    var init = {
+      startOnLoad: false,
+      look: "neo",
+      fontFamily: SKIN.font,
+      theme: "base",
+      themeVariables: expandPalette(palette),
+      themeCSS: buildThemeCSS(palette),
+      flowchart: { nodeSpacing: 24, rankSpacing: 40, diagramPadding: 8 },
+      sequence: {
+        actorFontFamily: SKIN.font,
+        messageFontFamily: SKIN.font,
+        noteFontFamily: SKIN.font,
+        actorFontSize: 13,
+        messageFontSize: 12,
+        noteFontSize: 12,
+      },
+    };
+    if (layout) {
+      init.layout = layout;
+    }
+    return init;
+  }
+
   // Initialize Mermaid with theme detection.
   if (typeof mermaid !== "undefined") {
     // Register Iconify icon packs for `pack:icon` references in architecture

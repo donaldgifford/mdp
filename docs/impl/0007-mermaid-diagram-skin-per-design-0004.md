@@ -288,7 +288,7 @@ palette until Phase 3 (Open Question 1).
   [new finding 2](#new-findings-not-in-design-0004); the selector list
   is confirmed against the rendered DOM in task 9 and trimmed to what
   actually matches.
-- [ ] 6. Add `buildMermaidInit(palette, layout)` returning the object in
+- [x] 6. Add `buildMermaidInit(palette, layout)` returning the object in
   DESIGN-0004 "Skin configuration": `startOnLoad: false`,
   `look: "neo"`, `layout` only when set (preserves the `--dagre`
   escape hatch), `fontFamily: SKIN.font`, `theme: "base"`,
