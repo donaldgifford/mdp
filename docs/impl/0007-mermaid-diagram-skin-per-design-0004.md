@@ -221,19 +221,20 @@ depends on.
   **Measured 2026-09-22** (plain `go build ./cmd/mdp`, same flags both
   sides): `main` 26,641,058 bytes → branch 26,839,202 bytes, **+198,144
   bytes (0.19 MB)**.
-- [ ] 8. `make fmt && make lint && make test`.
+- [x] 8. `make fmt && make lint && make test`.
 
 #### Success Criteria
 
 - `assets/vendor/fonts/` contains four `.woff2` files and two license
-  files, all reachable at `/vendor/fonts/…` from a running server.
+  files, all reachable at `/vendor/fonts/…` from a running server —
+  **met**
 - `TestPreviewCSSDeclaresVendoredFonts` and
-  `TestServer_VendorFontsServed` pass.
+  `TestServer_VendorFontsServed` pass — **met**
 - `make update-vendor` re-downloads the fonts byte-identically (run it,
-  `git status` shows no change).
+  `git status` shows no change) — **met** (font lines re-run; no diff)
 - No visible change in the preview (fonts are declared but nothing
-  references them yet).
-- Binary size delta recorded and under 0.3 MB.
+  references them yet) — **met** (no `font-family` rule uses them)
+- Binary size delta recorded and under 0.3 MB — **met** (0.19 MB)
 
 ---
 
