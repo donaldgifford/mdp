@@ -482,19 +482,24 @@ Verify the whole matrix, tune what looks wrong, and ship.
 - [x] 7. `make fmt && make lint && make test && make build`; run
   `go test -race ./...` once. **Result:** fmt clean, lint 0 issues,
   all packages pass, build ok, race detector clean.
-- [ ] 8. Open the PR against `main` with label `minor`, the screenshot
+- [x] 8. Open the PR against `main` with label `minor`, the screenshot
   matrix, and links to INV-0004, DESIGN-0004, and this document. After
-  merge, set this document's status to `Completed`.
+  merge, set this document's status to `Completed`. **Result:** opened
+  as [#91](https://github.com/donaldgifford/mdp/pull/91) with a pending
+  screenshot checklist in place of the matrix; CI green (build, lint,
+  test, licenses, security). Setting `Completed` after merge is
+  **deferred - human required**.
 
 #### Success Criteria
 
 - All matrix checks pass on all six captures, and the images are in
-  the PR.
+  the PR. — **deferred - human required**
 - Open Question 3 is resolved and recorded; if `classic` was chosen,
-  `buildMermaidInit` and DESIGN-0004 both say so.
-- DESIGN-0004 tables match the shipped code.
+  `buildMermaidInit` and DESIGN-0004 both say so. — **deferred - human
+  required**
+- DESIGN-0004 tables match the shipped code. — **met**
 - CI (lint, test, build) is green on the PR; `go test -race ./...` is
-  clean.
+  clean. — **met** (CI green on #91; race detector clean locally)
 
 ## File Changes
 
