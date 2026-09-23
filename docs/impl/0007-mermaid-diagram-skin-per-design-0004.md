@@ -297,7 +297,7 @@ palette until Phase 3 (Open Question 1).
   `flowchart: { nodeSpacing: 24, rankSpacing: 40, diagramPadding: 8 }`,
   `sequence: { actorFontFamily, messageFontFamily, noteFontFamily:
   SKIN.font, actorFontSize: 13, messageFontSize: 12, noteFontSize: 12 }`.
-- [ ] 7. Replace `assets/preview.js:39-72` (from `var prefersDark` to
+- [x] 7. Replace `assets/preview.js:39-72` (from `var prefersDark` to
   the closing `}` of the `else` branch) with
   `mermaid.initialize(buildMermaidInit(readPalette(getComputedStyle(document.body)), document.body.dataset.mermaidLayout));`.
   Delete `prefersDark` and `mermaidTheme`; `data-mermaid-theme` stays

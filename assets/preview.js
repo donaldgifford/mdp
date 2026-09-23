@@ -221,40 +221,12 @@
         console.warn("mermaid icon pack registration failed:", e);
       }
     }
-    var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    var mermaidTheme = document.body.dataset.mermaidTheme;
-    // "dagre" when the dagre escape hatch is set, else "" for the Mermaid v12 ELK default.
-    var mermaidLayout = document.body.dataset.mermaidLayout;
-    var mermaidInit = { startOnLoad: false };
-    if (mermaidLayout) {
-      mermaidInit.layout = mermaidLayout;
-    }
-    if (mermaidTheme === "base") {
-      // Named built-in theme: read --mermaid-* CSS custom properties that the
-      // theme stylesheet defines on [data-theme] / body.
-      var bodyStyle = getComputedStyle(document.body);
-      var themeVariables = {
-        primaryColor:        bodyStyle.getPropertyValue("--mermaid-primaryColor").trim(),
-        primaryTextColor:    bodyStyle.getPropertyValue("--mermaid-primaryTextColor").trim(),
-        primaryBorderColor:  bodyStyle.getPropertyValue("--mermaid-primaryBorderColor").trim(),
-        lineColor:           bodyStyle.getPropertyValue("--mermaid-lineColor").trim(),
-        secondaryColor:      bodyStyle.getPropertyValue("--mermaid-secondaryColor").trim(),
-        tertiaryColor:       bodyStyle.getPropertyValue("--mermaid-tertiaryColor").trim(),
-        background:          bodyStyle.getPropertyValue("--mermaid-background").trim(),
-        noteBkgColor:        bodyStyle.getPropertyValue("--mermaid-noteBkgColor").trim(),
-        noteTextColor:       bodyStyle.getPropertyValue("--mermaid-noteTextColor").trim(),
-        edgeLabelBackground: bodyStyle.getPropertyValue("--mermaid-edgeLabelBackground").trim(),
-        actorBkg:            bodyStyle.getPropertyValue("--mermaid-actorBkg").trim(),
-        actorTextColor:      bodyStyle.getPropertyValue("--mermaid-actorTextColor").trim(),
-      };
-      mermaidInit.theme = "base";
-      mermaidInit.themeVariables = themeVariables;
-      mermaid.initialize(mermaidInit);
-    } else {
-      // auto: fall back to prefers-color-scheme for Mermaid theme selection.
-      mermaidInit.theme = prefersDark ? "dark" : "default";
-      mermaid.initialize(mermaidInit);
-    }
+    // "dagre" when the --dagre escape hatch is set, else "" for the Mermaid
+    // v12 ELK default. data-mermaid-theme is still rendered by the server
+    // but no longer read: every theme goes through the same skin.
+    mermaid.initialize(
+      buildMermaidInit(readPalette(getComputedStyle(document.body)), document.body.dataset.mermaidLayout)
+    );
   }
 
   // Run all client-side rendering after content update.
