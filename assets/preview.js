@@ -142,7 +142,7 @@
   }
 
   // buildThemeCSS returns CSS that Mermaid injects inside its own
-  // id-scoped <style> block, for the three things no theme variable
+  // id-scoped style element, for the three things no theme variable
   // reaches (IMPL-0007 "New findings"):
   //   - arrowheads: .marker is painted with lineColor, not arrowheadColor;
   //   - class text: painted with nodeBorder, which is the faint border
