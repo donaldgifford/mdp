@@ -17,19 +17,14 @@
   --color-danger-fg:      #f52a65;
   --color-success-fg:     #587539;
 
-  /* Mermaid theme variables (theme: 'base') — light palette */
-  --mermaid-primaryColor:        #2e7de9;
-  --mermaid-primaryTextColor:    #3760bf;
-  --mermaid-primaryBorderColor:  #b4b5c9;
-  --mermaid-lineColor:           #6172b0;
-  --mermaid-secondaryColor:      #d5d6db;
-  --mermaid-tertiaryColor:       #e1e2e7;
-  --mermaid-background:          #e1e2e7;
-  --mermaid-noteBkgColor:        #d5d6db;
-  --mermaid-noteTextColor:       #3760bf;
-  --mermaid-edgeLabelBackground: #e1e2e7;
-  --mermaid-actorBkg:            #d5d6db;
-  --mermaid-actorTextColor:      #3760bf;
+  /* Diagram palette (DESIGN-0004, upstream palette) — seven required slots, hex only */
+  --mermaid-bg:      #e1e2e7;  /* canvas behind the diagram; edge-label backing */
+  --mermaid-fg:      #343b58;  /* node, actor, title text */
+  --mermaid-line:    #34548a;  /* edges, lifelines, relations, transitions */
+  --mermaid-accent:  #34548a;  /* arrowheads, activations, special states */
+  --mermaid-muted:   #9699a3;  /* edge labels, secondary text */
+  --mermaid-surface: #dcdde3;  /* node, actor, note, cluster fill */
+  --mermaid-border:  #bec1ca;  /* node, actor, cluster stroke */
 
   /* Callout colors */
   --callout-note-color:      #2e7de9;

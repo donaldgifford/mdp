@@ -354,7 +354,7 @@ values, remove the legacy twelve, and guard the contract with a test.
 
 #### Tasks
 
-- [ ] 1. In each of the thirteen files under `assets/themes/`, replace
+- [x] 1. In each of the thirteen files under `assets/themes/`, replace
   the `/* Mermaid theme variables … */` block (twelve
   `--mermaid-<name>` lines; `github.css` has three such blocks) with the
   seven-slot block, values copied from the DESIGN-0004 "Seed values"
