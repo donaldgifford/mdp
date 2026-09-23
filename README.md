@@ -215,6 +215,21 @@ tints of these; branches, slices, and rules use them at full strength. A
 missing entry falls back to, in order: accent, success, danger, the three
 50% mixes of those, muted, and fg.
 
+Flowchart and state nodes can carry a semantic class — `danger`,
+`success`, `warning`, or `accent` — with plain Mermaid syntax and no
+`classDef`:
+
+```
+flowchart TB
+    B -->|No| D[Request changes]
+    class D danger
+```
+
+The node gets a faint tint of the theme's `--color-danger-fg`,
+`--color-success-fg`, `--callout-warning-color`, or `--mermaid-accent`
+with a full-strength border. Other Mermaid renderers ignore the class.
+Edges are not coloured: Mermaid v12 does not apply classes to edges.
+
 Slot values must be six-digit hex (`#1a1b26`); `var()` and `color-mix()` are
 not accepted. The Mermaid-specific `--mermaid-primaryColor`-style variables
 used before this palette are no longer read.

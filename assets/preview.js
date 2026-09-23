@@ -72,6 +72,13 @@
     p.series = fallback.map(function (c, i) {
       return prop("--mermaid-series-" + (i + 1)) || c;
     });
+    // Status colours for the semantic node classes (see buildThemeCSS).
+    p.status = {
+      danger: bad,
+      success: ok,
+      warning: prop("--callout-warning-color") || mixHex(ok, bad, 50),
+      accent: p.accent,
+    };
     return p;
   }
 
@@ -216,6 +223,21 @@
   //     slot here and would make members nearly invisible;
   //   - edge labels: take the node text colour instead of a muted one.
   // Do not remove these rules as redundant with the theme variables.
+  // statusRules styles nodes that carry one of mdp's semantic classes
+  // (`class D danger` in flowchart or state syntax): a faint tint of the
+  // theme's status colour with a full-strength border. No classDef is
+  // needed, and other renderers ignore the unknown class.
+  function statusRules(p) {
+    return Object.keys(p.status).map(function (name) {
+      var c = p.status[name];
+      var shape = ".node." + name + " ";
+      return (
+        [shape + "rect", shape + "polygon", shape + "circle", shape + "ellipse", shape + "path"].join(", ") +
+        " { fill: " + mixHex(c, p.surface, 18) + "; stroke: " + c + "; }"
+      );
+    });
+  }
+
   function buildThemeCSS(p) {
     return [
       ".edgeLabel, .edgeLabel span, .edgeLabel p { color: " + p.muted + "; font-size: 11px; }",
@@ -242,6 +264,7 @@
           return "circle.actor-" + i + " { fill: " + c + "; }";
         })
       )
+      .concat(statusRules(p))
       .join("\n");
   }
 

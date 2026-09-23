@@ -13,6 +13,8 @@ flowchart TB
     B -->|No| D[Request changes]
     C --> E[Deploy]
     D --> E
+    class C success
+    class D danger
 ```
 
 ## Sequence

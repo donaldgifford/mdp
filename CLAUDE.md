@@ -87,7 +87,10 @@ the theme's seven `--mermaid-*` slots and eight `--mermaid-series-*`
 hues, deriving anything missing from `--color-*`. The series feeds every
 multi-hue diagram (timeline/kanban/mindmap sections via `cScale*`, gitGraph
 `git*`, `pie*`, journey `fillType*`, `xyChart.plotColorPalette`); Mermaid's
-own derivation of those from `primaryColor` is near-black on dark themes. `expandPalette` maps the slots onto Mermaid variables.
+own derivation of those from `primaryColor` is near-black on dark themes.
+`statusRules` adds theme-aware `danger`/`success`/`warning`/`accent` node
+classes (`class D danger`, no `classDef`); edge classes are not possible
+in Mermaid v12. `expandPalette` maps the slots onto Mermaid variables.
 **`buildThemeCSS` is not redundant with the variables** — it covers
 three things no variable reaches: `.marker` arrowheads are painted with
 `lineColor`, class-diagram text is painted with `nodeBorder` (the faint

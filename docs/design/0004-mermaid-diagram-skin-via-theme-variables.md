@@ -504,6 +504,14 @@ it over the stock light theme). Journey actor dots are set in
 to accent, success, danger, their 50% mixes, muted, and fg. Nodes,
 edges, and borders stay monochrome.
 
+Semantic node classes (same date). `buildThemeCSS` styles nodes with the
+class `danger`, `success`, `warning`, or `accent` (plain `class D danger`,
+no `classDef`) with an 18% tint of the theme's status colour and a
+full-strength stroke. Colours come from `--color-danger-fg`,
+`--color-success-fg`, `--callout-warning-color`, and the accent slot.
+Colouring edges by label text ("No", "needs work") was rejected as a
+guess that is often wrong; edge classes are not applied by Mermaid v12.
+
 ## References
 
 - [INV-0004](../investigation/0004-evaluate-beautiful-mermaid-for-diagram-rendering-and-ascii.md),
