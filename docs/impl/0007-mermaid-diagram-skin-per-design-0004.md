@@ -180,7 +180,7 @@ depends on.
 
 #### Tasks
 
-- [ ] 1. Create `assets/vendor/fonts/` and download the four subsets
+- [x] 1. Create `assets/vendor/fonts/` and download the four subsets
   from jsDelivr with `curl -sL -o` (pinned major, like the other
   vendored assets):
   `https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5/files/inter-latin-wght-normal.woff2`,
