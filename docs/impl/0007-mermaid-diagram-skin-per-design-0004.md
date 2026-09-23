@@ -454,30 +454,34 @@ Verify the whole matrix, tune what looks wrong, and ship.
 
 #### Tasks
 
-- [ ] 1. Author captures `docs/examples/all.md` under tokyo-night,
+- [ ] 1. **Deferred - human required** (author screenshots and visual judgement, Decision 2). Author captures `docs/examples/all.md` under tokyo-night,
   github-light, catppuccin-mocha, rose-pine-dawn, and auto in light and
   dark (Decision 2). Attach the images to the PR.
-- [ ] 2. Check every item of the DESIGN-0004 manual matrix on each
+- [ ] 2. **Deferred - human required** (author screenshots and visual judgement, Decision 2). Check every item of the DESIGN-0004 manual matrix on each
   image: no gradient, no shadow, Inter labels, JetBrains Mono class
   members, muted edge labels, accent arrowheads, twelve types rendered,
   `architecture-beta` icons loaded, `--dagre` switch, custom theme
   fallback.
-- [ ] 3. Judge node padding against the Craft page (neo pins 28 × 24 px;
+- [ ] 3. **Deferred - human required** (author screenshots and visual judgement, Decision 2). Judge node padding against the Craft page (neo pins 28 × 24 px;
   Craft uses 20 × 10 px). Decision 3 pre-authorises the switch to
   `look: "classic"` with `flowchart.padding: 10` if nodes are
   noticeably roomier; record the outcome under
   [Resolved Decisions](#resolved-decisions) either way.
-- [ ] 4. Tune seed values or the expansion table where a theme reads
+- [ ] 4. **Deferred - human required** (author screenshots and visual judgement, Decision 2). Tune seed values or the expansion table where a theme reads
   wrong (typical candidates: `surface` / `border` on the derived
   themes, `line` on dark themes). Keep the JS derivation and the CSS
   seeds consistent.
 - [x] 5. Update the DESIGN-0004 "Seed values" and "Palette expansion"
   tables and the `themeCSS` block to what shipped; set DESIGN-0004
   status to `Implemented`.
-- [ ] 6. Record the final binary size and the count of theme variables
-  set per theme in this document.
-- [ ] 7. `make fmt && make lint && make test && make build`; run
-  `go test -race ./...` once.
+- [x] 6. Record the final binary size and the count of theme variables
+  set per theme in this document. **Result:** 26,839,202 bytes (plain
+  `go build`), +198,144 bytes over `main`, all from the fonts;
+  `expandPalette` sets 62 Mermaid theme variables per theme (56 colours
+  from the seven slots, 6 fixed).
+- [x] 7. `make fmt && make lint && make test && make build`; run
+  `go test -race ./...` once. **Result:** fmt clean, lint 0 issues,
+  all packages pass, build ok, race detector clean.
 - [ ] 8. Open the PR against `main` with label `minor`, the screenshot
   matrix, and links to INV-0004, DESIGN-0004, and this document. After
   merge, set this document's status to `Completed`.
