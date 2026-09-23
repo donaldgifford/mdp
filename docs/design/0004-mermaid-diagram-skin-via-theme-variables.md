@@ -510,7 +510,12 @@ no `classDef`) with an 18% tint of the theme's status colour and a
 full-strength stroke. Colours come from `--color-danger-fg`,
 `--color-success-fg`, `--callout-warning-color`, and the accent slot.
 Colouring edges by label text ("No", "needs work") was rejected as a
-guess that is often wrong; edge classes are not applied by Mermaid v12.
+guess that is often wrong, and Mermaid v12 does not apply classes to
+edges. Edges instead take the status names through `linkStyle`
+(`linkStyle 2 stroke:danger`). Mermaid passes the unknown value through
+to the inline style; `colourEdges` runs after each render, replaces the
+name with the theme colour, and points every edge that has its own
+stroke (named or hex) at a marker clone filled with that colour.
 
 ## References
 

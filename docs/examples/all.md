@@ -13,8 +13,8 @@ flowchart TB
     B -->|No| D[Request changes]
     C --> E[Deploy]
     D --> E
-    class C success
-    class D danger
+    linkStyle 1 stroke:success
+    linkStyle 2 stroke:danger
 ```
 
 ## Sequence
@@ -69,6 +69,7 @@ agentflow-beta TB
     analyse -.- spec
     decide --x|needs work| analyse
   end
+  linkStyle 4 stroke:danger
 ```
 
 ## Kanban

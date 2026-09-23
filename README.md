@@ -228,7 +228,21 @@ flowchart TB
 The node gets a faint tint of the theme's `--color-danger-fg`,
 `--color-success-fg`, `--callout-warning-color`, or `--mermaid-accent`
 with a full-strength border. Other Mermaid renderers ignore the class.
-Edges are not coloured: Mermaid v12 does not apply classes to edges.
+
+Edges take the same names through Mermaid's `linkStyle` (edges are
+numbered from 0 in source order):
+
+```
+flowchart TB
+    B -->|Yes| C[Merge]
+    B -->|No| D[Request changes]
+    linkStyle 0 stroke:success
+    linkStyle 1 stroke:danger
+```
+
+Any edge with its own stroke colour, named or hex, gets an arrowhead in
+that colour. Other renderers do not know the names and draw those edges
+in their default colour.
 
 Slot values must be six-digit hex (`#1a1b26`); `var()` and `color-mix()` are
 not accepted. The Mermaid-specific `--mermaid-primaryColor`-style variables

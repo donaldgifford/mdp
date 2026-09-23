@@ -89,8 +89,12 @@ multi-hue diagram (timeline/kanban/mindmap sections via `cScale*`, gitGraph
 `git*`, `pie*`, journey `fillType*`, `xyChart.plotColorPalette`); Mermaid's
 own derivation of those from `primaryColor` is near-black on dark themes.
 `statusRules` adds theme-aware `danger`/`success`/`warning`/`accent` node
-classes (`class D danger`, no `classDef`); edge classes are not possible
-in Mermaid v12. `expandPalette` maps the slots onto Mermaid variables.
+classes (`class D danger`, no `classDef`). Edges use the same names via
+`linkStyle N stroke:danger`: Mermaid passes the unknown value through, and
+`colourEdges` (run from `mermaid.run`'s `postRenderCallback`) swaps in the
+theme colour and gives each coloured edge a private marker clone, since
+Mermaid keys its marker clones off the first `stroke` in the style and the
+skin's `.marker` rule repaints the rest with the accent. `expandPalette` maps the slots onto Mermaid variables.
 **`buildThemeCSS` is not redundant with the variables** — it covers
 three things no variable reaches: `.marker` arrowheads are painted with
 `lineColor`, class-diagram text is painted with `nodeBorder` (the faint

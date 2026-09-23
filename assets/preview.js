@@ -268,6 +268,46 @@
       .join("\n");
   }
 
+  // colourEdges runs after each diagram renders. It resolves mdp's status
+  // names in linkStyle (`linkStyle 2 stroke:danger`) to the theme colour,
+  // then gives every edge with its own stroke an arrowhead in that colour.
+  // Mermaid clones markers per colour but keys the clone off the first
+  // stroke in the style (the linkStyle default, when set), and the skin's
+  // .marker rule repaints every arrowhead with the accent; inline styles on
+  // a private clone outrank both.
+  function colourEdges(svg, p) {
+    var named = /stroke:\s*(danger|success|warning|accent)\b/g;
+    var edges = svg.querySelectorAll("path[marker-end], path[marker-start]");
+    for (var i = 0; i < edges.length; i++) {
+      var path = edges[i];
+      var style = (path.getAttribute("style") || "").replace(named, function (m, name) {
+        return "stroke:" + p.status[name];
+      });
+      path.setAttribute("style", style);
+      var strokes = style.match(/stroke:\s*#[0-9a-fA-F]{6}\b/g);
+      if (!strokes) continue;
+      var colour = strokes[strokes.length - 1].replace(/stroke:\s*/, "").toLowerCase();
+      if (colour === p.line) continue;
+      ["marker-end", "marker-start"].forEach(function (attr) {
+        var ref = /url\(#([^)]+)\)/.exec(path.getAttribute(attr) || "");
+        var marker = ref && svg.querySelector('[id="' + ref[1] + '"]');
+        if (!marker) return;
+        var id = ref[1] + "-mdp" + colour.slice(1);
+        if (!svg.querySelector('[id="' + id + '"]')) {
+          var clone = marker.cloneNode(true);
+          clone.id = id;
+          var parts = clone.querySelectorAll("path, circle, polygon");
+          for (var j = 0; j < parts.length; j++) {
+            parts[j].style.fill = colour;
+            parts[j].style.stroke = colour;
+          }
+          marker.parentNode.appendChild(clone);
+        }
+        path.setAttribute(attr, "url(#" + id + ")");
+      });
+    }
+  }
+
   // buildMermaidInit assembles the whole mermaid.initialize() config. The
   // neo look is kept (INV-0004 decision 1b) with its gradient and shadow
   // switched off through expandPalette. layout is set only when the
@@ -303,6 +343,9 @@
   // Initialize Mermaid with the diagram skin: neo look with gradient and
   // shadow off; palette from the theme's seven --mermaid-* slots or derived
   // from --color-*; fonts, geometry, and spacing constant (see SKIN above).
+  // Palette read at init; colourEdges needs it after each render.
+  var diagramPalette = null;
+
   if (typeof mermaid !== "undefined") {
     // Register Iconify icon packs for `pack:icon` references in architecture
     // diagrams. Packs download lazily on first use only; offline diagrams
@@ -333,9 +376,8 @@
     // "dagre" when the --dagre escape hatch is set, else "" for the Mermaid
     // v12 ELK default. data-mermaid-theme is still rendered by the server
     // but no longer read: every theme goes through the same skin.
-    mermaid.initialize(
-      buildMermaidInit(readPalette(getComputedStyle(document.body)), document.body.dataset.mermaidLayout)
-    );
+    diagramPalette = readPalette(getComputedStyle(document.body));
+    mermaid.initialize(buildMermaidInit(diagramPalette, document.body.dataset.mermaidLayout));
   }
 
   // Tail of the serialized mermaid.run() chain; see renderClientSide.
@@ -368,7 +410,13 @@
           for (var i = 0; i < rendered.length; i++) {
             rendered[i].removeAttribute("data-processed");
           }
-          return mermaid.run({ nodes: content.querySelectorAll(".mermaid") });
+          return mermaid.run({
+            nodes: content.querySelectorAll(".mermaid"),
+            postRenderCallback: function (id) {
+              var svg = document.getElementById(id);
+              if (svg && diagramPalette) colourEdges(svg, diagramPalette);
+            },
+          });
         })
         .catch(function (e) {
           console.warn("mermaid render error:", e);
