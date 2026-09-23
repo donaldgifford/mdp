@@ -211,7 +211,7 @@ depends on.
   `JetBrains Mono` exist, and assert every `url(/vendor/fonts/…)` it
   references is present in `assets.FS`. Same package and style as
   `footnotecss_test.go`.
-- [ ] 6. Add `TestServer_VendorFontsServed` to
+- [x] 6. Add `TestServer_VendorFontsServed` to
   `internal/server/server_test.go`: start a server with `fetchBody`'s
   config pattern, `GET /vendor/fonts/inter-latin-wght-normal.woff2`,
   assert status 200, `Content-Type` starting with `font/woff2`, and a

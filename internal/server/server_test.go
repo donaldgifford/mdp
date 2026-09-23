@@ -399,3 +399,50 @@ func waitForServer(t *testing.T, url string) {
 	}
 	t.Fatal("server did not start within 2s")
 }
+
+// TestServer_VendorFontsServed asserts the vendored diagram fonts are
+// reachable over HTTP with a font MIME type. Browsers reject a font
+// served as text/plain or application/octet-stream under strict MIME
+// checking, which would silently drop diagrams back to a system face.
+func TestServer_VendorFontsServed(t *testing.T) {
+	t.Parallel()
+
+	srv, err := server.New(server.Config{
+		File:        tempMDFile(t),
+		Port:        0,
+		OpenBrowser: false,
+	})
+	if err != nil {
+		t.Fatalf("server.New: %v", err)
+	}
+
+	go func() {
+		if serveErr := srv.ListenAndServe(); serveErr != nil && !errors.Is(serveErr, http.ErrServerClosed) {
+			t.Logf("server error: %v", serveErr)
+		}
+	}()
+
+	base := "http://" + srv.Addr()
+	waitForServer(t, base)
+
+	resp, err := http.Get(base + "/vendor/fonts/inter-latin-wght-normal.woff2") //nolint:noctx // Test helper.
+	if err != nil {
+		t.Fatalf("GET font: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status = %d, want %d", resp.StatusCode, http.StatusOK)
+	}
+	if ct := resp.Header.Get("Content-Type"); !strings.HasPrefix(ct, "font/woff2") {
+		t.Errorf("Content-Type = %q, want font/woff2", ct)
+	}
+
+	raw, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("reading body: %v", err)
+	}
+	if len(raw) < 1024 {
+		t.Errorf("font body is %d bytes, want > 1024", len(raw))
+	}
+}
