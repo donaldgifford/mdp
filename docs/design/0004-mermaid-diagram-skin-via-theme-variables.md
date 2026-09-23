@@ -1,7 +1,7 @@
 ---
 id: DESIGN-0004
 title: "Mermaid diagram skin via theme variables"
-status: Approved
+status: Implemented
 author: Donald Gifford
 created: 2026-09-22
 ---
@@ -10,7 +10,7 @@ created: 2026-09-22
 
 # DESIGN-0004: Mermaid diagram skin via theme variables
 
-**Status:** Approved
+**Status:** Implemented
 **Author:** Donald Gifford
 **Date:** 2026-09-22
 
@@ -153,8 +153,8 @@ color arithmetic on them and cannot consume `var()` or `color-mix()`.
   --mermaid-line:    #3d59a1;  /* edges, lifelines, relations, transitions */
   --mermaid-accent:  #7aa2f7;  /* arrowheads, activations, special states */
   --mermaid-muted:   #565f89;  /* edge labels, secondary text */
-  --mermaid-surface: #1e1f2b;  /* node, actor, note, cluster fill */
-  --mermaid-border:  #373948;  /* node, actor, cluster stroke */
+  --mermaid-surface: #1e202b;  /* node, actor, note, cluster fill */
+  --mermaid-border:  #373949;  /* node, actor, cluster stroke */
 }
 ```
 
@@ -191,7 +191,8 @@ is exactly what upstream computes when those slots are unset.
 | catppuccin-macchiato | derived | `#24273a` | `#cad3f5` | `#777d98` | `#8aadf4` | `#6e738d` | `#292c40` | `#45495f` |
 | catppuccin-mocha | upstream | `#1e1e2e` | `#cdd6f4` | `#585b70` | `#cba6f7` | `#6c7086` | `#232434` | `#414356` |
 
-These are starting values. The screenshot pass in the rollout plan may
+Shipped unchanged in IMPL-0007 Phase 3. These are starting values. The
+screenshot pass in the rollout plan may
 swap `surface` / `border` for a theme's `--color-canvas-subtle` /
 `--color-border-default` where the mix reads wrong against that page.
 
@@ -254,9 +255,9 @@ matter, plus the fixed geometry. Grouped by slot:
 
 Setting `nodeBorder` already switches the gradient off in base;
 `useGradient: false` is set as well so the intent is explicit. The
-variable list is the design's starting point; the implementation trims
-or extends it from the screenshot pass, and the table in this section
-is updated to match.
+list shipped exactly as tabled in IMPL-0007 Phase 2: 56 colour
+variables plus the 6 fixed entries, 62 in total. The screenshot pass may
+still trim or extend it; update this table to match if it does.
 
 ### themeCSS
 
@@ -264,17 +265,24 @@ Three things have no variable and go through `config.themeCSS`, which
 mermaid injects inside its own id-scoped `<style>` block so it
 outranks the theme's stylesheet where page CSS would not:
 
+As shipped (IMPL-0007 Phase 2; the class rules also restore `fill` /
+`color`, because mermaid paints class text with `nodeBorder`):
+
 ```css
-.edgeLabel, .edgeLabel p { color: <muted>; font-size: 11px; }
-.marker, .marker path       { fill: <accent>; stroke: <accent>; }
-g.classGroup text, .classLabel .label { font-family: <mono>; font-size: 12px; }
-.cluster-label, .cluster text { font-size: 12px; font-weight: 600; }
+.edgeLabel, .edgeLabel span, .edgeLabel p { color: <muted>; font-size: 11px; }
+.marker, .marker path { fill: <accent>; stroke: <accent>; }
+.marker.cross { stroke: <accent>; }
+g.classGroup text, .classLabel .label { fill: <fg>; font-family: <mono>; font-size: 12px; }
+.classGroup .nodeLabel, .classGroup .label { color: <fg>; font-family: <mono>; font-size: 12px; }
+.classTitle, .classTitleText { font-family: <font>; font-weight: 600; }
+.cluster-label text, .cluster-label span { font-size: 12px; font-weight: 600; }
+.branchLabelBkg { filter: none !important; } /* gitGraph inline shadow under neo */
 ```
 
 `buildThemeCSS(palette)` interpolates the slot values. Selectors are
-taken from mermaid's v12 flowchart and class stylesheets and must be
-re-checked against the rendered SVG during implementation; if any
-selector is wrong the effect is a cosmetic miss, not a broken diagram.
+taken from mermaid's v12 flowchart and class stylesheets; confirming
+each against the rendered DOM is part of the IMPL-0007 screenshot
+gates. A wrong selector is a cosmetic miss, not a broken diagram.
 Arrowhead *size* is not adjustable through CSS and stays at mermaid's
 default.
 

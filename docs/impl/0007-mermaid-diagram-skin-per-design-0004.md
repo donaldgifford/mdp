@@ -471,7 +471,7 @@ Verify the whole matrix, tune what looks wrong, and ship.
   wrong (typical candidates: `surface` / `border` on the derived
   themes, `line` on dark themes). Keep the JS derivation and the CSS
   seeds consistent.
-- [ ] 5. Update the DESIGN-0004 "Seed values" and "Palette expansion"
+- [x] 5. Update the DESIGN-0004 "Seed values" and "Palette expansion"
   tables and the `themeCSS` block to what shipped; set DESIGN-0004
   status to `Implemented`.
 - [ ] 6. Record the final binary size and the count of theme variables
