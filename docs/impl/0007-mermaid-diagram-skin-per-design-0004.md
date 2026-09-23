@@ -364,7 +364,7 @@ values, remove the legacy twelve, and guard the contract with a test.
   `catppuccin-mocha`, `donald`, `github` (light, dark, dimmed),
   `rose-pine-dawn`, `rose-pine-moon`, `rose-pine`, `tokyo-night-day`,
   `tokyo-night-moon`, `tokyo-night-storm`, `tokyo-night`.
-- [ ] 2. Update each file's header comment where it references Mermaid
+- [x] 2. Update each file's header comment where it references Mermaid
   variables so it names the seven slots.
 - [ ] 3. Add `assets/diagramcss_test.go` with
   `TestDiagramPaletteDefinedByEveryTheme`: for every

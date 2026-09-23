@@ -4,8 +4,9 @@
  * (github.min.css and github-dark.min.css) for syntax highlighting.
  * github-dimmed writes its own direct scoped hljs token rules.
  *
- * All three define --mermaid-* CSS custom properties consumed by
- * the preview.js Mermaid initialiser (theme: 'base').
+ * All three define the seven --mermaid-* diagram palette slots
+ * (bg, fg, line, accent, muted, surface, border) read by readPalette()
+ * in preview.js (DESIGN-0004).
  */
 
 /* ── github-light ─────────────────────────────────────────────────────────── */
