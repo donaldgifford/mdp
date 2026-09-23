@@ -188,7 +188,7 @@ depends on.
   `…/jetbrains-mono@5/files/jetbrains-mono-latin-wght-normal.woff2`,
   `…/jetbrains-mono@5/files/jetbrains-mono-latin-ext-wght-normal.woff2`.
   Expected sizes at 5.3.0: 47.1 KB, 83.1 KB, 39.5 KB, 14.8 KB.
-- [ ] 2. Download `…/inter@5/LICENSE` as
+- [x] 2. Download `…/inter@5/LICENSE` as
   `assets/vendor/fonts/LICENSE-Inter` and `…/jetbrains-mono@5/LICENSE`
   as `assets/vendor/fonts/LICENSE-JetBrainsMono` (both SIL OFL 1.1).
 - [ ] 3. Add the same six `curl` lines to the `update-vendor` target in
