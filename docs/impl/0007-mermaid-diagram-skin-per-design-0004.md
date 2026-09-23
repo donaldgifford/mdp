@@ -374,7 +374,7 @@ values, remove the legacy twelve, and guard the contract with a test.
   appears anywhere in the file. Derive the theme list from `assets.FS`
   so a new theme is covered automatically (same approach as
   `footnotecss_test.go`).
-- [ ] 4. Update the comments in `pkg/theme/theme.go` (line 15 "mermaid
+- [x] 4. Update the comments in `pkg/theme/theme.go` (line 15 "mermaid
   vars", lines 43-45 `mermaidBase`) to describe the seven slots and
   that `preview.js` derives a palette when they are absent. No exported
   API change; `Theme.MermaidTheme` keeps its values.
