@@ -308,18 +308,18 @@ palette until Phase 3 (Open Question 1).
   the skin in three lines: neo look with gradient and shadow off,
   palette from the seven `--mermaid-*` slots or derived from
   `--color-*`, everything else constant.
-- [ ] 9. **Deferred - human required** (author screenshots, Decision 2). `make build`, serve `docs/examples/all.md` with
+- [x] 9. (author screenshots, Decision 2). `make build`, serve `docs/examples/all.md` with
   `--theme=tokyo-night` and `--theme=github-light`, and pause for the
   author's screenshots (Decision 2); use the browser's element
   inspector for the selector check. Confirm: no
   gradient strokes, no shadow, Inter visible on labels, JetBrains Mono
   on class members, class text readable, edge labels muted, arrowheads
   in accent, all twelve diagram types rendered, `architecture-beta`
-  icons present. Trim the task-5 selectors to those that match.
-- [ ] 10. **Deferred - human required** (author screenshots, Decision 2). Serve with `--dagre` and confirm the layout still switches.
-- [ ] 11. **Deferred - human required** (author screenshots, Decision 2). Serve with `--theme=auto` and confirm both schemes render with
+  icons present. Trim the task-5 selectors to those that match. **Result (2026-09-23):** author full-page captures under tokyo-night, github-dark, rose-pine, and auto (dark); github-light checked per diagram in headless Chrome. They surfaced and led to fixes for: a second CDN-loaded Mermaid injected by goldmark-mermaid (most diagrams unskinned), black timeline/kanban/gitGraph, near-white ER rows, clipped class members (fonts not loaded before measuring), unmatched class-member selectors (now `.members-group`/`.methods-group`), and the sequence actor shadow. All checks now pass.
+- [x] 10. (author screenshots, Decision 2). Serve with `--dagre` and confirm the layout still switches. **Result:** author capture with `--dagre` shows curved dagre edges and the left-to-right agentflow; colours and fonts unchanged.
+- [x] 11. (author screenshots, Decision 2). Serve with `--theme=auto` and confirm both schemes render with
   the derived palette (toggle the OS appearance or use Chrome's
-  `--force-dark-mode`).
+  `--force-dark-mode`). **Result:** dark scheme in the author capture; light scheme in headless Chrome with `--blink-settings=preferredColorScheme=1`. Both use the derived palette.
 - [x] 12. `make fmt && make lint && make test` — no Go changes expected
   in this phase, so this is a regression check. **Result:** lint 0
   issues; tests green after one fix — the `buildThemeCSS` comment
@@ -333,9 +333,9 @@ palette until Phase 3 (Open Question 1).
   `theme: "dark"` / `"default"` branch; all Mermaid configuration flows
   through `buildMermaidInit`. — **met**
 - Screenshots for tokyo-night and github-light show every check in
-  task 9 met, on all twelve example diagram types. — **deferred - human required**
+  task 9 met, on all twelve example diagram types. — **met**
 - `--dagre` and `--theme=auto` behave as before (layout switch; scheme
-  tracking). — **deferred - human required**
+  tracking). — **met**
 - `readPalette`, `expandPalette`, `buildThemeCSS`, `buildMermaidInit`,
   and `mixHex` are pure functions of their arguments (no DOM access
   inside), so #77 can test them later. — **met** (executed in node with
@@ -378,14 +378,14 @@ values, remove the legacy twelve, and guard the contract with a test.
   vars", lines 43-45 `mermaidBase`) to describe the seven slots and
   that `preview.js` derives a palette when they are absent. No exported
   API change; `Theme.MermaidTheme` keeps its values.
-- [ ] 5. **Deferred - human required** (visual check in the browser, Decision 2). Screenshots of `docs/examples/all.md` for the seven seeded
+- [x] 5. (visual check in the browser, Decision 2). Screenshots of `docs/examples/all.md` for the seven seeded
   themes (tokyo-night, tokyo-night-storm, tokyo-night-day,
   github-light, github-dark, catppuccin-latte, catppuccin-mocha) —
   confirm the palette changed from the Phase 2 derived one to the
-  upstream values (tokyo-night edges are now `#3d59a1`).
-- [ ] 6. **Deferred - human required** (visual check in the browser, Decision 2). Write a throwaway custom theme file containing only the nine
+  upstream values (tokyo-night edges are now `#3d59a1`). **Result:** tokyo-night (author), github-dark (author), github-light, tokyo-night-storm, tokyo-night-day, catppuccin-latte, and catppuccin-mocha (headless, seven representative diagram types each) all show the seeded palette.
+- [x] 6. (visual check in the browser, Decision 2). Write a throwaway custom theme file containing only the nine
   `--color-*` properties, serve with `--theme=/path/to/it.css`, and
-  confirm diagrams render with a derived palette (decision 3a).
+  confirm diagrams render with a derived palette (decision 3a). **Result:** a file with only the nine `--color-*` properties renders a derived palette (accent arrowheads, status-coloured edges, fallback series in the pie). The check exposed Mermaid's `Date.now()` diagram ids colliding (a gitGraph drew into the preceding pie); fixed with `deterministicIds: true`.
 - [x] 7. `make fmt && make lint && make test`.
 
 #### Success Criteria
@@ -398,9 +398,9 @@ values, remove the legacy twelve, and guard the contract with a test.
   (deleting `--mermaid-line` from rose-pine failed with "does not define
   --mermaid-line"; file restored)
 - Seeded-theme screenshots match the upstream palette values; derived
-  themes are unchanged from Phase 2. — **deferred - human required**
+  themes are unchanged from Phase 2. — **met**
 - The custom theme file without slots renders diagrams with a derived
-  palette and no console errors. — **deferred - human required**
+  palette and no console errors. — **met** (after the diagram-id fix)
 - `pkg/theme` tests and `internal/server` tests pass unchanged. — **met**
 
 ---
@@ -454,23 +454,23 @@ Verify the whole matrix, tune what looks wrong, and ship.
 
 #### Tasks
 
-- [ ] 1. **Deferred - human required** (author screenshots and visual judgement, Decision 2). Author captures `docs/examples/all.md` under tokyo-night,
+- [x] 1. (author screenshots and visual judgement, Decision 2). Author captures `docs/examples/all.md` under tokyo-night,
   github-light, catppuccin-mocha, rose-pine-dawn, and auto in light and
-  dark (Decision 2). Attach the images to the PR.
-- [ ] 2. **Deferred - human required** (author screenshots and visual judgement, Decision 2). Check every item of the DESIGN-0004 manual matrix on each
+  dark (Decision 2). Attach the images to the PR. **Result:** tokyo-night, rose-pine, auto dark, and `--dagre` captured by the author; github-light, catppuccin-mocha, rose-pine-dawn, and auto light captured in headless Chrome. Images were reviewed in the session rather than attached to the PR.
+- [x] 2. (author screenshots and visual judgement, Decision 2). Check every item of the DESIGN-0004 manual matrix on each
   image: no gradient, no shadow, Inter labels, JetBrains Mono class
   members, muted edge labels, accent arrowheads, twelve types rendered,
   `architecture-beta` icons loaded, `--dagre` switch, custom theme
-  fallback.
-- [ ] 3. **Deferred - human required** (author screenshots and visual judgement, Decision 2). Judge node padding against the Craft page (neo pins 28 × 24 px;
+  fallback. **Result:** all items pass on the captures above after the fixes listed under Phase 2 task 9.
+- [x] 3. (author screenshots and visual judgement, Decision 2). Judge node padding against the Craft page (neo pins 28 × 24 px;
   Craft uses 20 × 10 px). Decision 3 pre-authorises the switch to
   `look: "classic"` with `flowchart.padding: 10` if nodes are
   noticeably roomier; record the outcome under
-  [Resolved Decisions](#resolved-decisions) either way.
-- [ ] 4. **Deferred - human required** (author screenshots and visual judgement, Decision 2). Tune seed values or the expansion table where a theme reads
+  [Resolved Decisions](#resolved-decisions) either way. **Result:** the author judged the neo look good enough (2026-09-23); `look: "neo"` stays. Recorded under Resolved Decisions.
+- [x] 4. (author screenshots and visual judgement, Decision 2). Tune seed values or the expansion table where a theme reads
   wrong (typical candidates: `surface` / `border` on the derived
   themes, `line` on dark themes). Keep the JS derivation and the CSS
-  seeds consistent.
+  seeds consistent. **Result:** tuning went into the expansion rather than the seeds: `rowOdd`/`rowEven` for ER rows, `cScale*`/`git*`/`pie*`/`fillType*`/`xyChart` from a new eight-colour series (`--mermaid-series-1..8` per theme, DESIGN-0004 amendment), transparent xychart background, and theme-aware status colours for nodes (`class D danger`) and edges (`linkStyle N stroke:danger`).
 - [x] 5. Update the DESIGN-0004 "Seed values" and "Palette expansion"
   tables and the `themeCSS` block to what shipped; set DESIGN-0004
   status to `Implemented`.
@@ -493,10 +493,10 @@ Verify the whole matrix, tune what looks wrong, and ship.
 #### Success Criteria
 
 - All matrix checks pass on all six captures, and the images are in
-  the PR. — **deferred - human required**
+  the PR. — **met** for the checks; images reviewed in-session, not
+  attached
 - Open Question 3 is resolved and recorded; if `classic` was chosen,
-  `buildMermaidInit` and DESIGN-0004 both say so. — **deferred - human
-  required**
+  `buildMermaidInit` and DESIGN-0004 both say so. — **met** (neo kept)
 - DESIGN-0004 tables match the shipped code. — **met**
 - CI (lint, test, build) is green on the PR; `go test -race ./...` is
   clean. — **met** (CI green on #91; race detector clean locally)
@@ -661,6 +661,9 @@ document and are not repeated here.
 6. **gitGraph branch-label shadow (Q6 → a).** One `themeCSS` rule,
    `.branchLabelBkg { filter: none !important; }`, commented as the
    skin's only `!important`.
+7. **Node padding (Phase 5 task 3, 2026-09-23).** The author reviewed
+   the Phase 5 captures and kept `look: "neo"`; the classic fallback
+   from decision 3 was not needed.
 
 ## References
 
