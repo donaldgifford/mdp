@@ -1,7 +1,7 @@
 ---
 id: IMPL-0007
 title: "Mermaid diagram skin per DESIGN-0004"
-status: In Progress
+status: Completed
 author: Donald Gifford
 created: 2026-09-22
 ---
@@ -487,8 +487,8 @@ Verify the whole matrix, tune what looks wrong, and ship.
   merge, set this document's status to `Completed`. **Result:** opened
   as [#91](https://github.com/donaldgifford/mdp/pull/91) with a pending
   screenshot checklist in place of the matrix; CI green (build, lint,
-  test, licenses, security). Setting `Completed` after merge is
-  **deferred - human required**.
+  test, licenses, security). Merged 2026-09-23; status set to
+  `Completed`.
 
 #### Success Criteria
 
