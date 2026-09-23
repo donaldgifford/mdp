@@ -509,6 +509,11 @@ func TestParser_WithMermaidRenderMode_Client(t *testing.T) {
 	if !strings.Contains(got, `<pre class="mermaid"`) {
 		t.Errorf("client mode should emit <pre class=\"mermaid\">, got: %s", got)
 	}
+	// A second, CDN-loaded Mermaid would race the page's own and render
+	// diagrams with stock themes.
+	if strings.Contains(got, "<script") {
+		t.Errorf("client mode should not emit a <script> tag, got: %s", got)
+	}
 }
 
 // TestParser_WithMermaidRenderMode_Server asserts the server render

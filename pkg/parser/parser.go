@@ -116,6 +116,11 @@ func New(opts ...Option) *Parser {
 	if cfg.mermaid {
 		extensions = append(extensions, &mermaid.Extender{
 			RenderMode: cfg.mermaidMode,
+			// Without NoScript, client mode appends a <script> that loads
+			// mermaid.js from a CDN and calls initialize({startOnLoad:
+			// true}). That second Mermaid races the page's own and renders
+			// diagrams with stock themes; the page must load Mermaid itself.
+			NoScript: true,
 		})
 	}
 	if cfg.math {

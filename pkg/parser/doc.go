@@ -55,7 +55,8 @@
 // WithMermaidRenderMode to render Mermaid diagrams to inline <svg>
 // at parse time (requires the mmdc CLI). The default
 // RenderModeClient emits <pre class="mermaid"> placeholders for the
-// browser to render with mermaid.js.
+// browser to render with mermaid.js. No <script> tag is emitted: the
+// page is expected to load and initialize mermaid.js itself.
 //
 //	import "go.abhg.dev/goldmark/mermaid"
 //
