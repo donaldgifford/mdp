@@ -304,7 +304,7 @@ palette until Phase 3 (Open Question 1).
   on `<body>` for `internal/server` and its tests but is no longer read
   here. Leave the Iconify registration (lines 16-38) and
   `renderClientSide` untouched.
-- [ ] 8. Update the comment block above the initialisation to describe
+- [x] 8. Update the comment block above the initialisation to describe
   the skin in three lines: neo look with gradient and shadow off,
   palette from the seven `--mermaid-*` slots or derived from
   `--color-*`, everything else constant.

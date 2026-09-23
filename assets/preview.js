@@ -193,7 +193,9 @@
     return init;
   }
 
-  // Initialize Mermaid with theme detection.
+  // Initialize Mermaid with the diagram skin: neo look with gradient and
+  // shadow off; palette from the theme's seven --mermaid-* slots or derived
+  // from --color-*; fonts, geometry, and spacing constant (see SKIN above).
   if (typeof mermaid !== "undefined") {
     // Register Iconify icon packs for `pack:icon` references in architecture
     // diagrams. Packs download lazily on first use only; offline diagrams
