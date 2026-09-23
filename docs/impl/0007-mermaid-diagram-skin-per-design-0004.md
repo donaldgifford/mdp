@@ -253,7 +253,7 @@ palette until Phase 3 (Open Question 1).
   `assets/preview.js`:
   `font: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'`,
   `mono: '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace'`.
-- [ ] 2. Add `mixHex(fg, bg, pct)` — per-channel sRGB mix returning a
+- [x] 2. Add `mixHex(fg, bg, pct)` — per-channel sRGB mix returning a
   six-digit lowercase hex, the same arithmetic as beautiful-mermaid's
   `color-mix(in srgb, fg pct%, bg)` and as the DESIGN-0004 seed table.
 - [ ] 3. Add `readPalette(style)`: read `--mermaid-bg`, `-fg`, `-line`,

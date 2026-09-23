@@ -25,6 +25,21 @@
     mono: '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace',
   };
 
+  // mixHex mixes fg into bg at pct percent per sRGB channel and returns a
+  // six-digit lowercase hex. Same arithmetic as CSS
+  // color-mix(in srgb, fg pct%, bg), which beautiful-mermaid uses for its
+  // derived slots and which produced the DESIGN-0004 seed table.
+  function mixHex(fg, bg, pct) {
+    var out = "#";
+    for (var i = 1; i < 7; i += 2) {
+      var f = parseInt(fg.slice(i, i + 2), 16);
+      var b = parseInt(bg.slice(i, i + 2), 16);
+      var c = Math.round((f * pct + b * (100 - pct)) / 100);
+      out += (c < 16 ? "0" : "") + c.toString(16);
+    }
+    return out;
+  }
+
   // Initialize Mermaid with theme detection.
   if (typeof mermaid !== "undefined") {
     // Register Iconify icon packs for `pack:icon` references in architecture
