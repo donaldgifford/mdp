@@ -431,15 +431,20 @@ Bring the written contract in line with the code.
   findings above (so nobody removes it as redundant).
 - [x] 4. `docs/examples/README.md`: one line noting the examples are the
   screenshot corpus for the diagram skin.
-- [ ] 5. Run `markdownlint-cli2` on every edited markdown file.
+- [x] 5. Run `markdownlint-cli2` on every edited markdown file.
+  **Result:** `docs/examples/README.md` and this document are clean.
+  `CLAUDE.md` (2) and `README.md` (7) report exactly the same errors as
+  on `main` (MD040, MD032, MD060 in untouched sections); no new findings.
 
 #### Success Criteria
 
 - `CLAUDE.md` and `README.md` describe exactly the seven slots the test
   enforces; no mention of the legacy twelve remains anywhere in the
   repo (`grep -rn "primaryBorderColor" --include=*.md --include=*.css
-  .` returns nothing outside `docs/`).
-- `markdownlint-cli2` reports zero issues on the edited files.
+  .` returns nothing outside `docs/`). — **met**
+- `markdownlint-cli2` reports zero issues on the edited files. — **met
+  for new content**; the pre-existing `CLAUDE.md` / `README.md` findings
+  are unchanged from `main` and out of scope
 
 ---
 
