@@ -366,7 +366,7 @@ values, remove the legacy twelve, and guard the contract with a test.
   `tokyo-night-moon`, `tokyo-night-storm`, `tokyo-night`.
 - [x] 2. Update each file's header comment where it references Mermaid
   variables so it names the seven slots.
-- [ ] 3. Add `assets/diagramcss_test.go` with
+- [x] 3. Add `assets/diagramcss_test.go` with
   `TestDiagramPaletteDefinedByEveryTheme`: for every
   `[data-theme="…"] {…}` block in `assets/themes/*.css` that defines
   `--color-fg-default`, assert the seven slots are present, each value
