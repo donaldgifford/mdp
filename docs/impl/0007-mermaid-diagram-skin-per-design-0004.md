@@ -411,7 +411,7 @@ Bring the written contract in line with the code.
 
 #### Tasks
 
-- [ ] 1. `CLAUDE.md` "Theme CSS Format": replace the twelve-line
+- [x] 1. `CLAUDE.md` "Theme CSS Format": replace the twelve-line
   `--mermaid-*` example with the seven slots and a one-line note that
   values must be six-digit hex (mermaid does color arithmetic on them;
   `var()` and `color-mix()` are not accepted). Keep the hljs rules and

@@ -144,15 +144,14 @@ Each built-in theme lives in `assets/themes/<name>.css` and must follow this str
   --color-danger-fg:      #hex;
   --color-success-fg:     #hex;
 
-  /* Mermaid theme variables (theme: 'base') — required */
-  --mermaid-primaryColor:        #hex;
-  --mermaid-primaryTextColor:    #hex;
-  --mermaid-primaryBorderColor:  #hex;
-  --mermaid-lineColor:           #hex;
-  --mermaid-secondaryColor:      #hex;
-  --mermaid-tertiaryColor:       #hex;
-  --mermaid-background:          #hex;
-  /* ... other mermaid vars */
+  /* Diagram palette (DESIGN-0004) — seven required slots, six-digit hex only */
+  --mermaid-bg:      #hex;  /* canvas behind the diagram; edge-label backing */
+  --mermaid-fg:      #hex;  /* node, actor, title text */
+  --mermaid-line:    #hex;  /* edges, lifelines, relations, transitions */
+  --mermaid-accent:  #hex;  /* arrowheads, activations, special states */
+  --mermaid-muted:   #hex;  /* edge labels, secondary text */
+  --mermaid-surface: #hex;  /* node, actor, note, cluster fill */
+  --mermaid-border:  #hex;  /* node, actor, cluster stroke */
 }
 
 /* Direct scoped hljs token rules — NO CSS variable indirection */
@@ -166,6 +165,8 @@ Each built-in theme lives in `assets/themes/<name>.css` and must follow this str
 - `.hljs-keyword` and `.hljs-operator` MUST use different colors — sharing them collapses syntax to a single hue
 - Register the theme in `pkg/theme/theme.go` `builtinThemes` map via `mustReadThemeCSS()`
 - Update theme count assertions in `pkg/theme/theme_test.go`
+- Diagram slots must be six-digit hex: `preview.js` hands them to Mermaid, which does colour arithmetic and cannot evaluate `var()` or `color-mix()`. `preview.js` maps the seven slots onto Mermaid's base-theme variables — never add Mermaid variable names to a theme file
+- `TestDiagramPaletteDefinedByEveryTheme` (`assets/diagramcss_test.go`) enforces all seven slots in every theme and fails on any other `--mermaid-*` property
 
 ## Code Style
 
