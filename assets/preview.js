@@ -198,7 +198,9 @@
     // xychart merges this over the stock light theme, not over the
     // variables above, so every colour must be given.
     vars.xyChart = {
-      backgroundColor: p.bg,
+      // Transparent like every other diagram, so the chart sits on the
+      // page's diagram panel instead of drawing its own darker box.
+      backgroundColor: "transparent",
       titleColor: p.fg,
       dataLabelColor: p.fg,
       legendTextColor: p.fg,
