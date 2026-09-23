@@ -271,7 +271,7 @@ palette until Phase 3 (Open Question 1).
   `dropShadow: "none"`, `strokeWidth: 1`, `radius: 6`,
   `fontFamily: SKIN.font`, `fontSize: "13px"`. Keep it as a literal
   object so the mapping is readable in one screen.
-- [ ] 5. Add `buildThemeCSS(p)` returning:
+- [x] 5. Add `buildThemeCSS(p)` returning:
 
   ```css
   .edgeLabel, .edgeLabel span, .edgeLabel p { color: <muted>; font-size: 11px; }

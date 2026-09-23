@@ -141,6 +141,30 @@
     };
   }
 
+  // buildThemeCSS returns CSS that Mermaid injects inside its own
+  // id-scoped <style> block, for the three things no theme variable
+  // reaches (IMPL-0007 "New findings"):
+  //   - arrowheads: .marker is painted with lineColor, not arrowheadColor;
+  //   - class text: painted with nodeBorder, which is the faint border
+  //     slot here and would make members nearly invisible;
+  //   - edge labels: take the node text colour instead of a muted one.
+  // Do not remove these rules as redundant with the theme variables.
+  function buildThemeCSS(p) {
+    return [
+      ".edgeLabel, .edgeLabel span, .edgeLabel p { color: " + p.muted + "; font-size: 11px; }",
+      ".marker, .marker path { fill: " + p.accent + "; stroke: " + p.accent + "; }",
+      ".marker.cross { stroke: " + p.accent + "; }",
+      "g.classGroup text, .classLabel .label { fill: " + p.fg + "; font-family: " + SKIN.mono + "; font-size: 12px; }",
+      ".classGroup .nodeLabel, .classGroup .label { color: " + p.fg + "; font-family: " + SKIN.mono + "; font-size: 12px; }",
+      ".classTitle, .classTitleText { font-family: " + SKIN.font + "; font-weight: 600; }",
+      ".cluster-label text, .cluster-label span { font-size: 12px; font-weight: 600; }",
+      // gitGraph sets this filter as an inline style under the neo look, so
+      // only !important reaches it. The skin's single !important (IMPL-0007
+      // decision 6).
+      ".branchLabelBkg { filter: none !important; }",
+    ].join("\n");
+  }
+
   // Initialize Mermaid with theme detection.
   if (typeof mermaid !== "undefined") {
     // Register Iconify icon packs for `pack:icon` references in architecture
