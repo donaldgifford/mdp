@@ -77,6 +77,23 @@ the goldmark-mermaid render mode. Default stays `RenderModeClient`
 (emits `<pre class="mermaid">` placeholders); setting
 `RenderModeServer` switches to inline `<svg>` via the `mmdc` CLI.
 
+**Mermaid is configured in exactly one place: `buildMermaidInit` in
+`assets/preview.js`** (the "diagram skin", DESIGN-0004 / IMPL-0007).
+It keeps Mermaid v12's `neo` look with `useGradient: false` and
+`dropShadow: "none"`, uses `theme: "base"` for every theme including
+auto, and sets fonts (vendored Inter / JetBrains Mono), stroke, radius,
+and spacing as constants. Colours come from `readPalette`, which reads
+the theme's seven `--mermaid-*` slots and derives any missing slot from
+`--color-*`. `expandPalette` maps the slots onto Mermaid variables.
+**`buildThemeCSS` is not redundant with the variables** — it covers
+three things no variable reaches: `.marker` arrowheads are painted with
+`lineColor`, class-diagram text is painted with `nodeBorder` (the faint
+border slot would make members unreadable), and edge labels take the
+node text colour. It also holds the skin's only `!important`, for the
+gitGraph branch-label shadow Mermaid sets inline. `preview.js` is
+inlined into the page, so never write a literal `<style>` tag in it,
+even in a comment — `TestServer_ThemeCSS_Injection` counts them.
+
 `pkg/parser.Parser.Render` holds a per-`Parser` `sync.Mutex` and
 serializes `goldmark.Convert` as a temporary workaround for a data
 race in `gm-alert-callouts@v0.8.0` (shared `cases.Caser`). The

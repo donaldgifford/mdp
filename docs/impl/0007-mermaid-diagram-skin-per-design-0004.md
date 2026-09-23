@@ -424,7 +424,7 @@ Bring the written contract in line with the code.
   required, the seven `--mermaid-*` slots are optional and are derived
   from the prose colors when absent, and diagrams use vendored Inter and
   JetBrains Mono.
-- [ ] 3. `CLAUDE.md` architecture notes: add a paragraph under the
+- [x] 3. `CLAUDE.md` architecture notes: add a paragraph under the
   existing Mermaid notes describing `buildMermaidInit` as the single
   place Mermaid is configured, the `neo` look with gradient and shadow
   off, and that `themeCSS` exists because of the three stylesheet
