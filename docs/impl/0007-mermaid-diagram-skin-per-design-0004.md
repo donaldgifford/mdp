@@ -308,7 +308,7 @@ palette until Phase 3 (Open Question 1).
   the skin in three lines: neo look with gradient and shadow off,
   palette from the seven `--mermaid-*` slots or derived from
   `--color-*`, everything else constant.
-- [ ] 9. `make build`, serve `docs/examples/all.md` with
+- [ ] 9. **Deferred - human required** (author screenshots, Decision 2). `make build`, serve `docs/examples/all.md` with
   `--theme=tokyo-night` and `--theme=github-light`, and pause for the
   author's screenshots (Decision 2); use the browser's element
   inspector for the selector check. Confirm: no
@@ -316,28 +316,34 @@ palette until Phase 3 (Open Question 1).
   on class members, class text readable, edge labels muted, arrowheads
   in accent, all twelve diagram types rendered, `architecture-beta`
   icons present. Trim the task-5 selectors to those that match.
-- [ ] 10. Serve with `--dagre` and confirm the layout still switches.
-- [ ] 11. Serve with `--theme=auto` and confirm both schemes render with
+- [ ] 10. **Deferred - human required** (author screenshots, Decision 2). Serve with `--dagre` and confirm the layout still switches.
+- [ ] 11. **Deferred - human required** (author screenshots, Decision 2). Serve with `--theme=auto` and confirm both schemes render with
   the derived palette (toggle the OS appearance or use Chrome's
   `--force-dark-mode`).
-- [ ] 12. `make fmt && make lint && make test` — no Go changes expected
-  in this phase, so this is a regression check.
+- [x] 12. `make fmt && make lint && make test` — no Go changes expected
+  in this phase, so this is a regression check. **Result:** lint 0
+  issues; tests green after one fix — the `buildThemeCSS` comment
+  contained a literal `<style>` tag, and because `preview.js` is inlined
+  into the page, `TestServer_ThemeCSS_Injection` counted it as a second
+  style block. The comment was reworded.
 
 #### Success Criteria
 
 - `preview.js` contains no `--mermaid-<mermaidVariableName>` reads and no
   `theme: "dark"` / `"default"` branch; all Mermaid configuration flows
-  through `buildMermaidInit`.
+  through `buildMermaidInit`. — **met**
 - Screenshots for tokyo-night and github-light show every check in
-  task 9 met, on all twelve example diagram types.
+  task 9 met, on all twelve example diagram types. — **deferred - human required**
 - `--dagre` and `--theme=auto` behave as before (layout switch; scheme
-  tracking).
+  tracking). — **deferred - human required**
 - `readPalette`, `expandPalette`, `buildThemeCSS`, `buildMermaidInit`,
   and `mixHex` are pure functions of their arguments (no DOM access
-  inside), so #77 can test them later.
+  inside), so #77 can test them later. — **met** (executed in node with
+  a stub style: 62 theme variables, `look: "neo"`, `useGradient: false`,
+  `layout` present only when `dagre` is passed)
 - Existing Go tests pass unchanged, including
   `TestServer_MermaidThemeAttribute` and
-  `TestServer_MermaidLayoutAttribute`.
+  `TestServer_MermaidLayoutAttribute`. — **met**
 
 ---
 
