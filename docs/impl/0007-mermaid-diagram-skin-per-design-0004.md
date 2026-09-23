@@ -249,7 +249,7 @@ palette until Phase 3 (Open Question 1).
 
 #### Tasks
 
-- [ ] 1. Add a `SKIN` constant near the top of the IIFE in
+- [x] 1. Add a `SKIN` constant near the top of the IIFE in
   `assets/preview.js`:
   `font: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'`,
   `mono: '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace'`.

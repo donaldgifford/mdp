@@ -8,6 +8,23 @@
   var maxReconnectDelay = 5000;
   var useSSE = false;
 
+  // ---------------------------------------------------------------------
+  // Mermaid diagram skin (DESIGN-0004)
+  //
+  // Everything that is not a colour is constant here, identical for every
+  // theme. Colours come from the theme's seven --mermaid-* slots, or are
+  // derived from its --color-* prose properties when the slots are absent.
+  // The functions below are pure (no DOM access) so a JS test harness
+  // (#77) can cover them directly.
+  // ---------------------------------------------------------------------
+
+  // Diagram font stacks. Inter and JetBrains Mono are vendored and declared
+  // with @font-face in preview.css; they are used inside diagrams only.
+  var SKIN = {
+    font: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    mono: '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace',
+  };
+
   // Initialize Mermaid with theme detection.
   if (typeof mermaid !== "undefined") {
     // Register Iconify icon packs for `pack:icon` references in architecture
