@@ -191,7 +191,7 @@ depends on.
 - [x] 2. Download `…/inter@5/LICENSE` as
   `assets/vendor/fonts/LICENSE-Inter` and `…/jetbrains-mono@5/LICENSE`
   as `assets/vendor/fonts/LICENSE-JetBrainsMono` (both SIL OFL 1.1).
-- [ ] 3. Add the same six `curl` lines to the `update-vendor` target in
+- [x] 3. Add the same six `curl` lines to the `update-vendor` target in
   `Makefile` (after the hljs lines, before the `✓` echo) so the fonts
   refresh with everything else. Replace the trailing "update KaTeX
   fonts manually" note with one that covers both font sets.
