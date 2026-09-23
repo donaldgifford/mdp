@@ -118,6 +118,11 @@
       altBackground: p.surface,
       attributeBackgroundColorOdd: p.surface,
       attributeBackgroundColorEven: p.surface,
+      // ER attribute rows under the neo look. The base theme lightens
+      // primaryColor for rowOdd, which gives near-white rows on dark
+      // themes; keep a faint stripe instead.
+      rowOdd: mixHex(p.fg, p.surface, 5),
+      rowEven: p.surface,
       requirementBackground: p.surface,
       // border
       primaryBorderColor: p.border,
