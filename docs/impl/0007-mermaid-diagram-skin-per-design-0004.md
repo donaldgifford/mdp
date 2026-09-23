@@ -418,7 +418,7 @@ Bring the written contract in line with the code.
   the keyword/operator warning unchanged. Add a bullet pointing at
   `TestDiagramPaletteDefinedByEveryTheme` next to the existing "Update
   theme count assertions" bullet.
-- [ ] 2. `README.md` "Themes": amend the closing sentence ("Each built-in
+- [x] 2. `README.md` "Themes": amend the closing sentence ("Each built-in
   theme provides … Mermaid diagram theming …") and add a short
   "Custom theme files" subsection: the nine `--color-*` properties are
   required, the seven `--mermaid-*` slots are optional and are derived
