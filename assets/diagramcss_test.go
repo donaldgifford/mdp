@@ -27,10 +27,21 @@ var (
 		"--mermaid-bg", "--mermaid-fg", "--mermaid-line", "--mermaid-accent",
 		"--mermaid-muted", "--mermaid-surface", "--mermaid-border",
 	}
+
+	// seriesSlots are the eight-colour series for multi-hue diagrams
+	// (timeline, gitGraph, pie, journey, xychart). Optional for custom
+	// themes -- readPalette() derives them -- but every built-in theme
+	// sets them so its diagrams use the theme's own hues.
+	seriesSlots = []string{
+		"--mermaid-series-1", "--mermaid-series-2", "--mermaid-series-3",
+		"--mermaid-series-4", "--mermaid-series-5", "--mermaid-series-6",
+		"--mermaid-series-7", "--mermaid-series-8",
+	}
 )
 
 // TestDiagramPaletteDefinedByEveryTheme asserts that every built-in theme
-// defines the seven diagram palette slots as lowercase six-digit hex, and
+// defines the seven diagram palette slots and the eight series colours as
+// lowercase six-digit hex, and
 // that none of the legacy --mermaid-<variableName> properties survive.
 //
 // readPalette() derives any missing slot from the prose colours, so a
@@ -52,8 +63,9 @@ func TestDiagramPaletteDefinedByEveryTheme(t *testing.T) {
 		t.Fatal("found no theme files; this test would pass vacuously")
 	}
 
-	allowed := make(map[string]bool, len(diagramSlots))
-	for _, slot := range diagramSlots {
+	required := append(append([]string{}, diagramSlots...), seriesSlots...)
+	allowed := make(map[string]bool, len(required))
+	for _, slot := range required {
 		allowed[slot] = true
 	}
 
@@ -79,13 +91,13 @@ func TestDiagramPaletteDefinedByEveryTheme(t *testing.T) {
 					prop, value := m[1], strings.TrimSpace(m[2])
 					if !allowed[prop] {
 						t.Errorf("%s (%s) still defines legacy property %s; only "+
-							"the seven palette slots are read", name, path, prop)
+							"the palette and series slots are read", name, path, prop)
 						continue
 					}
 					got[prop] = value
 				}
 
-				for _, slot := range diagramSlots {
+				for _, slot := range required {
 					value, ok := got[slot]
 					if !ok {
 						t.Errorf("%s (%s) does not define %s", name, path, slot)

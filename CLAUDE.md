@@ -83,8 +83,11 @@ It keeps Mermaid v12's `neo` look with `useGradient: false` and
 `dropShadow: "none"`, uses `theme: "base"` for every theme including
 auto, and sets fonts (vendored Inter / JetBrains Mono), stroke, radius,
 and spacing as constants. Colours come from `readPalette`, which reads
-the theme's seven `--mermaid-*` slots and derives any missing slot from
-`--color-*`. `expandPalette` maps the slots onto Mermaid variables.
+the theme's seven `--mermaid-*` slots and eight `--mermaid-series-*`
+hues, deriving anything missing from `--color-*`. The series feeds every
+multi-hue diagram (timeline/kanban/mindmap sections via `cScale*`, gitGraph
+`git*`, `pie*`, journey `fillType*`, `xyChart.plotColorPalette`); Mermaid's
+own derivation of those from `primaryColor` is near-black on dark themes. `expandPalette` maps the slots onto Mermaid variables.
 **`buildThemeCSS` is not redundant with the variables** — it covers
 three things no variable reaches: `.marker` arrowheads are painted with
 `lineColor`, class-diagram text is painted with `nodeBorder` (the faint
@@ -169,6 +172,10 @@ Each built-in theme lives in `assets/themes/<name>.css` and must follow this str
   --mermaid-muted:   #hex;  /* edge labels, secondary text */
   --mermaid-surface: #hex;  /* node, actor, note, cluster fill */
   --mermaid-border:  #hex;  /* node, actor, cluster stroke */
+
+  /* Series (DESIGN-0004 amendment) — eight hues, six-digit hex only;
+     series-1 should be the accent */
+  --mermaid-series-1: #hex;  /* ... through --mermaid-series-8 */
 }
 
 /* Direct scoped hljs token rules — NO CSS variable indirection */
@@ -183,7 +190,7 @@ Each built-in theme lives in `assets/themes/<name>.css` and must follow this str
 - Register the theme in `pkg/theme/theme.go` `builtinThemes` map via `mustReadThemeCSS()`
 - Update theme count assertions in `pkg/theme/theme_test.go`
 - Diagram slots must be six-digit hex: `preview.js` hands them to Mermaid, which does colour arithmetic and cannot evaluate `var()` or `color-mix()`. `preview.js` maps the seven slots onto Mermaid's base-theme variables — never add Mermaid variable names to a theme file
-- `TestDiagramPaletteDefinedByEveryTheme` (`assets/diagramcss_test.go`) enforces all seven slots in every theme and fails on any other `--mermaid-*` property
+- `TestDiagramPaletteDefinedByEveryTheme` (`assets/diagramcss_test.go`) enforces all seven slots and all eight series colours in every built-in theme and fails on any other `--mermaid-*` property
 
 ## Code Style
 

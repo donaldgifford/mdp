@@ -32,6 +32,16 @@
   --mermaid-surface: #f8f8f9;  /* node, actor, note, cluster fill */
   --mermaid-border:  #d2d3d4;  /* node, actor, cluster stroke */
 
+  /* Series (optional): distinct hues for timeline, git, pie, journey, xychart */
+  --mermaid-series-1: #0969da;
+  --mermaid-series-2: #8250df;
+  --mermaid-series-3: #1a7f37;
+  --mermaid-series-4: #bc4c00;
+  --mermaid-series-5: #1b7c83;
+  --mermaid-series-6: #cf222e;
+  --mermaid-series-7: #9a6700;
+  --mermaid-series-8: #bf3989;
+
   /* Callout colors */
   --callout-note-color:      #0969da;
   --callout-note-bg:         #ddf4ff;
@@ -68,6 +78,16 @@
   --mermaid-surface: #14181e;  /* node, actor, note, cluster fill */
   --mermaid-border:  #383d43;  /* node, actor, cluster stroke */
 
+  /* Series (optional): distinct hues for timeline, git, pie, journey, xychart */
+  --mermaid-series-1: #4493f8;
+  --mermaid-series-2: #ab7df8;
+  --mermaid-series-3: #3fb950;
+  --mermaid-series-4: #db6d28;
+  --mermaid-series-5: #39c5cf;
+  --mermaid-series-6: #f85149;
+  --mermaid-series-7: #d29922;
+  --mermaid-series-8: #db61a2;
+
   /* Callout colors */
   --callout-note-color:      #58a6ff;
   --callout-note-bg:         #12283e;
@@ -103,6 +123,16 @@
   --mermaid-muted:   #768390;  /* edge labels, secondary text */
   --mermaid-surface: #262b33;  /* node, actor, note, cluster fill */
   --mermaid-border:  #3e444d;  /* node, actor, cluster stroke */
+
+  /* Series (optional): distinct hues for timeline, git, pie, journey, xychart */
+  --mermaid-series-1: #539bf5;
+  --mermaid-series-2: #986ee2;
+  --mermaid-series-3: #57ab5a;
+  --mermaid-series-4: #cc6b2c;
+  --mermaid-series-5: #39c5cf;
+  --mermaid-series-6: #e5534b;
+  --mermaid-series-7: #c69026;
+  --mermaid-series-8: #c96198;
 
   /* Callout colors */
   --callout-note-color:      #539bf5;

@@ -485,6 +485,25 @@ Decided in this document (2026-09-22):
   the legacy twelve names are ignored (Open Question 3a).
 - Starting corner radius is 6 (Open Question 4a).
 
+### Amendment (2026-09-23): series palette
+
+The seven slots made every diagram monochrome. Diagrams whose meaning
+depends on distinct hues (timeline, kanban, and mindmap sections,
+gitGraph branches, pie slices, journey sections and actors, xychart
+series) lost the colours mermaid used to derive from an accent-filled
+`primaryColor`, and on dark themes mermaid's derivation from the new
+near-black `primaryColor` gave black sections. Each theme now adds an
+optional eight-hue series, `--mermaid-series-1` to `-8`, taken from the
+theme's own palette with series-1 equal to the accent. `expandPalette`
+maps it onto `cScale*` (18% tint over surface, full-strength
+`cScaleInv*` rule), `git*`, `pie*`, `fillType*` (25% tint), and
+`xyChart.plotColorPalette` (which must be passed complete: xychart merges
+it over the stock light theme). Journey actor dots are set in
+`buildThemeCSS` because mermaid's config merge appends
+`journey.actorColours` instead of replacing it. Missing entries fall back
+to accent, success, danger, their 50% mixes, muted, and fg. Nodes,
+edges, and borders stay monochrome.
+
 ## References
 
 - [INV-0004](../investigation/0004-evaluate-beautiful-mermaid-for-diagram-rendering-and-ascii.md),

@@ -180,7 +180,8 @@ mdp serve --theme=/path/to/my-theme.css README.md   # custom CSS file
 | `catppuccin-mocha`     | Catppuccin  | Dark               |
 
 Each built-in theme provides prose styling, syntax-highlighting token colours,
-and a seven-colour Mermaid diagram palette in a single embedded CSS file.
+a seven-colour Mermaid diagram palette, and an eight-colour series for
+multi-hue diagrams in a single embedded CSS file.
 Diagrams share one skin across every theme: flat strokes with no gradient or
 shadow, rounded corners, and labels in vendored Inter and JetBrains Mono
 (embedded, so they work offline).
@@ -205,6 +206,14 @@ the prose colours:
 | `--mermaid-muted`   | Edge labels, secondary text           | `--color-fg-muted`                            |
 | `--mermaid-surface` | Node, actor, note, and cluster fill   | 3% mix of fg into bg                          |
 | `--mermaid-border`  | Node, actor, and cluster stroke       | 20% mix of fg into bg                         |
+
+Diagrams that need several distinct colours — timeline, kanban, and
+mindmap sections, gitGraph branches, pie slices, journey sections and
+actors, xychart series — read an optional series,
+`--mermaid-series-1` through `--mermaid-series-8`. Section fills are faint
+tints of these; branches, slices, and rules use them at full strength. A
+missing entry falls back to, in order: accent, success, danger, the three
+50% mixes of those, muted, and fg.
 
 Slot values must be six-digit hex (`#1a1b26`); `var()` and `color-mix()` are
 not accepted. The Mermaid-specific `--mermaid-primaryColor`-style variables

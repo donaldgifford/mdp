@@ -59,6 +59,19 @@
     p.line = prop("--mermaid-line") || mixHex(p.fg, p.bg, 50);
     p.surface = prop("--mermaid-surface") || mixHex(p.fg, p.bg, 3);
     p.border = prop("--mermaid-border") || mixHex(p.fg, p.bg, 20);
+    // Optional eight-colour series for diagrams that need distinct hues
+    // (timeline sections, git branches, pie slices, journey, xychart).
+    // Missing entries are filled from the prose accent/success/danger.
+    var ok = prop("--color-success-fg") || p.accent;
+    var bad = prop("--color-danger-fg") || p.accent;
+    var fallback = [
+      p.accent, ok, bad,
+      mixHex(p.accent, ok, 50), mixHex(p.accent, bad, 50), mixHex(ok, bad, 50),
+      p.muted, p.fg,
+    ];
+    p.series = fallback.map(function (c, i) {
+      return prop("--mermaid-series-" + (i + 1)) || c;
+    });
     return p;
   }
 
@@ -150,21 +163,48 @@
       tagLabelBackground: p.surface,
       tagLabelBorder: p.border,
     };
-    // The base theme derives the timeline/kanban section scale (cScale*)
-    // and the gitGraph branch colours (git*) by darkening primaryColor,
-    // which is already near-black on dark themes. Set them outright:
-    // surface sections with an accent rule; branches alternate accent/line.
+    // Multi-colour diagrams take the series. The base theme would derive
+    // these from primaryColor, which is near-black on dark themes. Section
+    // fills (timeline, kanban, mindmap, journey) are faint series tints so
+    // fg text stays readable; branches, slices, and rules get full colour.
+    var n = p.series.length;
     for (var i = 0; i < 12; i++) {
-      vars["cScale" + i] = p.surface;
+      var c = p.series[i % n];
+      vars["cScale" + i] = mixHex(c, p.surface, 18);
       vars["cScaleLabel" + i] = p.fg;
       vars["cScalePeer" + i] = p.border;
-      vars["cScaleInv" + i] = p.accent;
+      vars["cScaleInv" + i] = c;
+      vars["pie" + (i + 1)] = c;
     }
     for (var j = 0; j < 8; j++) {
-      vars["git" + j] = j % 2 === 0 ? p.accent : p.line;
+      vars["git" + j] = p.series[j % n];
       vars["gitInv" + j] = p.bg;
-      vars["gitBranchLabel" + j] = j % 2 === 0 ? p.bg : p.fg;
+      vars["gitBranchLabel" + j] = p.bg;
+      vars["fillType" + j] = mixHex(p.series[j % n], p.surface, 25);
     }
+    vars.pieStrokeColor = p.bg;
+    vars.pieOuterStrokeColor = p.border;
+    vars.pieSectionTextColor = p.bg;
+    vars.pieTitleTextColor = p.fg;
+    vars.pieLegendTextColor = p.fg;
+    vars.pieOpacity = "0.9";
+    // xychart merges this over the stock light theme, not over the
+    // variables above, so every colour must be given.
+    vars.xyChart = {
+      backgroundColor: p.bg,
+      titleColor: p.fg,
+      dataLabelColor: p.fg,
+      legendTextColor: p.fg,
+      xAxisTitleColor: p.muted,
+      xAxisLabelColor: p.muted,
+      xAxisTickColor: p.border,
+      xAxisLineColor: p.border,
+      yAxisTitleColor: p.muted,
+      yAxisLabelColor: p.muted,
+      yAxisTickColor: p.border,
+      yAxisLineColor: p.border,
+      plotColorPalette: p.series.join(","),
+    };
     return vars;
   }
 
@@ -193,7 +233,16 @@
       // only !important reaches it. The skin's single !important (IMPL-0007
       // decision 6).
       ".branchLabelBkg { filter: none !important; }",
-    ].join("\n");
+    ]
+      // Journey actor dots. Mermaid's config merge appends arrays, so
+      // journey.actorColours cannot replace the stock colours; the circles
+      // carry an actor-N class instead.
+      .concat(
+        p.series.map(function (c, i) {
+          return "circle.actor-" + i + " { fill: " + c + "; }";
+        })
+      )
+      .join("\n");
   }
 
   // buildMermaidInit assembles the whole mermaid.initialize() config. The
@@ -209,6 +258,10 @@
       themeVariables: expandPalette(palette),
       themeCSS: buildThemeCSS(palette),
       flowchart: { nodeSpacing: 24, rankSpacing: 40, diagramPadding: 8 },
+      journey: {
+        titleFontFamily: SKIN.font,
+        titleColor: palette.fg,
+      },
       sequence: {
         actorFontFamily: SKIN.font,
         messageFontFamily: SKIN.font,

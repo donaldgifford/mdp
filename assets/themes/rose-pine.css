@@ -27,6 +27,16 @@
   --mermaid-surface: #1f1d2a;  /* node, actor, note, cluster fill */
   --mermaid-border:  #413f4e;  /* node, actor, cluster stroke */
 
+  /* Series (optional): distinct hues for timeline, git, pie, journey, xychart */
+  --mermaid-series-1: #c4a7e7;
+  --mermaid-series-2: #9ccfd8;
+  --mermaid-series-3: #f6c177;
+  --mermaid-series-4: #ebbcba;
+  --mermaid-series-5: #eb6f92;
+  --mermaid-series-6: #31748f;
+  --mermaid-series-7: #908caa;
+  --mermaid-series-8: #6e6a86;
+
   /* Callout colors */
   --callout-note-color:      #9ccfd8;
   --callout-note-bg:         #1b2a33;
