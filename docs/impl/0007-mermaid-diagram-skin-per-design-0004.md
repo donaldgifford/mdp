@@ -216,8 +216,11 @@ depends on.
   config pattern, `GET /vendor/fonts/inter-latin-wght-normal.woff2`,
   assert status 200, `Content-Type` starting with `font/woff2`, and a
   body longer than 1 KB.
-- [ ] 7. `make build`; record the binary size before and after in this
+- [x] 7. `make build`; record the binary size before and after in this
   document (baseline from #82: 26 MB; expected delta ≈ +0.2 MB).
+  **Measured 2026-09-22** (plain `go build ./cmd/mdp`, same flags both
+  sides): `main` 26,641,058 bytes → branch 26,839,202 bytes, **+198,144
+  bytes (0.19 MB)**.
 - [ ] 8. `make fmt && make lint && make test`.
 
 #### Success Criteria
