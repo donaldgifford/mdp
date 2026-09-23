@@ -67,7 +67,7 @@
   // geometry. useGradient and dropShadow are what the neo look reads to
   // decide on gradient strokes and the drop-shadow filter.
   function expandPalette(p) {
-    return {
+    var vars = {
       // bg
       background: p.bg,
       edgeLabelBackground: p.bg,
@@ -138,7 +138,29 @@
       radius: 6,
       fontFamily: SKIN.font,
       fontSize: "13px",
+      // gitGraph commit labels and tags
+      commitLabelColor: p.muted,
+      commitLabelBackground: p.surface,
+      tagLabelColor: p.fg,
+      tagLabelBackground: p.surface,
+      tagLabelBorder: p.border,
     };
+    // The base theme derives the timeline/kanban section scale (cScale*)
+    // and the gitGraph branch colours (git*) by darkening primaryColor,
+    // which is already near-black on dark themes. Set them outright:
+    // surface sections with an accent rule; branches alternate accent/line.
+    for (var i = 0; i < 12; i++) {
+      vars["cScale" + i] = p.surface;
+      vars["cScaleLabel" + i] = p.fg;
+      vars["cScalePeer" + i] = p.border;
+      vars["cScaleInv" + i] = p.accent;
+    }
+    for (var j = 0; j < 8; j++) {
+      vars["git" + j] = j % 2 === 0 ? p.accent : p.line;
+      vars["gitInv" + j] = p.bg;
+      vars["gitBranchLabel" + j] = j % 2 === 0 ? p.bg : p.fg;
+    }
+    return vars;
   }
 
   // buildThemeCSS returns CSS that Mermaid injects inside its own
@@ -156,8 +178,12 @@
       ".marker.cross { stroke: " + p.accent + "; }",
       "g.classGroup text, .classLabel .label { fill: " + p.fg + "; font-family: " + SKIN.mono + "; font-size: 12px; }",
       ".classGroup .nodeLabel, .classGroup .label { color: " + p.fg + "; font-family: " + SKIN.mono + "; font-size: 12px; }",
+      ".members-group .nodeLabel, .methods-group .nodeLabel { color: " + p.fg + "; font-family: " + SKIN.mono + "; font-size: 12px; }",
       ".classTitle, .classTitleText { font-family: " + SKIN.font + "; font-weight: 600; }",
       ".cluster-label text, .cluster-label span { font-size: 12px; font-weight: 600; }",
+      // Sequence actors carry a drop-shadow filter attribute that the
+      // dropShadow variable does not reach; CSS outranks the attribute.
+      "rect.actor { filter: none; }",
       // gitGraph sets this filter as an inline style under the neo look, so
       // only !important reaches it. The skin's single !important (IMPL-0007
       // decision 6).
@@ -231,20 +257,41 @@
     );
   }
 
+  // Tail of the serialized mermaid.run() chain; see renderClientSide.
+  // It starts on the vendored fonts: Mermaid sizes node boxes by measuring
+  // label text, so measuring with a fallback font clips labels once Inter
+  // or JetBrains Mono swaps in. A failed load still lets diagrams render.
+  var mermaidQueue =
+    document.fonts && document.fonts.load
+      ? Promise.all([
+          document.fonts.load('13px "Inter"'),
+          document.fonts.load('600 13px "Inter"'),
+          document.fonts.load('12px "JetBrains Mono"'),
+        ]).catch(function () {})
+      : Promise.resolve();
+
   // Run all client-side rendering after content update.
   function renderClientSide() {
     // Mermaid: re-render diagram blocks.
     if (typeof mermaid !== "undefined") {
-      // Remove previous Mermaid SVG output so re-init works cleanly.
-      var rendered = content.querySelectorAll(".mermaid[data-processed]");
-      for (var i = 0; i < rendered.length; i++) {
-        rendered[i].removeAttribute("data-processed");
-      }
-      try {
-        mermaid.run({ nodes: content.querySelectorAll(".mermaid") });
-      } catch (e) {
-        console.warn("mermaid render error:", e);
-      }
+      // Serialize runs. renderClientSide fires on page load and again when
+      // the first WebSocket/SSE content update arrives; both wait on the
+      // fonts, and overlapping mermaid.run() calls would render nodes the
+      // update has already detached. Nodes are selected when the queued
+      // run starts, so a run queued behind an update renders the current
+      // DOM.
+      mermaidQueue = mermaidQueue
+        .then(function () {
+          // Remove previous Mermaid SVG output so re-init works cleanly.
+          var rendered = content.querySelectorAll(".mermaid[data-processed]");
+          for (var i = 0; i < rendered.length; i++) {
+            rendered[i].removeAttribute("data-processed");
+          }
+          return mermaid.run({ nodes: content.querySelectorAll(".mermaid") });
+        })
+        .catch(function (e) {
+          console.warn("mermaid render error:", e);
+        });
     }
 
     // KaTeX: render math expressions.
