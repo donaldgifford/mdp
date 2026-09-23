@@ -95,8 +95,15 @@ update-vendor: ## Update vendored JS/CSS libraries from CDN
 	@curl -sL -o $(VENDOR)/hljs/highlight.min.js "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"
 	@curl -sL -o $(VENDOR)/hljs/github.min.css "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github.min.css"
 	@curl -sL -o $(VENDOR)/hljs/github-dark.min.css "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css"
+	@curl -sL -o $(VENDOR)/fonts/inter-latin-wght-normal.woff2 "https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5/files/inter-latin-wght-normal.woff2"
+	@curl -sL -o $(VENDOR)/fonts/inter-latin-ext-wght-normal.woff2 "https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5/files/inter-latin-ext-wght-normal.woff2"
+	@curl -sL -o $(VENDOR)/fonts/jetbrains-mono-latin-wght-normal.woff2 "https://cdn.jsdelivr.net/npm/@fontsource-variable/jetbrains-mono@5/files/jetbrains-mono-latin-wght-normal.woff2"
+	@curl -sL -o $(VENDOR)/fonts/jetbrains-mono-latin-ext-wght-normal.woff2 "https://cdn.jsdelivr.net/npm/@fontsource-variable/jetbrains-mono@5/files/jetbrains-mono-latin-ext-wght-normal.woff2"
+	@curl -sL -o $(VENDOR)/fonts/LICENSE-Inter "https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5/LICENSE"
+	@curl -sL -o $(VENDOR)/fonts/LICENSE-JetBrainsMono "https://cdn.jsdelivr.net/npm/@fontsource-variable/jetbrains-mono@5/LICENSE"
 	@echo "✓ Vendor libraries updated"
-	@echo "  Note: update KaTeX fonts manually if the version changed"
+	@echo "  Note: KaTeX fonts are updated manually if the KaTeX version changed;"
+	@echo "  diagram fonts (Inter, JetBrains Mono) are refreshed above"
 
 ###############
 ##@ CI/CD

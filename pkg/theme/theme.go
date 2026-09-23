@@ -12,7 +12,9 @@ import (
 
 // Theme holds everything the server needs to render a page with the correct styling.
 type Theme struct {
-	// CSS is the complete theme stylesheet (prose + hljs tokens + mermaid vars).
+	// CSS is the complete theme stylesheet: prose properties, hljs tokens,
+	// and the seven --mermaid-* diagram palette slots (bg, fg, line, accent,
+	// muted, surface, border) that preview.js reads.
 	// Empty for themeAuto — the base preview.css handles auto via media query.
 	CSS string
 
@@ -20,8 +22,12 @@ type Theme struct {
 	// Only set for github-light / github-dark. Empty for all other themes.
 	HljsVendorCSS string
 
-	// MermaidTheme is the string passed to mermaid.initialize().
-	// "base" for named themes (uses CSS vars), "" for auto.
+	// MermaidTheme is rendered as the data-mermaid-theme attribute on
+	// <body>: "base" for named themes, "" for auto. preview.js no longer
+	// branches on it -- every theme is rendered with Mermaid's base theme
+	// and a palette read from the --mermaid-* slots, or derived from the
+	// --color-* prose properties when the slots are absent (auto and
+	// custom theme files). The field is kept for API stability.
 	MermaidTheme string
 
 	// isAuto skips server-side CSS injection and lets the browser's
@@ -40,8 +46,8 @@ func (t Theme) IsAuto() bool {
 // themeAuto is the sentinel name for the browser-driven auto theme.
 const themeAuto = "auto"
 
-// mermaidBase is the Mermaid theme passed to mermaid.initialize() for all
-// named themes; per-theme CSS variables do the actual styling.
+// mermaidBase is the MermaidTheme value for named themes. The diagram
+// colours come from each theme's seven --mermaid-* palette slots.
 const mermaidBase = "base"
 
 // GitHub theme names share a single CSS file with multiple [data-theme] blocks.

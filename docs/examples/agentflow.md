@@ -16,4 +16,5 @@ agentflow-beta TB
     analyse -.- spec
     decide --x|needs work| analyse
   end
+  linkStyle 4 stroke:danger
 ```

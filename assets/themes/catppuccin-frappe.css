@@ -14,19 +14,24 @@
   --color-danger-fg:      #e78284;
   --color-success-fg:     #a6d189;
 
-  /* Mermaid theme variables (theme: 'base') */
-  --mermaid-primaryColor:        #8caaee;
-  --mermaid-primaryTextColor:    #c6d0f5;
-  --mermaid-primaryBorderColor:  #414559;
-  --mermaid-lineColor:           #737994;
-  --mermaid-secondaryColor:      #292c3c;
-  --mermaid-tertiaryColor:       #303446;
-  --mermaid-background:          #303446;
-  --mermaid-noteBkgColor:        #292c3c;
-  --mermaid-noteTextColor:       #737994;
-  --mermaid-edgeLabelBackground: #303446;
-  --mermaid-actorBkg:            #292c3c;
-  --mermaid-actorTextColor:      #c6d0f5;
+  /* Diagram palette (DESIGN-0004, derived from --color-*) — seven required slots, hex only */
+  --mermaid-bg:      #303446;  /* canvas behind the diagram; edge-label backing */
+  --mermaid-fg:      #c6d0f5;  /* node, actor, title text */
+  --mermaid-line:    #7b829e;  /* edges, lifelines, relations, transitions */
+  --mermaid-accent:  #8caaee;  /* arrowheads, activations, special states */
+  --mermaid-muted:   #737994;  /* edge labels, secondary text */
+  --mermaid-surface: #34394b;  /* node, actor, note, cluster fill */
+  --mermaid-border:  #4e5369;  /* node, actor, cluster stroke */
+
+  /* Series (optional): distinct hues for timeline, git, pie, journey, xychart */
+  --mermaid-series-1: #8caaee;
+  --mermaid-series-2: #ca9ee6;
+  --mermaid-series-3: #a6d189;
+  --mermaid-series-4: #ef9f76;
+  --mermaid-series-5: #99d1db;
+  --mermaid-series-6: #e78284;
+  --mermaid-series-7: #e5c890;
+  --mermaid-series-8: #81c8be;
 
   /* Callout colors */
   --callout-note-color:      #8caaee;

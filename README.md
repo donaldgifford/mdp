@@ -180,7 +180,73 @@ mdp serve --theme=/path/to/my-theme.css README.md   # custom CSS file
 | `catppuccin-mocha`     | Catppuccin  | Dark               |
 
 Each built-in theme provides prose styling, syntax-highlighting token colours,
-and Mermaid diagram theming in a single embedded CSS file.
+a seven-colour Mermaid diagram palette, and an eight-colour series for
+multi-hue diagrams in a single embedded CSS file.
+Diagrams share one skin across every theme: flat strokes with no gradient or
+shadow, rounded corners, and labels in vendored Inter and JetBrains Mono
+(embedded, so they work offline).
+
+### Custom theme files
+
+A file passed with `--theme=/path/to/theme.css` must define the nine prose
+properties on `[data-theme]` or `:root`: `--color-fg-default`,
+`--color-fg-muted`, `--color-canvas-default`, `--color-canvas-subtle`,
+`--color-border-default`, `--color-border-muted`, `--color-accent-fg`,
+`--color-danger-fg`, and `--color-success-fg`.
+
+The seven diagram slots are optional. Any slot you leave out is derived from
+the prose colours:
+
+| Slot                | Used for                              | Derived from when absent                      |
+| ------------------- | ------------------------------------- | --------------------------------------------- |
+| `--mermaid-bg`      | Diagram canvas, edge-label backing    | `--color-canvas-default`                      |
+| `--mermaid-fg`      | Node, actor, and title text           | `--color-fg-default`                          |
+| `--mermaid-line`    | Edges, lifelines, relations           | 50% mix of fg into bg                         |
+| `--mermaid-accent`  | Arrowheads, activations               | `--color-accent-fg`                           |
+| `--mermaid-muted`   | Edge labels, secondary text           | `--color-fg-muted`                            |
+| `--mermaid-surface` | Node, actor, note, and cluster fill   | 3% mix of fg into bg                          |
+| `--mermaid-border`  | Node, actor, and cluster stroke       | 20% mix of fg into bg                         |
+
+Diagrams that need several distinct colours — timeline, kanban, and
+mindmap sections, gitGraph branches, pie slices, journey sections and
+actors, xychart series — read an optional series,
+`--mermaid-series-1` through `--mermaid-series-8`. Section fills are faint
+tints of these; branches, slices, and rules use them at full strength. A
+missing entry falls back to, in order: accent, success, danger, the three
+50% mixes of those, muted, and fg.
+
+Flowchart and state nodes can carry a semantic class — `danger`,
+`success`, `warning`, or `accent` — with plain Mermaid syntax and no
+`classDef`:
+
+```
+flowchart TB
+    B -->|No| D[Request changes]
+    class D danger
+```
+
+The node gets a faint tint of the theme's `--color-danger-fg`,
+`--color-success-fg`, `--callout-warning-color`, or `--mermaid-accent`
+with a full-strength border. Other Mermaid renderers ignore the class.
+
+Edges take the same names through Mermaid's `linkStyle` (edges are
+numbered from 0 in source order):
+
+```
+flowchart TB
+    B -->|Yes| C[Merge]
+    B -->|No| D[Request changes]
+    linkStyle 0 stroke:success
+    linkStyle 1 stroke:danger
+```
+
+Any edge with its own stroke colour, named or hex, gets an arrowhead in
+that colour. Other renderers do not know the names and draw those edges
+in their default colour.
+
+Slot values must be six-digit hex (`#1a1b26`); `var()` and `color-mix()` are
+not accepted. The Mermaid-specific `--mermaid-primaryColor`-style variables
+used before this palette are no longer read.
 
 ## Architecture
 

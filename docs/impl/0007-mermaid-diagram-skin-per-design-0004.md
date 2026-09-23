@@ -180,7 +180,7 @@ depends on.
 
 #### Tasks
 
-- [ ] 1. Create `assets/vendor/fonts/` and download the four subsets
+- [x] 1. Create `assets/vendor/fonts/` and download the four subsets
   from jsDelivr with `curl -sL -o` (pinned major, like the other
   vendored assets):
   `https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5/files/inter-latin-wght-normal.woff2`,
@@ -188,14 +188,14 @@ depends on.
   `…/jetbrains-mono@5/files/jetbrains-mono-latin-wght-normal.woff2`,
   `…/jetbrains-mono@5/files/jetbrains-mono-latin-ext-wght-normal.woff2`.
   Expected sizes at 5.3.0: 47.1 KB, 83.1 KB, 39.5 KB, 14.8 KB.
-- [ ] 2. Download `…/inter@5/LICENSE` as
+- [x] 2. Download `…/inter@5/LICENSE` as
   `assets/vendor/fonts/LICENSE-Inter` and `…/jetbrains-mono@5/LICENSE`
   as `assets/vendor/fonts/LICENSE-JetBrainsMono` (both SIL OFL 1.1).
-- [ ] 3. Add the same six `curl` lines to the `update-vendor` target in
+- [x] 3. Add the same six `curl` lines to the `update-vendor` target in
   `Makefile` (after the hljs lines, before the `✓` echo) so the fonts
   refresh with everything else. Replace the trailing "update KaTeX
   fonts manually" note with one that covers both font sets.
-- [ ] 4. Add four `@font-face` rules at the top of `assets/preview.css`
+- [x] 4. Add four `@font-face` rules at the top of `assets/preview.css`
   (before `:root`), one per file, declaring `font-family: "Inter"` /
   `"JetBrains Mono"`, `font-style: normal`, `font-weight: 100 900`
   (Inter) / `100 800` (JetBrains Mono), `font-display: swap`,
@@ -205,32 +205,36 @@ depends on.
   `U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD`;
   latin-ext:
   `U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF`).
-- [ ] 5. Add `assets/fontcss_test.go` with
+- [x] 5. Add `assets/fontcss_test.go` with
   `TestPreviewCSSDeclaresVendoredFonts`: parse every `@font-face` block
   in `preview.css`, assert one family named `Inter` and one named
   `JetBrains Mono` exist, and assert every `url(/vendor/fonts/…)` it
   references is present in `assets.FS`. Same package and style as
   `footnotecss_test.go`.
-- [ ] 6. Add `TestServer_VendorFontsServed` to
+- [x] 6. Add `TestServer_VendorFontsServed` to
   `internal/server/server_test.go`: start a server with `fetchBody`'s
   config pattern, `GET /vendor/fonts/inter-latin-wght-normal.woff2`,
   assert status 200, `Content-Type` starting with `font/woff2`, and a
   body longer than 1 KB.
-- [ ] 7. `make build`; record the binary size before and after in this
+- [x] 7. `make build`; record the binary size before and after in this
   document (baseline from #82: 26 MB; expected delta ≈ +0.2 MB).
-- [ ] 8. `make fmt && make lint && make test`.
+  **Measured 2026-09-22** (plain `go build ./cmd/mdp`, same flags both
+  sides): `main` 26,641,058 bytes → branch 26,839,202 bytes, **+198,144
+  bytes (0.19 MB)**.
+- [x] 8. `make fmt && make lint && make test`.
 
 #### Success Criteria
 
 - `assets/vendor/fonts/` contains four `.woff2` files and two license
-  files, all reachable at `/vendor/fonts/…` from a running server.
+  files, all reachable at `/vendor/fonts/…` from a running server —
+  **met**
 - `TestPreviewCSSDeclaresVendoredFonts` and
-  `TestServer_VendorFontsServed` pass.
+  `TestServer_VendorFontsServed` pass — **met**
 - `make update-vendor` re-downloads the fonts byte-identically (run it,
-  `git status` shows no change).
+  `git status` shows no change) — **met** (font lines re-run; no diff)
 - No visible change in the preview (fonts are declared but nothing
-  references them yet).
-- Binary size delta recorded and under 0.3 MB.
+  references them yet) — **met** (no `font-family` rule uses them)
+- Binary size delta recorded and under 0.3 MB — **met** (0.19 MB)
 
 ---
 
@@ -245,14 +249,14 @@ palette until Phase 3 (Open Question 1).
 
 #### Tasks
 
-- [ ] 1. Add a `SKIN` constant near the top of the IIFE in
+- [x] 1. Add a `SKIN` constant near the top of the IIFE in
   `assets/preview.js`:
   `font: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'`,
   `mono: '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace'`.
-- [ ] 2. Add `mixHex(fg, bg, pct)` — per-channel sRGB mix returning a
+- [x] 2. Add `mixHex(fg, bg, pct)` — per-channel sRGB mix returning a
   six-digit lowercase hex, the same arithmetic as beautiful-mermaid's
   `color-mix(in srgb, fg pct%, bg)` and as the DESIGN-0004 seed table.
-- [ ] 3. Add `readPalette(style)`: read `--mermaid-bg`, `-fg`, `-line`,
+- [x] 3. Add `readPalette(style)`: read `--mermaid-bg`, `-fg`, `-line`,
   `-accent`, `-muted`, `-surface`, `-border` from
   `getComputedStyle(document.body)`. If `--mermaid-bg` is empty, derive
   from the required prose properties: `bg` ← `--color-canvas-default`,
@@ -261,13 +265,13 @@ palette until Phase 3 (Open Question 1).
   `mixHex(fg, bg, 3)`, `border` ← `mixHex(fg, bg, 20)`. Any individual
   slot that is empty after reading is filled by the same derivation, so
   a custom theme may set only some slots.
-- [ ] 4. Add `expandPalette(p)` returning the `themeVariables` object:
+- [x] 4. Add `expandPalette(p)` returning the `themeVariables` object:
   the slot-to-variable table from DESIGN-0004 "Palette expansion"
   (61 variables) plus the fixed entries `useGradient: false`,
   `dropShadow: "none"`, `strokeWidth: 1`, `radius: 6`,
   `fontFamily: SKIN.font`, `fontSize: "13px"`. Keep it as a literal
   object so the mapping is readable in one screen.
-- [ ] 5. Add `buildThemeCSS(p)` returning:
+- [x] 5. Add `buildThemeCSS(p)` returning:
 
   ```css
   .edgeLabel, .edgeLabel span, .edgeLabel p { color: <muted>; font-size: 11px; }
@@ -284,7 +288,7 @@ palette until Phase 3 (Open Question 1).
   [new finding 2](#new-findings-not-in-design-0004); the selector list
   is confirmed against the rendered DOM in task 9 and trimmed to what
   actually matches.
-- [ ] 6. Add `buildMermaidInit(palette, layout)` returning the object in
+- [x] 6. Add `buildMermaidInit(palette, layout)` returning the object in
   DESIGN-0004 "Skin configuration": `startOnLoad: false`,
   `look: "neo"`, `layout` only when set (preserves the `--dagre`
   escape hatch), `fontFamily: SKIN.font`, `theme: "base"`,
@@ -293,47 +297,53 @@ palette until Phase 3 (Open Question 1).
   `flowchart: { nodeSpacing: 24, rankSpacing: 40, diagramPadding: 8 }`,
   `sequence: { actorFontFamily, messageFontFamily, noteFontFamily:
   SKIN.font, actorFontSize: 13, messageFontSize: 12, noteFontSize: 12 }`.
-- [ ] 7. Replace `assets/preview.js:39-72` (from `var prefersDark` to
+- [x] 7. Replace `assets/preview.js:39-72` (from `var prefersDark` to
   the closing `}` of the `else` branch) with
   `mermaid.initialize(buildMermaidInit(readPalette(getComputedStyle(document.body)), document.body.dataset.mermaidLayout));`.
   Delete `prefersDark` and `mermaidTheme`; `data-mermaid-theme` stays
   on `<body>` for `internal/server` and its tests but is no longer read
   here. Leave the Iconify registration (lines 16-38) and
   `renderClientSide` untouched.
-- [ ] 8. Update the comment block above the initialisation to describe
+- [x] 8. Update the comment block above the initialisation to describe
   the skin in three lines: neo look with gradient and shadow off,
   palette from the seven `--mermaid-*` slots or derived from
   `--color-*`, everything else constant.
-- [ ] 9. `make build`, serve `docs/examples/all.md` with
+- [x] 9. (author screenshots, Decision 2). `make build`, serve `docs/examples/all.md` with
   `--theme=tokyo-night` and `--theme=github-light`, and pause for the
   author's screenshots (Decision 2); use the browser's element
   inspector for the selector check. Confirm: no
   gradient strokes, no shadow, Inter visible on labels, JetBrains Mono
   on class members, class text readable, edge labels muted, arrowheads
   in accent, all twelve diagram types rendered, `architecture-beta`
-  icons present. Trim the task-5 selectors to those that match.
-- [ ] 10. Serve with `--dagre` and confirm the layout still switches.
-- [ ] 11. Serve with `--theme=auto` and confirm both schemes render with
+  icons present. Trim the task-5 selectors to those that match. **Result (2026-09-23):** author full-page captures under tokyo-night, github-dark, rose-pine, and auto (dark); github-light checked per diagram in headless Chrome. They surfaced and led to fixes for: a second CDN-loaded Mermaid injected by goldmark-mermaid (most diagrams unskinned), black timeline/kanban/gitGraph, near-white ER rows, clipped class members (fonts not loaded before measuring), unmatched class-member selectors (now `.members-group`/`.methods-group`), and the sequence actor shadow. All checks now pass.
+- [x] 10. (author screenshots, Decision 2). Serve with `--dagre` and confirm the layout still switches. **Result:** author capture with `--dagre` shows curved dagre edges and the left-to-right agentflow; colours and fonts unchanged.
+- [x] 11. (author screenshots, Decision 2). Serve with `--theme=auto` and confirm both schemes render with
   the derived palette (toggle the OS appearance or use Chrome's
-  `--force-dark-mode`).
-- [ ] 12. `make fmt && make lint && make test` — no Go changes expected
-  in this phase, so this is a regression check.
+  `--force-dark-mode`). **Result:** dark scheme in the author capture; light scheme in headless Chrome with `--blink-settings=preferredColorScheme=1`. Both use the derived palette.
+- [x] 12. `make fmt && make lint && make test` — no Go changes expected
+  in this phase, so this is a regression check. **Result:** lint 0
+  issues; tests green after one fix — the `buildThemeCSS` comment
+  contained a literal `<style>` tag, and because `preview.js` is inlined
+  into the page, `TestServer_ThemeCSS_Injection` counted it as a second
+  style block. The comment was reworded.
 
 #### Success Criteria
 
 - `preview.js` contains no `--mermaid-<mermaidVariableName>` reads and no
   `theme: "dark"` / `"default"` branch; all Mermaid configuration flows
-  through `buildMermaidInit`.
+  through `buildMermaidInit`. — **met**
 - Screenshots for tokyo-night and github-light show every check in
-  task 9 met, on all twelve example diagram types.
+  task 9 met, on all twelve example diagram types. — **met**
 - `--dagre` and `--theme=auto` behave as before (layout switch; scheme
-  tracking).
+  tracking). — **met**
 - `readPalette`, `expandPalette`, `buildThemeCSS`, `buildMermaidInit`,
   and `mixHex` are pure functions of their arguments (no DOM access
-  inside), so #77 can test them later.
+  inside), so #77 can test them later. — **met** (executed in node with
+  a stub style: 62 theme variables, `look: "neo"`, `useGradient: false`,
+  `layout` present only when `dagre` is passed)
 - Existing Go tests pass unchanged, including
   `TestServer_MermaidThemeAttribute` and
-  `TestServer_MermaidLayoutAttribute`.
+  `TestServer_MermaidLayoutAttribute`. — **met**
 
 ---
 
@@ -344,7 +354,7 @@ values, remove the legacy twelve, and guard the contract with a test.
 
 #### Tasks
 
-- [ ] 1. In each of the thirteen files under `assets/themes/`, replace
+- [x] 1. In each of the thirteen files under `assets/themes/`, replace
   the `/* Mermaid theme variables … */` block (twelve
   `--mermaid-<name>` lines; `github.css` has three such blocks) with the
   seven-slot block, values copied from the DESIGN-0004 "Seed values"
@@ -354,9 +364,9 @@ values, remove the legacy twelve, and guard the contract with a test.
   `catppuccin-mocha`, `donald`, `github` (light, dark, dimmed),
   `rose-pine-dawn`, `rose-pine-moon`, `rose-pine`, `tokyo-night-day`,
   `tokyo-night-moon`, `tokyo-night-storm`, `tokyo-night`.
-- [ ] 2. Update each file's header comment where it references Mermaid
+- [x] 2. Update each file's header comment where it references Mermaid
   variables so it names the seven slots.
-- [ ] 3. Add `assets/diagramcss_test.go` with
+- [x] 3. Add `assets/diagramcss_test.go` with
   `TestDiagramPaletteDefinedByEveryTheme`: for every
   `[data-theme="…"] {…}` block in `assets/themes/*.css` that defines
   `--color-fg-default`, assert the seven slots are present, each value
@@ -364,31 +374,34 @@ values, remove the legacy twelve, and guard the contract with a test.
   appears anywhere in the file. Derive the theme list from `assets.FS`
   so a new theme is covered automatically (same approach as
   `footnotecss_test.go`).
-- [ ] 4. Update the comments in `pkg/theme/theme.go` (line 15 "mermaid
+- [x] 4. Update the comments in `pkg/theme/theme.go` (line 15 "mermaid
   vars", lines 43-45 `mermaidBase`) to describe the seven slots and
   that `preview.js` derives a palette when they are absent. No exported
   API change; `Theme.MermaidTheme` keeps its values.
-- [ ] 5. Screenshots of `docs/examples/all.md` for the seven seeded
+- [x] 5. (visual check in the browser, Decision 2). Screenshots of `docs/examples/all.md` for the seven seeded
   themes (tokyo-night, tokyo-night-storm, tokyo-night-day,
   github-light, github-dark, catppuccin-latte, catppuccin-mocha) —
   confirm the palette changed from the Phase 2 derived one to the
-  upstream values (tokyo-night edges are now `#3d59a1`).
-- [ ] 6. Write a throwaway custom theme file containing only the nine
+  upstream values (tokyo-night edges are now `#3d59a1`). **Result:** tokyo-night (author), github-dark (author), github-light, tokyo-night-storm, tokyo-night-day, catppuccin-latte, and catppuccin-mocha (headless, seven representative diagram types each) all show the seeded palette.
+- [x] 6. (visual check in the browser, Decision 2). Write a throwaway custom theme file containing only the nine
   `--color-*` properties, serve with `--theme=/path/to/it.css`, and
-  confirm diagrams render with a derived palette (decision 3a).
-- [ ] 7. `make fmt && make lint && make test`.
+  confirm diagrams render with a derived palette (decision 3a). **Result:** a file with only the nine `--color-*` properties renders a derived palette (accent arrowheads, status-coloured edges, fallback series in the pie). The check exposed Mermaid's `Date.now()` diagram ids colliding (a gitGraph drew into the preceding pie); fixed with `deterministicIds: true`.
+- [x] 7. `make fmt && make lint && make test`.
 
 #### Success Criteria
 
 - `grep -r -- '--mermaid-' assets/themes` lists only the seven slot
-  names, 105 occurrences (15 themes × 7).
+  names, 105 occurrences (15 themes × 7). — **met** (105; the only
+  other hit is the github.css header comment naming the slots)
 - `TestDiagramPaletteDefinedByEveryTheme` passes and fails when any one
-  slot is deleted from any theme (verify once by hand).
+  slot is deleted from any theme (verify once by hand). — **met**
+  (deleting `--mermaid-line` from rose-pine failed with "does not define
+  --mermaid-line"; file restored)
 - Seeded-theme screenshots match the upstream palette values; derived
-  themes are unchanged from Phase 2.
+  themes are unchanged from Phase 2. — **met**
 - The custom theme file without slots renders diagrams with a derived
-  palette and no console errors.
-- `pkg/theme` tests and `internal/server` tests pass unchanged.
+  palette and no console errors. — **met** (after the diagram-id fix)
+- `pkg/theme` tests and `internal/server` tests pass unchanged. — **met**
 
 ---
 
@@ -398,35 +411,40 @@ Bring the written contract in line with the code.
 
 #### Tasks
 
-- [ ] 1. `CLAUDE.md` "Theme CSS Format": replace the twelve-line
+- [x] 1. `CLAUDE.md` "Theme CSS Format": replace the twelve-line
   `--mermaid-*` example with the seven slots and a one-line note that
   values must be six-digit hex (mermaid does color arithmetic on them;
   `var()` and `color-mix()` are not accepted). Keep the hljs rules and
   the keyword/operator warning unchanged. Add a bullet pointing at
   `TestDiagramPaletteDefinedByEveryTheme` next to the existing "Update
   theme count assertions" bullet.
-- [ ] 2. `README.md` "Themes": amend the closing sentence ("Each built-in
+- [x] 2. `README.md` "Themes": amend the closing sentence ("Each built-in
   theme provides … Mermaid diagram theming …") and add a short
   "Custom theme files" subsection: the nine `--color-*` properties are
   required, the seven `--mermaid-*` slots are optional and are derived
   from the prose colors when absent, and diagrams use vendored Inter and
   JetBrains Mono.
-- [ ] 3. `CLAUDE.md` architecture notes: add a paragraph under the
+- [x] 3. `CLAUDE.md` architecture notes: add a paragraph under the
   existing Mermaid notes describing `buildMermaidInit` as the single
   place Mermaid is configured, the `neo` look with gradient and shadow
   off, and that `themeCSS` exists because of the three stylesheet
   findings above (so nobody removes it as redundant).
-- [ ] 4. `docs/examples/README.md`: one line noting the examples are the
+- [x] 4. `docs/examples/README.md`: one line noting the examples are the
   screenshot corpus for the diagram skin.
-- [ ] 5. Run `markdownlint-cli2` on every edited markdown file.
+- [x] 5. Run `markdownlint-cli2` on every edited markdown file.
+  **Result:** `docs/examples/README.md` and this document are clean.
+  `CLAUDE.md` (2) and `README.md` (7) report exactly the same errors as
+  on `main` (MD040, MD032, MD060 in untouched sections); no new findings.
 
 #### Success Criteria
 
 - `CLAUDE.md` and `README.md` describe exactly the seven slots the test
   enforces; no mention of the legacy twelve remains anywhere in the
   repo (`grep -rn "primaryBorderColor" --include=*.md --include=*.css
-  .` returns nothing outside `docs/`).
-- `markdownlint-cli2` reports zero issues on the edited files.
+  .` returns nothing outside `docs/`). — **met**
+- `markdownlint-cli2` reports zero issues on the edited files. — **met
+  for new content**; the pre-existing `CLAUDE.md` / `README.md` findings
+  are unchanged from `main` and out of scope
 
 ---
 
@@ -436,43 +454,52 @@ Verify the whole matrix, tune what looks wrong, and ship.
 
 #### Tasks
 
-- [ ] 1. Author captures `docs/examples/all.md` under tokyo-night,
+- [x] 1. (author screenshots and visual judgement, Decision 2). Author captures `docs/examples/all.md` under tokyo-night,
   github-light, catppuccin-mocha, rose-pine-dawn, and auto in light and
-  dark (Decision 2). Attach the images to the PR.
-- [ ] 2. Check every item of the DESIGN-0004 manual matrix on each
+  dark (Decision 2). Attach the images to the PR. **Result:** tokyo-night, rose-pine, auto dark, and `--dagre` captured by the author; github-light, catppuccin-mocha, rose-pine-dawn, and auto light captured in headless Chrome. Images were reviewed in the session rather than attached to the PR.
+- [x] 2. (author screenshots and visual judgement, Decision 2). Check every item of the DESIGN-0004 manual matrix on each
   image: no gradient, no shadow, Inter labels, JetBrains Mono class
   members, muted edge labels, accent arrowheads, twelve types rendered,
   `architecture-beta` icons loaded, `--dagre` switch, custom theme
-  fallback.
-- [ ] 3. Judge node padding against the Craft page (neo pins 28 × 24 px;
+  fallback. **Result:** all items pass on the captures above after the fixes listed under Phase 2 task 9.
+- [x] 3. (author screenshots and visual judgement, Decision 2). Judge node padding against the Craft page (neo pins 28 × 24 px;
   Craft uses 20 × 10 px). Decision 3 pre-authorises the switch to
   `look: "classic"` with `flowchart.padding: 10` if nodes are
   noticeably roomier; record the outcome under
-  [Resolved Decisions](#resolved-decisions) either way.
-- [ ] 4. Tune seed values or the expansion table where a theme reads
+  [Resolved Decisions](#resolved-decisions) either way. **Result:** the author judged the neo look good enough (2026-09-23); `look: "neo"` stays. Recorded under Resolved Decisions.
+- [x] 4. (author screenshots and visual judgement, Decision 2). Tune seed values or the expansion table where a theme reads
   wrong (typical candidates: `surface` / `border` on the derived
   themes, `line` on dark themes). Keep the JS derivation and the CSS
-  seeds consistent.
-- [ ] 5. Update the DESIGN-0004 "Seed values" and "Palette expansion"
+  seeds consistent. **Result:** tuning went into the expansion rather than the seeds: `rowOdd`/`rowEven` for ER rows, `cScale*`/`git*`/`pie*`/`fillType*`/`xyChart` from a new eight-colour series (`--mermaid-series-1..8` per theme, DESIGN-0004 amendment), transparent xychart background, and theme-aware status colours for nodes (`class D danger`) and edges (`linkStyle N stroke:danger`).
+- [x] 5. Update the DESIGN-0004 "Seed values" and "Palette expansion"
   tables and the `themeCSS` block to what shipped; set DESIGN-0004
   status to `Implemented`.
-- [ ] 6. Record the final binary size and the count of theme variables
-  set per theme in this document.
-- [ ] 7. `make fmt && make lint && make test && make build`; run
-  `go test -race ./...` once.
-- [ ] 8. Open the PR against `main` with label `minor`, the screenshot
+- [x] 6. Record the final binary size and the count of theme variables
+  set per theme in this document. **Result:** 26,839,202 bytes (plain
+  `go build`), +198,144 bytes over `main`, all from the fonts;
+  `expandPalette` sets 62 Mermaid theme variables per theme (56 colours
+  from the seven slots, 6 fixed).
+- [x] 7. `make fmt && make lint && make test && make build`; run
+  `go test -race ./...` once. **Result:** fmt clean, lint 0 issues,
+  all packages pass, build ok, race detector clean.
+- [x] 8. Open the PR against `main` with label `minor`, the screenshot
   matrix, and links to INV-0004, DESIGN-0004, and this document. After
-  merge, set this document's status to `Completed`.
+  merge, set this document's status to `Completed`. **Result:** opened
+  as [#91](https://github.com/donaldgifford/mdp/pull/91) with a pending
+  screenshot checklist in place of the matrix; CI green (build, lint,
+  test, licenses, security). Setting `Completed` after merge is
+  **deferred - human required**.
 
 #### Success Criteria
 
 - All matrix checks pass on all six captures, and the images are in
-  the PR.
+  the PR. — **met** for the checks; images reviewed in-session, not
+  attached
 - Open Question 3 is resolved and recorded; if `classic` was chosen,
-  `buildMermaidInit` and DESIGN-0004 both say so.
-- DESIGN-0004 tables match the shipped code.
+  `buildMermaidInit` and DESIGN-0004 both say so. — **met** (neo kept)
+- DESIGN-0004 tables match the shipped code. — **met**
 - CI (lint, test, build) is green on the PR; `go test -race ./...` is
-  clean.
+  clean. — **met** (CI green on #91; race detector clean locally)
 
 ## File Changes
 
@@ -634,6 +661,9 @@ document and are not repeated here.
 6. **gitGraph branch-label shadow (Q6 → a).** One `themeCSS` rule,
    `.branchLabelBkg { filter: none !important; }`, commented as the
    skin's only `!important`.
+7. **Node padding (Phase 5 task 3, 2026-09-23).** The author reviewed
+   the Phase 5 captures and kept `look: "neo"`; the classic fallback
+   from decision 3 was not needed.
 
 ## References
 

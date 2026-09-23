@@ -13,6 +13,8 @@ flowchart TB
     B -->|No| D[Request changes]
     C --> E[Deploy]
     D --> E
+    linkStyle 1 stroke:success
+    linkStyle 2 stroke:danger
 ```
 
 ## Sequence
@@ -67,6 +69,7 @@ agentflow-beta TB
     analyse -.- spec
     decide --x|needs work| analyse
   end
+  linkStyle 4 stroke:danger
 ```
 
 ## Kanban
@@ -108,6 +111,63 @@ gitGraph
     checkout main
     merge develop
     commit
+```
+
+## Pie
+
+```mermaid
+pie title Time spent per review stage
+    "Reading the diff" : 42
+    "Running tests" : 18
+    "Writing comments" : 24
+    "Waiting on CI" : 11
+    "Coffee" : 5
+```
+
+## User journey
+
+```mermaid
+journey
+    title Previewing a markdown file
+    section Setup
+      Install plugin: 4: Author
+      Run MdpInstall: 3: Author
+    section Writing
+      Open preview: 5: Author
+      Edit and scroll: 5: Author, Browser
+    section Sharing
+      Copy diagram: 2: Author
+```
+
+## XY chart
+
+```mermaid
+xychart-beta
+    title "Render time by document size"
+    x-axis [1k, 5k, 10k, 50k, 100k]
+    y-axis "Milliseconds" 0 --> 120
+    bar [4, 9, 15, 48, 96]
+    line [3, 7, 12, 40, 81]
+```
+
+## Mindmap
+
+```mermaid
+mindmap
+  root((mdp))
+    Parser
+      GFM
+      Footnotes
+      Line annotations
+    Preview
+      Mermaid
+      KaTeX
+      highlight.js
+    Transport
+      WebSocket
+      SSE
+    Editor
+      Neovim plugin
 ```
 
 ## AWS web service (built-in icons)

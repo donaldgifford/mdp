@@ -8,7 +8,350 @@
   var maxReconnectDelay = 5000;
   var useSSE = false;
 
-  // Initialize Mermaid with theme detection.
+  // ---------------------------------------------------------------------
+  // Mermaid diagram skin (DESIGN-0004)
+  //
+  // Everything that is not a colour is constant here, identical for every
+  // theme. Colours come from the theme's seven --mermaid-* slots, or are
+  // derived from its --color-* prose properties when the slots are absent.
+  // The functions below are pure (no DOM access) so a JS test harness
+  // (#77) can cover them directly.
+  // ---------------------------------------------------------------------
+
+  // Diagram font stacks. Inter and JetBrains Mono are vendored and declared
+  // with @font-face in preview.css; they are used inside diagrams only.
+  var SKIN = {
+    font: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    mono: '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace',
+  };
+
+  // mixHex mixes fg into bg at pct percent per sRGB channel and returns a
+  // six-digit lowercase hex. Same arithmetic as CSS
+  // color-mix(in srgb, fg pct%, bg), which beautiful-mermaid uses for its
+  // derived slots and which produced the DESIGN-0004 seed table.
+  function mixHex(fg, bg, pct) {
+    var out = "#";
+    for (var i = 1; i < 7; i += 2) {
+      var f = parseInt(fg.slice(i, i + 2), 16);
+      var b = parseInt(bg.slice(i, i + 2), 16);
+      var c = Math.round((f * pct + b * (100 - pct)) / 100);
+      out += (c < 16 ? "0" : "") + c.toString(16);
+    }
+    return out;
+  }
+
+  // readPalette returns the seven diagram colour slots from a computed
+  // style. A theme may define any subset of --mermaid-bg/-fg/-line/-accent/
+  // -muted/-surface/-border; each missing slot is derived from the required
+  // --color-* prose properties with the same mixes as the DESIGN-0004 seed
+  // table. The auto theme and custom theme files without slots therefore
+  // get a coherent palette with no extra CSS.
+  function readPalette(style) {
+    function prop(name) {
+      return style.getPropertyValue(name).trim();
+    }
+    var p = {
+      bg: prop("--mermaid-bg") || prop("--color-canvas-default"),
+      fg: prop("--mermaid-fg") || prop("--color-fg-default"),
+      muted: prop("--mermaid-muted") || prop("--color-fg-muted"),
+      accent: prop("--mermaid-accent") || prop("--color-accent-fg"),
+    };
+    p.line = prop("--mermaid-line") || mixHex(p.fg, p.bg, 50);
+    p.surface = prop("--mermaid-surface") || mixHex(p.fg, p.bg, 3);
+    p.border = prop("--mermaid-border") || mixHex(p.fg, p.bg, 20);
+    // Optional eight-colour series for diagrams that need distinct hues
+    // (timeline sections, git branches, pie slices, journey, xychart).
+    // Missing entries are filled from the prose accent/success/danger.
+    var ok = prop("--color-success-fg") || p.accent;
+    var bad = prop("--color-danger-fg") || p.accent;
+    var fallback = [
+      p.accent, ok, bad,
+      mixHex(p.accent, ok, 50), mixHex(p.accent, bad, 50), mixHex(ok, bad, 50),
+      p.muted, p.fg,
+    ];
+    p.series = fallback.map(function (c, i) {
+      return prop("--mermaid-series-" + (i + 1)) || c;
+    });
+    // Status colours for the semantic node classes (see buildThemeCSS).
+    p.status = {
+      danger: bad,
+      success: ok,
+      warning: prop("--callout-warning-color") || mixHex(ok, bad, 50),
+      accent: p.accent,
+    };
+    return p;
+  }
+
+  // expandPalette maps the seven slots onto Mermaid's base-theme variables
+  // (the DESIGN-0004 "Palette expansion" table) and adds the fixed
+  // geometry. useGradient and dropShadow are what the neo look reads to
+  // decide on gradient strokes and the drop-shadow filter.
+  function expandPalette(p) {
+    var vars = {
+      // bg
+      background: p.bg,
+      edgeLabelBackground: p.bg,
+      labelBackgroundColor: p.bg,
+      // fg
+      primaryTextColor: p.fg,
+      textColor: p.fg,
+      nodeTextColor: p.fg,
+      titleColor: p.fg,
+      actorTextColor: p.fg,
+      signalTextColor: p.fg,
+      labelTextColor: p.fg,
+      loopTextColor: p.fg,
+      noteTextColor: p.fg,
+      classText: p.fg,
+      stateLabelColor: p.fg,
+      transitionLabelColor: p.fg,
+      // line
+      lineColor: p.line,
+      defaultLinkColor: p.line,
+      signalColor: p.line,
+      actorLineColor: p.line,
+      transitionColor: p.line,
+      relationColor: p.line,
+      archEdgeColor: p.line,
+      // accent
+      arrowheadColor: p.accent,
+      archEdgeArrowColor: p.accent,
+      activationBorderColor: p.accent,
+      specialStateColor: p.accent,
+      // muted
+      secondaryTextColor: p.muted,
+      tertiaryTextColor: p.muted,
+      sequenceNumberColor: p.muted,
+      // surface
+      primaryColor: p.surface,
+      secondaryColor: p.surface,
+      tertiaryColor: p.surface,
+      nodeBkg: p.surface,
+      mainBkg: p.surface,
+      actorBkg: p.surface,
+      noteBkgColor: p.surface,
+      labelBoxBkgColor: p.surface,
+      activationBkgColor: p.surface,
+      clusterBkg: p.surface,
+      stateBkg: p.surface,
+      compositeBackground: p.surface,
+      altBackground: p.surface,
+      attributeBackgroundColorOdd: p.surface,
+      attributeBackgroundColorEven: p.surface,
+      // ER attribute rows under the neo look. The base theme lightens
+      // primaryColor for rowOdd, which gives near-white rows on dark
+      // themes; keep a faint stripe instead.
+      rowOdd: mixHex(p.fg, p.surface, 5),
+      rowEven: p.surface,
+      requirementBackground: p.surface,
+      // border
+      primaryBorderColor: p.border,
+      secondaryBorderColor: p.border,
+      tertiaryBorderColor: p.border,
+      nodeBorder: p.border,
+      clusterBorder: p.border,
+      actorBorder: p.border,
+      noteBorderColor: p.border,
+      labelBoxBorderColor: p.border,
+      compositeBorder: p.border,
+      requirementBorderColor: p.border,
+      archGroupBorderColor: p.border,
+      // fixed geometry and typography
+      useGradient: false,
+      dropShadow: "none",
+      strokeWidth: 1,
+      radius: 6,
+      fontFamily: SKIN.font,
+      fontSize: "13px",
+      // gitGraph commit labels and tags
+      commitLabelColor: p.muted,
+      commitLabelBackground: p.surface,
+      tagLabelColor: p.fg,
+      tagLabelBackground: p.surface,
+      tagLabelBorder: p.border,
+    };
+    // Multi-colour diagrams take the series. The base theme would derive
+    // these from primaryColor, which is near-black on dark themes. Section
+    // fills (timeline, kanban, mindmap, journey) are faint series tints so
+    // fg text stays readable; branches, slices, and rules get full colour.
+    var n = p.series.length;
+    for (var i = 0; i < 12; i++) {
+      var c = p.series[i % n];
+      vars["cScale" + i] = mixHex(c, p.surface, 18);
+      vars["cScaleLabel" + i] = p.fg;
+      vars["cScalePeer" + i] = p.border;
+      vars["cScaleInv" + i] = c;
+      vars["pie" + (i + 1)] = c;
+    }
+    for (var j = 0; j < 8; j++) {
+      vars["git" + j] = p.series[j % n];
+      vars["gitInv" + j] = p.bg;
+      vars["gitBranchLabel" + j] = p.bg;
+      vars["fillType" + j] = mixHex(p.series[j % n], p.surface, 25);
+    }
+    vars.pieStrokeColor = p.bg;
+    vars.pieOuterStrokeColor = p.border;
+    vars.pieSectionTextColor = p.bg;
+    vars.pieTitleTextColor = p.fg;
+    vars.pieLegendTextColor = p.fg;
+    vars.pieOpacity = "0.9";
+    // xychart merges this over the stock light theme, not over the
+    // variables above, so every colour must be given.
+    vars.xyChart = {
+      // Transparent like every other diagram, so the chart sits on the
+      // page's diagram panel instead of drawing its own darker box.
+      backgroundColor: "transparent",
+      titleColor: p.fg,
+      dataLabelColor: p.fg,
+      legendTextColor: p.fg,
+      xAxisTitleColor: p.muted,
+      xAxisLabelColor: p.muted,
+      xAxisTickColor: p.border,
+      xAxisLineColor: p.border,
+      yAxisTitleColor: p.muted,
+      yAxisLabelColor: p.muted,
+      yAxisTickColor: p.border,
+      yAxisLineColor: p.border,
+      plotColorPalette: p.series.join(","),
+    };
+    return vars;
+  }
+
+  // buildThemeCSS returns CSS that Mermaid injects inside its own
+  // id-scoped style element, for the three things no theme variable
+  // reaches (IMPL-0007 "New findings"):
+  //   - arrowheads: .marker is painted with lineColor, not arrowheadColor;
+  //   - class text: painted with nodeBorder, which is the faint border
+  //     slot here and would make members nearly invisible;
+  //   - edge labels: take the node text colour instead of a muted one.
+  // Do not remove these rules as redundant with the theme variables.
+  // statusRules styles nodes that carry one of mdp's semantic classes
+  // (`class D danger` in flowchart or state syntax): a faint tint of the
+  // theme's status colour with a full-strength border. No classDef is
+  // needed, and other renderers ignore the unknown class.
+  function statusRules(p) {
+    return Object.keys(p.status).map(function (name) {
+      var c = p.status[name];
+      var shape = ".node." + name + " ";
+      return (
+        [shape + "rect", shape + "polygon", shape + "circle", shape + "ellipse", shape + "path"].join(", ") +
+        " { fill: " + mixHex(c, p.surface, 18) + "; stroke: " + c + "; }"
+      );
+    });
+  }
+
+  function buildThemeCSS(p) {
+    return [
+      ".edgeLabel, .edgeLabel span, .edgeLabel p { color: " + p.muted + "; font-size: 11px; }",
+      ".marker, .marker path { fill: " + p.accent + "; stroke: " + p.accent + "; }",
+      ".marker.cross { stroke: " + p.accent + "; }",
+      "g.classGroup text, .classLabel .label { fill: " + p.fg + "; font-family: " + SKIN.mono + "; font-size: 12px; }",
+      ".classGroup .nodeLabel, .classGroup .label { color: " + p.fg + "; font-family: " + SKIN.mono + "; font-size: 12px; }",
+      ".members-group .nodeLabel, .methods-group .nodeLabel { color: " + p.fg + "; font-family: " + SKIN.mono + "; font-size: 12px; }",
+      ".classTitle, .classTitleText { font-family: " + SKIN.font + "; font-weight: 600; }",
+      ".cluster-label text, .cluster-label span { font-size: 12px; font-weight: 600; }",
+      // Sequence actors carry a drop-shadow filter attribute that the
+      // dropShadow variable does not reach; CSS outranks the attribute.
+      "rect.actor { filter: none; }",
+      // gitGraph sets this filter as an inline style under the neo look, so
+      // only !important reaches it. The skin's single !important (IMPL-0007
+      // decision 6).
+      ".branchLabelBkg { filter: none !important; }",
+    ]
+      // Journey actor dots. Mermaid's config merge appends arrays, so
+      // journey.actorColours cannot replace the stock colours; the circles
+      // carry an actor-N class instead.
+      .concat(
+        p.series.map(function (c, i) {
+          return "circle.actor-" + i + " { fill: " + c + "; }";
+        })
+      )
+      .concat(statusRules(p))
+      .join("\n");
+  }
+
+  // colourEdges runs after each diagram renders. It resolves mdp's status
+  // names in linkStyle (`linkStyle 2 stroke:danger`) to the theme colour,
+  // then gives every edge with its own stroke an arrowhead in that colour.
+  // Mermaid clones markers per colour but keys the clone off the first
+  // stroke in the style (the linkStyle default, when set), and the skin's
+  // .marker rule repaints every arrowhead with the accent; inline styles on
+  // a private clone outrank both.
+  function colourEdges(svg, p) {
+    var named = /stroke:\s*(danger|success|warning|accent)\b/g;
+    var edges = svg.querySelectorAll("path[marker-end], path[marker-start]");
+    for (var i = 0; i < edges.length; i++) {
+      var path = edges[i];
+      var style = (path.getAttribute("style") || "").replace(named, function (m, name) {
+        return "stroke:" + p.status[name];
+      });
+      path.setAttribute("style", style);
+      var strokes = style.match(/stroke:\s*#[0-9a-fA-F]{6}\b/g);
+      if (!strokes) continue;
+      var colour = strokes[strokes.length - 1].replace(/stroke:\s*/, "").toLowerCase();
+      if (colour === p.line) continue;
+      ["marker-end", "marker-start"].forEach(function (attr) {
+        var ref = /url\(#([^)]+)\)/.exec(path.getAttribute(attr) || "");
+        var marker = ref && svg.querySelector('[id="' + ref[1] + '"]');
+        if (!marker) return;
+        var id = ref[1] + "-mdp" + colour.slice(1);
+        if (!svg.querySelector('[id="' + id + '"]')) {
+          var clone = marker.cloneNode(true);
+          clone.id = id;
+          var parts = clone.querySelectorAll("path, circle, polygon");
+          for (var j = 0; j < parts.length; j++) {
+            parts[j].style.fill = colour;
+            parts[j].style.stroke = colour;
+          }
+          marker.parentNode.appendChild(clone);
+        }
+        path.setAttribute(attr, "url(#" + id + ")");
+      });
+    }
+  }
+
+  // buildMermaidInit assembles the whole mermaid.initialize() config. The
+  // neo look is kept (INV-0004 decision 1b) with its gradient and shadow
+  // switched off through expandPalette. layout is set only when the
+  // --dagre escape hatch is on; otherwise Mermaid v12's ELK default holds.
+  function buildMermaidInit(palette, layout) {
+    var init = {
+      startOnLoad: false,
+      // Default ids are mermaid-<Date.now()>, so two diagrams that render in
+      // the same millisecond share an id and the second draws into the
+      // first one's SVG. A per-run counter cannot collide.
+      deterministicIds: true,
+      look: "neo",
+      fontFamily: SKIN.font,
+      theme: "base",
+      themeVariables: expandPalette(palette),
+      themeCSS: buildThemeCSS(palette),
+      flowchart: { nodeSpacing: 24, rankSpacing: 40, diagramPadding: 8 },
+      journey: {
+        titleFontFamily: SKIN.font,
+        titleColor: palette.fg,
+      },
+      sequence: {
+        actorFontFamily: SKIN.font,
+        messageFontFamily: SKIN.font,
+        noteFontFamily: SKIN.font,
+        actorFontSize: 13,
+        messageFontSize: 12,
+        noteFontSize: 12,
+      },
+    };
+    if (layout) {
+      init.layout = layout;
+    }
+    return init;
+  }
+
+  // Initialize Mermaid with the diagram skin: neo look with gradient and
+  // shadow off; palette from the theme's seven --mermaid-* slots or derived
+  // from --color-*; fonts, geometry, and spacing constant (see SKIN above).
+  // Palette read at init; colourEdges needs it after each render.
+  var diagramPalette = null;
+
   if (typeof mermaid !== "undefined") {
     // Register Iconify icon packs for `pack:icon` references in architecture
     // diagrams. Packs download lazily on first use only; offline diagrams
@@ -36,56 +379,54 @@
         console.warn("mermaid icon pack registration failed:", e);
       }
     }
-    var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    var mermaidTheme = document.body.dataset.mermaidTheme;
-    // "dagre" when the dagre escape hatch is set, else "" for the Mermaid v12 ELK default.
-    var mermaidLayout = document.body.dataset.mermaidLayout;
-    var mermaidInit = { startOnLoad: false };
-    if (mermaidLayout) {
-      mermaidInit.layout = mermaidLayout;
-    }
-    if (mermaidTheme === "base") {
-      // Named built-in theme: read --mermaid-* CSS custom properties that the
-      // theme stylesheet defines on [data-theme] / body.
-      var bodyStyle = getComputedStyle(document.body);
-      var themeVariables = {
-        primaryColor:        bodyStyle.getPropertyValue("--mermaid-primaryColor").trim(),
-        primaryTextColor:    bodyStyle.getPropertyValue("--mermaid-primaryTextColor").trim(),
-        primaryBorderColor:  bodyStyle.getPropertyValue("--mermaid-primaryBorderColor").trim(),
-        lineColor:           bodyStyle.getPropertyValue("--mermaid-lineColor").trim(),
-        secondaryColor:      bodyStyle.getPropertyValue("--mermaid-secondaryColor").trim(),
-        tertiaryColor:       bodyStyle.getPropertyValue("--mermaid-tertiaryColor").trim(),
-        background:          bodyStyle.getPropertyValue("--mermaid-background").trim(),
-        noteBkgColor:        bodyStyle.getPropertyValue("--mermaid-noteBkgColor").trim(),
-        noteTextColor:       bodyStyle.getPropertyValue("--mermaid-noteTextColor").trim(),
-        edgeLabelBackground: bodyStyle.getPropertyValue("--mermaid-edgeLabelBackground").trim(),
-        actorBkg:            bodyStyle.getPropertyValue("--mermaid-actorBkg").trim(),
-        actorTextColor:      bodyStyle.getPropertyValue("--mermaid-actorTextColor").trim(),
-      };
-      mermaidInit.theme = "base";
-      mermaidInit.themeVariables = themeVariables;
-      mermaid.initialize(mermaidInit);
-    } else {
-      // auto: fall back to prefers-color-scheme for Mermaid theme selection.
-      mermaidInit.theme = prefersDark ? "dark" : "default";
-      mermaid.initialize(mermaidInit);
-    }
+    // "dagre" when the --dagre escape hatch is set, else "" for the Mermaid
+    // v12 ELK default. data-mermaid-theme is still rendered by the server
+    // but no longer read: every theme goes through the same skin.
+    diagramPalette = readPalette(getComputedStyle(document.body));
+    mermaid.initialize(buildMermaidInit(diagramPalette, document.body.dataset.mermaidLayout));
   }
+
+  // Tail of the serialized mermaid.run() chain; see renderClientSide.
+  // It starts on the vendored fonts: Mermaid sizes node boxes by measuring
+  // label text, so measuring with a fallback font clips labels once Inter
+  // or JetBrains Mono swaps in. A failed load still lets diagrams render.
+  var mermaidQueue =
+    document.fonts && document.fonts.load
+      ? Promise.all([
+          document.fonts.load('13px "Inter"'),
+          document.fonts.load('600 13px "Inter"'),
+          document.fonts.load('12px "JetBrains Mono"'),
+        ]).catch(function () {})
+      : Promise.resolve();
 
   // Run all client-side rendering after content update.
   function renderClientSide() {
     // Mermaid: re-render diagram blocks.
     if (typeof mermaid !== "undefined") {
-      // Remove previous Mermaid SVG output so re-init works cleanly.
-      var rendered = content.querySelectorAll(".mermaid[data-processed]");
-      for (var i = 0; i < rendered.length; i++) {
-        rendered[i].removeAttribute("data-processed");
-      }
-      try {
-        mermaid.run({ nodes: content.querySelectorAll(".mermaid") });
-      } catch (e) {
-        console.warn("mermaid render error:", e);
-      }
+      // Serialize runs. renderClientSide fires on page load and again when
+      // the first WebSocket/SSE content update arrives; both wait on the
+      // fonts, and overlapping mermaid.run() calls would render nodes the
+      // update has already detached. Nodes are selected when the queued
+      // run starts, so a run queued behind an update renders the current
+      // DOM.
+      mermaidQueue = mermaidQueue
+        .then(function () {
+          // Remove previous Mermaid SVG output so re-init works cleanly.
+          var rendered = content.querySelectorAll(".mermaid[data-processed]");
+          for (var i = 0; i < rendered.length; i++) {
+            rendered[i].removeAttribute("data-processed");
+          }
+          return mermaid.run({
+            nodes: content.querySelectorAll(".mermaid"),
+            postRenderCallback: function (id) {
+              var svg = document.getElementById(id);
+              if (svg && diagramPalette) colourEdges(svg, diagramPalette);
+            },
+          });
+        })
+        .catch(function (e) {
+          console.warn("mermaid render error:", e);
+        });
     }
 
     // KaTeX: render math expressions.

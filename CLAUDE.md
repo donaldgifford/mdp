@@ -77,6 +77,33 @@ the goldmark-mermaid render mode. Default stays `RenderModeClient`
 (emits `<pre class="mermaid">` placeholders); setting
 `RenderModeServer` switches to inline `<svg>` via the `mmdc` CLI.
 
+**Mermaid is configured in exactly one place: `buildMermaidInit` in
+`assets/preview.js`** (the "diagram skin", DESIGN-0004 / IMPL-0007).
+It keeps Mermaid v12's `neo` look with `useGradient: false` and
+`dropShadow: "none"`, uses `theme: "base"` for every theme including
+auto, and sets fonts (vendored Inter / JetBrains Mono), stroke, radius,
+and spacing as constants. Colours come from `readPalette`, which reads
+the theme's seven `--mermaid-*` slots and eight `--mermaid-series-*`
+hues, deriving anything missing from `--color-*`. The series feeds every
+multi-hue diagram (timeline/kanban/mindmap sections via `cScale*`, gitGraph
+`git*`, `pie*`, journey `fillType*`, `xyChart.plotColorPalette`); Mermaid's
+own derivation of those from `primaryColor` is near-black on dark themes.
+`statusRules` adds theme-aware `danger`/`success`/`warning`/`accent` node
+classes (`class D danger`, no `classDef`). Edges use the same names via
+`linkStyle N stroke:danger`: Mermaid passes the unknown value through, and
+`colourEdges` (run from `mermaid.run`'s `postRenderCallback`) swaps in the
+theme colour and gives each coloured edge a private marker clone, since
+Mermaid keys its marker clones off the first `stroke` in the style and the
+skin's `.marker` rule repaints the rest with the accent. `expandPalette` maps the slots onto Mermaid variables.
+**`buildThemeCSS` is not redundant with the variables** — it covers
+three things no variable reaches: `.marker` arrowheads are painted with
+`lineColor`, class-diagram text is painted with `nodeBorder` (the faint
+border slot would make members unreadable), and edge labels take the
+node text colour. It also holds the skin's only `!important`, for the
+gitGraph branch-label shadow Mermaid sets inline. `preview.js` is
+inlined into the page, so never write a literal `<style>` tag in it,
+even in a comment — `TestServer_ThemeCSS_Injection` counts them.
+
 `pkg/parser.Parser.Render` holds a per-`Parser` `sync.Mutex` and
 serializes `goldmark.Convert` as a temporary workaround for a data
 race in `gm-alert-callouts@v0.8.0` (shared `cases.Caser`). The
@@ -144,15 +171,18 @@ Each built-in theme lives in `assets/themes/<name>.css` and must follow this str
   --color-danger-fg:      #hex;
   --color-success-fg:     #hex;
 
-  /* Mermaid theme variables (theme: 'base') — required */
-  --mermaid-primaryColor:        #hex;
-  --mermaid-primaryTextColor:    #hex;
-  --mermaid-primaryBorderColor:  #hex;
-  --mermaid-lineColor:           #hex;
-  --mermaid-secondaryColor:      #hex;
-  --mermaid-tertiaryColor:       #hex;
-  --mermaid-background:          #hex;
-  /* ... other mermaid vars */
+  /* Diagram palette (DESIGN-0004) — seven required slots, six-digit hex only */
+  --mermaid-bg:      #hex;  /* canvas behind the diagram; edge-label backing */
+  --mermaid-fg:      #hex;  /* node, actor, title text */
+  --mermaid-line:    #hex;  /* edges, lifelines, relations, transitions */
+  --mermaid-accent:  #hex;  /* arrowheads, activations, special states */
+  --mermaid-muted:   #hex;  /* edge labels, secondary text */
+  --mermaid-surface: #hex;  /* node, actor, note, cluster fill */
+  --mermaid-border:  #hex;  /* node, actor, cluster stroke */
+
+  /* Series (DESIGN-0004 amendment) — eight hues, six-digit hex only;
+     series-1 should be the accent */
+  --mermaid-series-1: #hex;  /* ... through --mermaid-series-8 */
 }
 
 /* Direct scoped hljs token rules — NO CSS variable indirection */
@@ -166,6 +196,8 @@ Each built-in theme lives in `assets/themes/<name>.css` and must follow this str
 - `.hljs-keyword` and `.hljs-operator` MUST use different colors — sharing them collapses syntax to a single hue
 - Register the theme in `pkg/theme/theme.go` `builtinThemes` map via `mustReadThemeCSS()`
 - Update theme count assertions in `pkg/theme/theme_test.go`
+- Diagram slots must be six-digit hex: `preview.js` hands them to Mermaid, which does colour arithmetic and cannot evaluate `var()` or `color-mix()`. `preview.js` maps the seven slots onto Mermaid's base-theme variables — never add Mermaid variable names to a theme file
+- `TestDiagramPaletteDefinedByEveryTheme` (`assets/diagramcss_test.go`) enforces all seven slots and all eight series colours in every built-in theme and fails on any other `--mermaid-*` property
 
 ## Code Style
 
