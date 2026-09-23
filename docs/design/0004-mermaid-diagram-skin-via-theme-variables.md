@@ -37,6 +37,7 @@ created: 2026-09-22
 - [Migration / Rollout Plan](#migration--rollout-plan)
 - [Open Questions](#open-questions)
 - [Resolved Decisions](#resolved-decisions)
+  - [Amendment (2026-09-23): series palette](#amendment-2026-09-23-series-palette)
 - [References](#references)
 <!--toc:end-->
 
