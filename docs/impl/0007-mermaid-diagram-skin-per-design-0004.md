@@ -429,7 +429,7 @@ Bring the written contract in line with the code.
   place Mermaid is configured, the `neo` look with gradient and shadow
   off, and that `themeCSS` exists because of the three stylesheet
   findings above (so nobody removes it as redundant).
-- [ ] 4. `docs/examples/README.md`: one line noting the examples are the
+- [x] 4. `docs/examples/README.md`: one line noting the examples are the
   screenshot corpus for the diagram skin.
 - [ ] 5. Run `markdownlint-cli2` on every edited markdown file.
 

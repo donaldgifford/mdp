@@ -2,6 +2,7 @@
 
 Copy-paste fixtures for testing mdp's vendored Mermaid (v12) rendering.
 Each file holds one diagram type; `all.md` combines everything.
+`all.md` is also the screenshot corpus for the diagram skin (DESIGN-0004).
 
 Preview any file with a local build:
 
