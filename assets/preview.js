@@ -317,6 +317,10 @@
   function buildMermaidInit(palette, layout) {
     var init = {
       startOnLoad: false,
+      // Default ids are mermaid-<Date.now()>, so two diagrams that render in
+      // the same millisecond share an id and the second draws into the
+      // first one's SVG. A per-run counter cannot collide.
+      deterministicIds: true,
       look: "neo",
       fontFamily: SKIN.font,
       theme: "base",
