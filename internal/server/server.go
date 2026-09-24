@@ -114,11 +114,17 @@ func New(cfg Config) (*Server, error) { //nolint:gocritic // Config is intention
 		}
 	}
 
+	// Code is highlighted in the browser by highlight.js, which the theme
+	// CSS styles. Server-side chroma output has no stylesheet here and
+	// drops the fence language, which left highlight.js guessing (Go was
+	// detected as CSS). Keep the language-* classes instead.
+	mdParser := parser.New(parser.WithSyntaxHighlighting(false))
+
 	return &Server{
 		cfg:     cfg,
 		addr:    addr,
 		token:   token,
-		parser:  parser.New(),
+		parser:  mdParser,
 		tmpl:    tmpl,
 		hub:     livereload.NewHub(),
 		theme:   resolvedTheme,

@@ -107,6 +107,29 @@ func fetchBody(t *testing.T, cfg *server.Config) string {
 }
 
 // tempMDFile creates a temp dir with a minimal markdown file and returns its path.
+// TestServer_CodeBlocksKeepLanguageForHljs guards against server-side
+// highlighting coming back: chroma output drops the fence language, so
+// highlight.js has to guess it (Go was detected as CSS).
+func TestServer_CodeBlocksKeepLanguageForHljs(t *testing.T) {
+	t.Parallel()
+
+	mdFile := filepath.Join(t.TempDir(), "code.md")
+	src := []byte("```go\nfunc main() {}\n```\n")
+	if err := os.WriteFile(mdFile, src, 0o644); err != nil {
+		t.Fatalf("writing test file: %v", err)
+	}
+
+	got := fetchBody(t, &server.Config{File: mdFile})
+	if !strings.Contains(got, `<code class="language-go">`) {
+		t.Errorf("code block lost its language class; want "+
+			`<code class="language-go">`+" in:\n%s", got)
+	}
+	if strings.Contains(got, `class="chroma"`) {
+		t.Error("code block was highlighted server-side (class=\"chroma\"); " +
+			"highlight.js should do it in the browser")
+	}
+}
+
 func tempMDFile(t *testing.T) string {
 	t.Helper()
 	dir := t.TempDir()
