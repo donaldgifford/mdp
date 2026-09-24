@@ -279,6 +279,16 @@ pre code {
   white-space: pre;
 }
 
+/* Themes give .hljs a background, which outranks the rule above once
+   highlight.js adds the class. On an inline <code> it paints a stripe
+   behind every line; the block colour comes from <pre> alone. The
+   vendored github hljs CSS also pads pre code.hljs on top of <pre>'s
+   own padding. */
+[data-theme] pre code.hljs {
+  padding: 0;
+  background: transparent;
+}
+
 /* Tables */
 table {
   border-spacing: 0;
