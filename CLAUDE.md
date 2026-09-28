@@ -216,7 +216,7 @@ Each built-in theme lives in `assets/themes/<name>.css` and must follow this str
 
 ## Key Dependencies
 
-- `github.com/yuin/goldmark` + extensions (GFM, mermaid, highlighting, mathjax)
+- `github.com/yuin/goldmark` + extensions (GFM, mermaid, highlighting); math parsing is mdp's own (`pkg/parser/math.go`)
 - `github.com/gorilla/websocket` -- WebSocket server
 - `github.com/fsnotify/fsnotify` -- file watching
 - `github.com/spf13/cobra` -- CLI framework
@@ -233,4 +233,4 @@ Each built-in theme lives in `assets/themes/<name>.css` and must follow this str
 
 ## CI/CD
 
-GitHub Actions: lint -> test -> build on push/PR. License check uses `go-licenses` (goldmark-mathjax is ignored since it declares MIT but has no LICENSE file). Releases use GoReleaser with GPG signing and semver (PR labels: `major`, `minor`, `patch`, `dont-release`). Archive naming: `mdp_<os>_<arch>.tar.gz`.
+GitHub Actions: lint -> test -> build on push/PR. License check uses `go-licenses`. Releases use GoReleaser with GPG signing and semver (PR labels: `major`, `minor`, `patch`, `dont-release`). Archive naming: `mdp_<os>_<arch>.tar.gz`.

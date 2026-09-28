@@ -429,18 +429,20 @@
         });
     }
 
-    // KaTeX: render math expressions.
-    if (typeof renderMathInElement !== "undefined") {
-      try {
-        renderMathInElement(content, {
-          delimiters: [
-            { left: "$$", right: "$$", display: true },
-            { left: "$", right: "$", display: false }
-          ],
-          throwOnError: false
-        });
-      } catch (e) {
-        console.warn("katex render error:", e);
+    // KaTeX: render the math elements the parser emitted. The server
+    // decides what is math (see pkg/parser/math.go), so the page is never
+    // scanned for $ delimiters.
+    if (typeof katex !== "undefined") {
+      var maths = content.querySelectorAll(".math");
+      for (var m = 0; m < maths.length; m++) {
+        try {
+          katex.render(maths[m].textContent, maths[m], {
+            displayMode: maths[m].classList.contains("display"),
+            throwOnError: false
+          });
+        } catch (e) {
+          console.warn("katex render error:", e);
+        }
       }
     }
 

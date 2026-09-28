@@ -78,8 +78,7 @@ fmt: ## Format code via golangci-lint formatters
 license-check: ## Check dependency licenses against allowed list
 	@ $(MAKE) --no-print-directory log-$@
 	@go-licenses check ./... \
-		--allowed_licenses=Apache-2.0,MIT,BSD-2-Clause,BSD-3-Clause,ISC,MPL-2.0 \
-		--ignore=github.com/litao91/goldmark-mathjax
+		--allowed_licenses=Apache-2.0,MIT,BSD-2-Clause,BSD-3-Clause,ISC,MPL-2.0
 
 ###############
 ##@ Assets
@@ -91,7 +90,6 @@ update-vendor: ## Update vendored JS/CSS libraries from CDN
 	@curl -sL -o $(VENDOR)/mermaid.min.js "https://cdn.jsdelivr.net/npm/mermaid@12/dist/mermaid.min.js"
 	@curl -sL -o $(VENDOR)/katex/katex.min.js "https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.js"
 	@curl -sL -o $(VENDOR)/katex/katex.min.css "https://cdn.jsdelivr.net/npm/katex@0.16/dist/katex.min.css"
-	@curl -sL -o $(VENDOR)/katex/auto-render.min.js "https://cdn.jsdelivr.net/npm/katex@0.16/dist/contrib/auto-render.min.js"
 	@curl -sL -o $(VENDOR)/hljs/highlight.min.js "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"
 	@curl -sL -o $(VENDOR)/hljs/github.min.css "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github.min.css"
 	@curl -sL -o $(VENDOR)/hljs/github-dark.min.css "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/styles/github-dark.min.css"

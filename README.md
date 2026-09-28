@@ -142,7 +142,9 @@ mdp serve [flags] <file>
 - **Syntax highlighting**: all languages supported by highlight.js with GitHub
   light/dark themes
 - **Mermaid diagrams**: flowcharts, sequence diagrams, gantt charts, etc.
-- **KaTeX math**: inline `$...$` and block `$$...$$` expressions
+- **KaTeX math**: inline `$...$` and block `$$...$$` expressions, parsed with
+  GitHub's rules (TeX inside is left untouched by markdown, and `$5 and $10`
+  stays text)
 - **GitHub-style callouts**: `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`,
   `> [!WARNING]`, `> [!CAUTION]` with themed icons and colors
 - **Footnotes**: `[^1]` references with `[^1]: ...` definitions, collected

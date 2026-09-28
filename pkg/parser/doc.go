@@ -1,8 +1,10 @@
 // Package parser converts markdown to HTML using a configurable
 // goldmark pipeline. The default Parser enables GFM extensions
 // (tables, strikethrough, task lists, autolinks), syntax highlighting
-// with chroma's github style, client-side Mermaid diagrams, MathJax,
-// GitHub-style callouts, and extended-syntax footnotes.
+// with chroma's github style, client-side Mermaid diagrams, GitHub-style
+// math ($...$ and $$...$$, emitted as elements with class "math inline"
+// or "math display" for client-side KaTeX), GitHub-style callouts, and
+// extended-syntax footnotes.
 //
 // Every block-level element in the output carries a data-source-line
 // attribute pointing at its 1-indexed line in the source, which
