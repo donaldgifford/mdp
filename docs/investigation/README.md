@@ -17,6 +17,7 @@ Design docs, plans, and implementation docs can reference investigations by ID
 | INV-0002 | Expose mdp as a Go library for other apps | Concluded | 2026-05-23 | Donald Gifford | [0002-expose-mdp-as-go-library.md](0002-expose-mdp-as-go-library.md) |
 | INV-0003 | callout extension race in TestRender_GitHubCallout | Concluded | 2026-06-18 | Donald Gifford | [0003-callout-extension-race-in-testrendergithubcallout.md](0003-callout-extension-race-in-testrendergithubcallout.md) |
 | INV-0004 | Evaluate beautiful-mermaid for diagram rendering and ASCII output | Concluded | 2026-09-21 | Donald Gifford | [0004-evaluate-beautiful-mermaid-for-diagram-rendering-and-ascii.md](0004-evaluate-beautiful-mermaid-for-diagram-rendering-and-ascii.md) |
+| INV-0005 | Rendering markdown guides as interactive explainers | Concluded | 2026-10-04 | Donald Gifford | [0005-rendering-markdown-guides-as-interactive-explainers.md](0005-rendering-markdown-guides-as-interactive-explainers.md) |
 <!-- END DOCZ AUTO-GENERATED -->
 <!-- BEGIN DOCZ AUTO-GENERATED -->
 ## All INVESTIGATIONs
