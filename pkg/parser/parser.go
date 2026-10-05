@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
-	mathjax "github.com/litao91/goldmark-mathjax"
 	"github.com/yuin/goldmark"
 	highlighting "github.com/yuin/goldmark-highlighting/v2"
 	"github.com/yuin/goldmark/extension"
@@ -124,7 +123,7 @@ func New(opts ...Option) *Parser {
 		})
 	}
 	if cfg.math {
-		extensions = append(extensions, mathjax.MathJax)
+		extensions = append(extensions, mathExtension{})
 	}
 	if cfg.callouts {
 		extensions = append(extensions, alertcallouts.NewAlertCallouts(
