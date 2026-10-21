@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.6.2] - 2026-10-21
+
+### Documentation
+
+- **inv-0005**: Conclude against interactive explainer rendering in mdp (#96)
+
+### Miscellaneous Tasks
+
+- Bump Go to 1.26.10 (#98)
+
 ## [0.6.1] - 2026-09-24
 
 ### Bug Fixes
@@ -11,6 +21,10 @@ All notable changes to this project will be documented in this file.
 ### Documentation
 
 - **impl-0007**: Mark Completed after PR #91 merged (#93)
+
+### Miscellaneous Tasks
+
+- **release**: Update CHANGELOG.md for v0.6.1
 
 ## [0.6.0] - 2026-09-23
 
@@ -263,6 +277,7 @@ All notable changes to this project will be documented in this file.
 - Update CLAUDE.md with current architecture and commands
 - Add Homebrew formula template for tap distribution
 
+[0.6.2]: https://github.com/donaldgifford/mdp/compare/v0.6.1...v0.6.2
 [0.6.1]: https://github.com/donaldgifford/mdp/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/donaldgifford/mdp/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/donaldgifford/mdp/compare/v0.4.0...v0.5.0
