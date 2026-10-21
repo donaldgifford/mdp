@@ -429,18 +429,27 @@
         });
     }
 
-    // KaTeX: render math expressions.
-    if (typeof renderMathInElement !== "undefined") {
-      try {
-        renderMathInElement(content, {
-          delimiters: [
-            { left: "$$", right: "$$", display: true },
-            { left: "$", right: "$", display: false }
-          ],
-          throwOnError: false
-        });
-      } catch (e) {
-        console.warn("katex render error:", e);
+    // KaTeX: render the math elements the parser emitted. The server
+    // decides what is math (see pkg/parser/math.go), so the page is never
+    // scanned for $ delimiters. data-math is the hook rather than the
+    // "math" class so author HTML that merely uses that class is left
+    // alone, and rendered elements are marked because katex.render keeps
+    // the element's attributes: without the marker a second pass over
+    // the same DOM would feed KaTeX its own output.
+    if (typeof katex !== "undefined") {
+      var maths = content.querySelectorAll(
+        "[data-math]:not([data-math-rendered])"
+      );
+      for (var m = 0; m < maths.length; m++) {
+        try {
+          katex.render(maths[m].textContent, maths[m], {
+            displayMode: maths[m].getAttribute("data-math") === "display",
+            throwOnError: false
+          });
+        } catch (e) {
+          console.warn("katex render error:", e);
+        }
+        maths[m].setAttribute("data-math-rendered", "");
       }
     }
 

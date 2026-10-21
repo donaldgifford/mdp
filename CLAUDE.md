@@ -143,6 +143,22 @@ and [IMPL-0006](docs/impl/0006-footnote-support-per-design-0003.md).
 
 **Stdin protocol (Neovim -> binary):** Newline-delimited JSON: `{"type":"content","data":"..."}` and `{"type":"cursor","line":N}`.
 
+**Math contract (`pkg/parser/math.go` -> `assets/preview.js`):** the
+parser decides what is math and emits `<span class="math inline">`,
+`<span class="math display">`, or a block-level `<div class="math
+display">`, each with a `data-math="inline"|"display"` attribute and the
+escaped TeX (no delimiters) as text. `preview.js` renders exactly
+`[data-math]:not([data-math-rendered])` with `katex.render` and marks
+each element `data-math-rendered`; the page is never scanned for `$`.
+The class is kept for CSS and is not the JS hook, so author HTML using
+class `math` is left alone. Delimiter rules mirror GitHub (checked with
+`gh api markdown`): the first `$` after an opener decides the
+expression, a closer may not be followed by a letter or digit, and a
+closer preceded by whitespace must be followed by punctuation or end of
+line. `TestRender_Math` pins each rule, including the two places mdp
+deliberately differs from GitHub (block lines that look like markdown
+stay math; `\$` is a literal dollar).
+
 ## Neovim Plugin
 
 - `lazy.lua` provides default spec with `main = "mdp"` so lazy.nvim can auto-detect the module for `opts`-based setup
@@ -216,7 +232,7 @@ Each built-in theme lives in `assets/themes/<name>.css` and must follow this str
 
 ## Key Dependencies
 
-- `github.com/yuin/goldmark` + extensions (GFM, mermaid, highlighting, mathjax)
+- `github.com/yuin/goldmark` + extensions (GFM, mermaid, highlighting); math parsing is mdp's own (`pkg/parser/math.go`)
 - `github.com/gorilla/websocket` -- WebSocket server
 - `github.com/fsnotify/fsnotify` -- file watching
 - `github.com/spf13/cobra` -- CLI framework
@@ -233,4 +249,4 @@ Each built-in theme lives in `assets/themes/<name>.css` and must follow this str
 
 ## CI/CD
 
-GitHub Actions: lint -> test -> build on push/PR. License check uses `go-licenses` (goldmark-mathjax is ignored since it declares MIT but has no LICENSE file). Releases use GoReleaser with GPG signing and semver (PR labels: `major`, `minor`, `patch`, `dont-release`). Archive naming: `mdp_<os>_<arch>.tar.gz`.
+GitHub Actions: lint -> test -> build on push/PR. License check uses `go-licenses`. Releases use GoReleaser with GPG signing and semver (PR labels: `major`, `minor`, `patch`, `dont-release`). Archive naming: `mdp_<os>_<arch>.tar.gz`.

@@ -53,7 +53,6 @@ func TestServer_ServesVendorScripts(t *testing.T) {
 	scripts := []string{
 		"/vendor/mermaid.min.js",
 		"/vendor/katex/katex.min.js",
-		"/vendor/katex/auto-render.min.js",
 		"/vendor/hljs/highlight.min.js",
 		"/vendor/katex/katex.min.css",
 	}

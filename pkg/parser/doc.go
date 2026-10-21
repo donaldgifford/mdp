@@ -1,8 +1,20 @@
 // Package parser converts markdown to HTML using a configurable
 // goldmark pipeline. The default Parser enables GFM extensions
 // (tables, strikethrough, task lists, autolinks), syntax highlighting
-// with chroma's github style, client-side Mermaid diagrams, MathJax,
-// GitHub-style callouts, and extended-syntax footnotes.
+// with chroma's github style, client-side Mermaid diagrams, GitHub-style
+// math ($...$ and $$...$$, emitted as elements carrying class "math
+// inline" or "math display" and a data-math="inline"|"display"
+// attribute, with the escaped TeX as their text, for client-side
+// KaTeX), GitHub-style callouts, and extended-syntax footnotes.
+//
+// Math follows GitHub's delimiter rules: an opening $ may not be
+// followed by whitespace, and a closing $ may not be followed by a
+// letter or digit, nor have whitespace on both sides, so "$5 and $10"
+// stays text. The first $ after an opener decides the expression; when
+// it cannot close, the opener is plain text. A "$$" alone on a line
+// opens a display block that, like a fenced code block, runs until the
+// closing "$$" or the end of its container and keeps its contents
+// verbatim. As on GitHub, math inside raw HTML blocks is not parsed.
 //
 // Every block-level element in the output carries a data-source-line
 // attribute pointing at its 1-indexed line in the source, which
